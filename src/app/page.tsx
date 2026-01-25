@@ -1,14 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { Settings } from "lucide-react";
 import SentenceInput from "@/components/SentenceInput";
 import SentenceVisualization from "@/components/SentenceVisualization";
+import SettingsModal from "@/components/SettingsModal";
+import { useSettings } from "@/hooks/useSettings";
 import type { SentenceAnalysis } from "@/types/analysis";
 
 export default function Home() {
   const [analysis, setAnalysis] = useState<SentenceAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { selectedModel, updateModel, isLoaded, models } = useSettings();
 
   const handleAnalyze = async (sentence: string) => {
     setIsLoading(true);
@@ -21,7 +26,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ sentence }),
+        body: JSON.stringify({ sentence, model: selectedModel }),
       });
 
       if (!response.ok) {
@@ -44,7 +49,14 @@ export default function Home() {
       <main className="container mx-auto px-4 py-12">
         <div className="flex flex-col items-center space-y-8">
           {/* Header */}
-          <div className="text-center space-y-2">
+          <div className="text-center space-y-2 relative w-full max-w-2xl">
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="absolute right-0 top-0 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+              aria-label="Settings"
+            >
+              <Settings className="w-6 h-6" />
+            </button>
             <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
               日本語 Sentence Analyzer
             </h1>
@@ -123,6 +135,15 @@ export default function Home() {
       <footer className="text-center py-8 text-gray-600 dark:text-gray-400 text-sm">
         <p>Powered by Claude AI and Next.js</p>
       </footer>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        currentModel={selectedModel}
+        models={models}
+        onSave={updateModel}
+      />
     </div>
   );
 }

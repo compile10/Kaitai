@@ -73,9 +73,18 @@ const analysisSchema = z.object({
   isFragment: z.boolean().describe("True if this is a sentence fragment or incomplete sentence (e.g., missing a verb, incomplete thought, or not a grammatically complete sentence). False if it's a complete sentence."),
 });
 
+// Allowed models
+const ALLOWED_MODELS = [
+  "claude-opus-4-5-20251101",
+  "claude-sonnet-4-5-20250929",
+  "claude-haiku-4-5-20251001",
+];
+
+const DEFAULT_MODEL = "claude-sonnet-4-5-20250929";
+
 export async function POST(request: NextRequest) {
   try {
-    const { sentence } = await request.json();
+    const { sentence, model } = await request.json();
 
     if (!sentence || typeof sentence !== "string") {
       return NextResponse.json(
@@ -84,8 +93,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check cache first
-    const cachedResponse = getCachedResponse(sentence);
+    // Validate and use the provided model or fall back to default
+    const selectedModel =
+      model && ALLOWED_MODELS.includes(model) ? model : DEFAULT_MODEL;
+
+    // Check cache first (include model in cache key)
+    const cacheKey = `${sentence}:${selectedModel}`;
+    const cachedResponse = getCachedResponse(cacheKey);
     if (cachedResponse) {
       return NextResponse.json(cachedResponse);
     }
@@ -98,13 +112,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const model = new ChatAnthropic({
-      model: "claude-sonnet-4-5-20250929",
+    const chatModel = new ChatAnthropic({
+      model: selectedModel,
       anthropicApiKey: apiKey,
       maxTokens: 2048,
     });
 
-    const structuredModel = model.withStructuredOutput(analysisSchema, {
+    const structuredModel = chatModel.withStructuredOutput(analysisSchema, {
       name: "analyze_sentence",
     });
 
@@ -173,8 +187,8 @@ Example: "<p>This sentence follows the <strong>SOV pattern</strong>. The topic <
       })),
     };
     
-    // Cache the successful response
-    setCachedResponse(sentence, sanitizedAnalysis);
+    // Cache the successful response (with model in cache key)
+    setCachedResponse(cacheKey, sanitizedAnalysis);
     
     return NextResponse.json(sanitizedAnalysis);
   } catch (error) {
