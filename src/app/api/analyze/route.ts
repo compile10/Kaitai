@@ -1,6 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { ChatAnthropic } from "@langchain/anthropic";
 import { type NextRequest, NextResponse } from "next/server";
 import sanitizeHtml from "sanitize-html";
+import { z } from "zod";
 import type { SentenceAnalysis } from "@/types/analysis";
 
 // Cache for memoizing API responses
@@ -49,88 +50,28 @@ function setCachedResponse(sentence: string, data: SentenceAnalysis) {
   }
 }
 
-// Define the schema for structured output
-const analysisSchema = {
-  $schema: "http://json-schema.org/draft-07/schema#",
-  type: "object" as const,
-  properties: {
-    originalSentence: {
-      type: "string" as const,
-      description: "The original Japanese sentence",
-    },
-    words: {
-      type: "array" as const,
-      items: {
-        type: "object" as const,
-        properties: {
-          id: {
-            type: "string" as const,
-            description: "Unique identifier for this word/phrase",
-          },
-          text: {
-            type: "string" as const,
-            description: "The actual text of the word/phrase in Japanese (NOT including particles - those go in attachedParticle)",
-          },
-          reading: {
-            type: "string" as const,
-            description: "Hiragana reading of the word (optional)",
-          },
-          partOfSpeech: {
-            type: "string" as const,
-            description:
-              "Part of speech (e.g., noun, verb, adjective, particle, etc.)",
-          },
-          modifies: {
-            type: "array" as const,
-            items: {
-              type: "string" as const,
-            },
-            description:
-              "Array of IDs of words/phrases that this word modifies or relates to",
-          },
-          position: {
-            type: "number",
-            description: "Position in the sentence (0-indexed)",
-          },
-          attachedParticle: {
-            type: "object" as const,
-            properties: {
-              text: {
-                type: "string" as const,
-                description: "The particle text (e.g., は, を, に, が, etc.)",
-              },
-              reading: {
-                type: "string" as const,
-                description: "Hiragana reading of the particle (optional)",
-              },
-              description: {
-                type: "string" as const,
-                description: "A brief explanation of what this particle does in this specific sentence context (1-2 sentences)",
-              },
-            },
-            required: ["text", "description"],
-            description: "Particle attached to this word (if any). Do NOT create separate word entries for particles.",
-          },
-          isTopic: {
-            type: "boolean" as const,
-            description: "True if this word is the sentence topic. Topics provide context but don't modify the main sentence.",
-          },
-        },
-        required: ["id", "text", "partOfSpeech", "position"],
-      },
-    },
-    explanation: {
-      type: "string" as const,
-      description: "Brief HTML-formatted explanation of the sentence structure. Use HTML tags like <p>, <strong>, <em>, <ul>, <li> for better formatting.",
-    },
-    isFragment: {
-      type: "boolean" as const,
-      description: "True if this is a sentence fragment or incomplete sentence (e.g., missing a verb, incomplete thought, or not a grammatically complete sentence). False if it's a complete sentence.",
-    },
-  },
-  required: ["originalSentence", "words", "explanation", "isFragment"],
-  additionalProperties: false,
-};
+// Define the Zod schema for structured output
+const analysisSchema = z.object({
+  originalSentence: z.string().describe("The original Japanese sentence"),
+  words: z.array(
+    z.object({
+      id: z.string().describe("Unique identifier for this word/phrase"),
+      text: z.string().describe("The actual text of the word/phrase in Japanese (NOT including particles - those go in attachedParticle)"),
+      reading: z.string().optional().describe("Hiragana reading of the word (optional)"),
+      partOfSpeech: z.string().describe("Part of speech (e.g., noun, verb, adjective, particle, etc.)"),
+      modifies: z.array(z.string()).optional().describe("Array of IDs of words/phrases that this word modifies or relates to"),
+      position: z.number().describe("Position in the sentence (0-indexed)"),
+      attachedParticle: z.object({
+        text: z.string().describe("The particle text (e.g., は, を, に, が, etc.)"),
+        reading: z.string().optional().describe("Hiragana reading of the particle (optional)"),
+        description: z.string().describe("A brief explanation of what this particle does in this specific sentence context (1-2 sentences)"),
+      }).optional().describe("Particle attached to this word (if any). Do NOT create separate word entries for particles."),
+      isTopic: z.boolean().optional().describe("True if this word is the sentence topic. Topics provide context but don't modify the main sentence."),
+    })
+  ),
+  explanation: z.string().describe("Brief HTML-formatted explanation of the sentence structure. Use HTML tags like <p>, <strong>, <em>, <ul>, <li> for better formatting."),
+  isFragment: z.boolean().describe("True if this is a sentence fragment or incomplete sentence (e.g., missing a verb, incomplete thought, or not a grammatically complete sentence). False if it's a complete sentence."),
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -157,15 +98,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const anthropic = new Anthropic({ apiKey });
-
-    const message = await anthropic.messages.create({
+    const model = new ChatAnthropic({
       model: "claude-sonnet-4-5-20250929",
-      max_tokens: 2048,
-      messages: [
-        {
-          role: "user",
-          content: `Analyze the following Japanese sentence and break it down into its constituent words and phrases. For each word/phrase, identify what it modifies or relates to in the sentence. This will be used to create a visual diagram showing the grammatical relationships.
+      anthropicApiKey: apiKey,
+      maxTokens: 2048,
+    });
+
+    const structuredModel = model.withStructuredOutput(analysisSchema, {
+      name: "analyze_sentence",
+    });
+
+    const prompt = `Analyze the following Japanese sentence and break it down into its constituent words and phrases. For each word/phrase, identify what it modifies or relates to in the sentence. This will be used to create a visual diagram showing the grammatical relationships.
 
 Sentence: ${sentence}
 
@@ -205,56 +148,35 @@ EXPLANATION FORMATTING:
 - Structure the explanation with clear sections
 - Highlight important grammatical terms with <strong>
 - Use lists for multiple points
-Example: "<p>This sentence follows the <strong>SOV pattern</strong>. The topic <strong>私</strong> is marked with は.</p>"
+Example: "<p>This sentence follows the <strong>SOV pattern</strong>. The topic <strong>私</strong> is marked with は.</p>"`;
 
-Use the analyze_sentence tool to structure your response.`,
-        },
-      ],
-      tools: [
-        {
-          name: "analyze_sentence",
-          description: "Provide structured analysis of the Japanese sentence",
-          input_schema: analysisSchema,
-        },
-      ],
-      tool_choice: { type: "tool", name: "analyze_sentence" },
-    });
-
-    const toolUse = message.content.find(
-      (content) => content.type === "tool_use" && content.name === "analyze_sentence"
-    ) as { type: "tool_use"; input: unknown; name: string } | undefined;
-
-    if (toolUse) {
-      const analysis = toolUse.input as SentenceAnalysis;
-      
-      // Sanitize HTML content to prevent XSS attacks
-      const sanitizedAnalysis: SentenceAnalysis = {
-        ...analysis,
-        explanation: sanitizeHtml(analysis.explanation, {
-          allowedTags: ['p', 'strong', 'em', 'ul', 'li', 'ol', 'br', 'span'],
-          allowedAttributes: {},
-        }),
-        words: analysis.words.map(word => ({
-          ...word,
-          attachedParticle: word.attachedParticle
-            ? {
-                ...word.attachedParticle,
-                description: sanitizeHtml(word.attachedParticle.description, {
-                  allowedTags: ['strong', 'em', 'br'],
-                  allowedAttributes: {},
-                }),
-              }
-            : undefined,
-        })),
-      };
-      
-      // Cache the successful response
-      setCachedResponse(sentence, sanitizedAnalysis);
-      
-      return NextResponse.json(sanitizedAnalysis);
-    } else {
-      throw new Error("No structured analysis returned from Claude");
-    }
+    const analysis = await structuredModel.invoke(prompt) as SentenceAnalysis;
+    
+    // Sanitize HTML content to prevent XSS attacks
+    const sanitizedAnalysis: SentenceAnalysis = {
+      ...analysis,
+      explanation: sanitizeHtml(analysis.explanation, {
+        allowedTags: ['p', 'strong', 'em', 'ul', 'li', 'ol', 'br', 'span'],
+        allowedAttributes: {},
+      }),
+      words: analysis.words.map(word => ({
+        ...word,
+        attachedParticle: word.attachedParticle
+          ? {
+              ...word.attachedParticle,
+              description: sanitizeHtml(word.attachedParticle.description, {
+                allowedTags: ['strong', 'em', 'br'],
+                allowedAttributes: {},
+              }),
+            }
+          : undefined,
+      })),
+    };
+    
+    // Cache the successful response
+    setCachedResponse(sentence, sanitizedAnalysis);
+    
+    return NextResponse.json(sanitizedAnalysis);
   } catch (error) {
     console.error("Error analyzing sentence:", error);
     return NextResponse.json(
