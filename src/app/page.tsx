@@ -1,14 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { Settings } from "lucide-react";
 import SentenceInput from "@/components/SentenceInput";
 import SentenceVisualization from "@/components/SentenceVisualization";
+import SettingsModal from "@/components/SettingsModal";
+import { useSettings, PROVIDERS } from "@/contexts/SettingsContext";
 import type { SentenceAnalysis } from "@/types/analysis";
 
 export default function Home() {
   const [analysis, setAnalysis] = useState<SentenceAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { provider, model } = useSettings();
+  
+  const currentProvider = PROVIDERS.find((p) => p.id === provider);
 
   const handleAnalyze = async (sentence: string) => {
     setIsLoading(true);
@@ -21,7 +28,11 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ sentence }),
+        body: JSON.stringify({
+          sentence,
+          provider,
+          model,
+        }),
       });
 
       if (!response.ok) {
@@ -44,7 +55,14 @@ export default function Home() {
       <main className="container mx-auto px-4 py-12">
         <div className="flex flex-col items-center space-y-8">
           {/* Header */}
-          <div className="text-center space-y-2">
+          <div className="text-center space-y-2 relative w-full max-w-2xl">
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="absolute right-0 top-0 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+              aria-label="Settings"
+            >
+              <Settings className="w-6 h-6" />
+            </button>
             <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
               日本語 Sentence Analyzer
             </h1>
@@ -70,7 +88,7 @@ export default function Home() {
             <div className="flex items-center justify-center space-x-2">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
               <p className="text-gray-600 dark:text-gray-400">
-                Analyzing with Claude...
+                Analyzing with {currentProvider?.models.find((m) => m.id === model)?.name || model}...
               </p>
             </div>
           )}
@@ -96,8 +114,7 @@ export default function Home() {
                 <li className="flex items-start">
                   <span className="mr-2">2.</span>
                   <span>
-                    Click "Analyze Sentence" to send it to Claude AI for
-                    analysis
+                    Click "Analyze Sentence" to send it to AI for analysis
                   </span>
                 </li>
                 <li className="flex items-start">
@@ -121,8 +138,14 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="text-center py-8 text-gray-600 dark:text-gray-400 text-sm">
-        <p>Powered by Claude AI and Next.js</p>
+        <p>Powered by AI and Next.js</p>
       </footer>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </div>
   );
 }
