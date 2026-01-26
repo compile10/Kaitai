@@ -60,13 +60,6 @@ export const PROVIDERS: ProviderConfig[] = [
         pricing: "$0.25 / $2.00 per MTok",
         speed: "Fast",
       },
-      {
-        id: "gpt-5-nano",
-        name: "GPT-5 Nano",
-        description: "Fastest, most cost-efficient version of GPT-5",
-        pricing: "$0.05 / $0.40 per MTok",
-        speed: "Fastest",
-      },
     ],
   },
   {
