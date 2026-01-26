@@ -1,8 +1,11 @@
 import { ChatAnthropic } from "@langchain/anthropic";
+import { ChatOpenAI } from "@langchain/openai";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatXAI } from "@langchain/xai";
 import { type NextRequest, NextResponse } from "next/server";
 import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
-import type { SentenceAnalysis } from "@/types/analysis";
+import type { SentenceAnalysis, Provider } from "@/types/analysis";
 
 // Cache for memoizing API responses
 interface CacheEntry {
@@ -24,22 +27,22 @@ function cleanExpiredCache() {
 }
 
 // Get cached response if available and not expired
-function getCachedResponse(sentence: string): SentenceAnalysis | null {
-  const cached = responseCache.get(sentence);
+function getCachedResponse(cacheKey: string): SentenceAnalysis | null {
+  const cached = responseCache.get(cacheKey);
   if (cached) {
     const now = Date.now();
     if (now - cached.timestamp <= CACHE_DURATION_MS) {
       return cached.data;
     }
     // Expired, remove it
-    responseCache.delete(sentence);
+    responseCache.delete(cacheKey);
   }
   return null;
 }
 
 // Store response in cache
-function setCachedResponse(sentence: string, data: SentenceAnalysis) {
-  responseCache.set(sentence, {
+function setCachedResponse(cacheKey: string, data: SentenceAnalysis) {
+  responseCache.set(cacheKey, {
     data,
     timestamp: Date.now(),
   });
@@ -57,34 +60,102 @@ const analysisSchema = z.object({
     z.object({
       id: z.string().describe("Unique identifier for this word/phrase"),
       text: z.string().describe("The actual text of the word/phrase in Japanese (NOT including particles - those go in attachedParticle)"),
-      reading: z.string().optional().describe("Hiragana reading of the word (optional)"),
+      reading: z.string().nullable().describe("Hiragana reading of the word (optional)"),
       partOfSpeech: z.string().describe("Part of speech (e.g., noun, verb, adjective, particle, etc.)"),
-      modifies: z.array(z.string()).optional().describe("Array of IDs of words/phrases that this word modifies or relates to"),
+      modifies: z.array(z.string()).nullable().describe("Array of IDs of words/phrases that this word modifies or relates to"),
       position: z.number().describe("Position in the sentence (0-indexed)"),
       attachedParticle: z.object({
         text: z.string().describe("The particle text (e.g., は, を, に, が, etc.)"),
-        reading: z.string().optional().describe("Hiragana reading of the particle (optional)"),
+        reading: z.string().nullable().describe("Hiragana reading of the particle (optional)"),
         description: z.string().describe("A brief explanation of what this particle does in this specific sentence context (1-2 sentences)"),
-      }).optional().describe("Particle attached to this word (if any). Do NOT create separate word entries for particles."),
-      isTopic: z.boolean().optional().describe("True if this word is the sentence topic. Topics provide context but don't modify the main sentence."),
+      }).nullable().describe("Particle attached to this word (if any). Do NOT create separate word entries for particles."),
+      isTopic: z.boolean().nullable().describe("True if this word is the sentence topic. Topics provide context but don't modify the main sentence."),
     })
   ),
   explanation: z.string().describe("Brief HTML-formatted explanation of the sentence structure. Use HTML tags like <p>, <strong>, <em>, <ul>, <li> for better formatting."),
   isFragment: z.boolean().describe("True if this is a sentence fragment or incomplete sentence (e.g., missing a verb, incomplete thought, or not a grammatically complete sentence). False if it's a complete sentence."),
 });
 
-// Allowed models
-const ALLOWED_MODELS = [
-  "claude-opus-4-5-20251101",
-  "claude-sonnet-4-5-20250929",
-  "claude-haiku-4-5-20251001",
-];
+// Provider configuration
+const PROVIDER_CONFIG = {
+  anthropic: {
+    name: "Anthropic",
+    envKey: "ANTHROPIC_API_KEY",
+  },
+  openai: {
+    name: "OpenAI",
+    envKey: "OPENAI_API_KEY",
+  },
+  google: {
+    name: "Google Gemini",
+    envKey: "GOOGLE_API_KEY",
+  },
+  xai: {
+    name: "xAI",
+    envKey: "XAI_API_KEY",
+  },
+  openrouter: {
+    name: "OpenRouter",
+    envKey: "OPENROUTER_API_KEY",
+  },
+} as const;
 
-const DEFAULT_MODEL = "claude-sonnet-4-5-20250929";
+// Provider factory function
+function createChatModel(provider: Provider, model: string) {
+  const config = PROVIDER_CONFIG[provider];
+  const apiKey = process.env[config.envKey];
+
+  if (!apiKey) {
+    throw new Error(`Server Error: Key not properly set for ${config.name}.`);
+  }
+
+  switch (provider) {
+    case "anthropic":
+      return new ChatAnthropic({
+        model,
+        anthropicApiKey: apiKey,
+        maxTokens: 2048,
+      });
+
+    case "openai":
+      return new ChatOpenAI({
+        model,
+        openAIApiKey: apiKey,
+        maxTokens: 2048,
+      });
+
+    case "google":
+      return new ChatGoogleGenerativeAI({
+        model,
+        apiKey,
+        maxOutputTokens: 2048,
+      });
+
+    case "xai":
+      return new ChatXAI({
+        model,
+        apiKey,
+        maxTokens: 2048,
+      });
+
+    case "openrouter":
+      return new ChatOpenAI({
+        model,
+        configuration: {
+          apiKey,
+          baseURL: "https://openrouter.ai/api/v1",
+        },
+        maxTokens: 2048,
+      });
+
+    default:
+      throw new Error(`Unsupported provider: ${provider}`);
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const { sentence, model } = await request.json();
+    const { sentence, provider, model } = await request.json();
 
     if (!sentence || typeof sentence !== "string") {
       return NextResponse.json(
@@ -93,30 +164,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate and use the provided model or fall back to default
-    const selectedModel =
-      model && ALLOWED_MODELS.includes(model) ? model : DEFAULT_MODEL;
+    if (!provider || typeof provider !== "string") {
+      return NextResponse.json(
+        { error: "Invalid provider specified" },
+        { status: 400 },
+      );
+    }
 
-    // Check cache first (include model in cache key)
-    const cacheKey = `${sentence}:${selectedModel}`;
+    if (!model || typeof model !== "string") {
+      return NextResponse.json(
+        { error: "Invalid model specified" },
+        { status: 400 },
+      );
+    }
+
+    // Check cache first (include provider and model in cache key)
+    const cacheKey = `${provider}:${model}:${sentence}`;
     const cachedResponse = getCachedResponse(cacheKey);
     if (cachedResponse) {
       return NextResponse.json(cachedResponse);
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
+    // Create chat model with provider factory
+    let chatModel;
+    try {
+      chatModel = createChatModel(provider as Provider, model);
+    } catch (error) {
       return NextResponse.json(
-        { error: "ANTHROPIC_API_KEY not configured" },
+        { error: error instanceof Error ? error.message : "Failed to create model" },
         { status: 500 },
       );
     }
-
-    const chatModel = new ChatAnthropic({
-      model: selectedModel,
-      anthropicApiKey: apiKey,
-      maxTokens: 2048,
-    });
 
     const structuredModel = chatModel.withStructuredOutput(analysisSchema, {
       name: "analyze_sentence",
@@ -183,11 +261,11 @@ Example: "<p>This sentence follows the <strong>SOV pattern</strong>. The topic <
                 allowedAttributes: {},
               }),
             }
-          : undefined,
+          : null,
       })),
     };
     
-    // Cache the successful response (with model in cache key)
+    // Cache the successful response
     setCachedResponse(cacheKey, sanitizedAnalysis);
     
     return NextResponse.json(sanitizedAnalysis);
@@ -199,4 +277,3 @@ Example: "<p>This sentence follows the <strong>SOV pattern</strong>. The topic <
     );
   }
 }
-

@@ -5,7 +5,7 @@ import { Settings } from "lucide-react";
 import SentenceInput from "@/components/SentenceInput";
 import SentenceVisualization from "@/components/SentenceVisualization";
 import SettingsModal from "@/components/SettingsModal";
-import { useSettings } from "@/hooks/useSettings";
+import { useSettings, PROVIDERS } from "@/contexts/SettingsContext";
 import type { SentenceAnalysis } from "@/types/analysis";
 
 export default function Home() {
@@ -13,7 +13,9 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const { selectedModel, updateModel, isLoaded, models } = useSettings();
+  const { provider, model } = useSettings();
+  
+  const currentProvider = PROVIDERS.find((p) => p.id === provider);
 
   const handleAnalyze = async (sentence: string) => {
     setIsLoading(true);
@@ -26,7 +28,11 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ sentence, model: selectedModel }),
+        body: JSON.stringify({
+          sentence,
+          provider,
+          model,
+        }),
       });
 
       if (!response.ok) {
@@ -82,7 +88,7 @@ export default function Home() {
             <div className="flex items-center justify-center space-x-2">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
               <p className="text-gray-600 dark:text-gray-400">
-                Analyzing with Claude...
+                Analyzing with {currentProvider?.models.find((m) => m.id === model)?.name || model}...
               </p>
             </div>
           )}
@@ -108,8 +114,7 @@ export default function Home() {
                 <li className="flex items-start">
                   <span className="mr-2">2.</span>
                   <span>
-                    Click "Analyze Sentence" to send it to Claude AI for
-                    analysis
+                    Click "Analyze Sentence" to send it to AI for analysis
                   </span>
                 </li>
                 <li className="flex items-start">
@@ -133,16 +138,13 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="text-center py-8 text-gray-600 dark:text-gray-400 text-sm">
-        <p>Powered by Claude AI and Next.js</p>
+        <p>Powered by AI and Next.js</p>
       </footer>
 
       {/* Settings Modal */}
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-        currentModel={selectedModel}
-        models={models}
-        onSave={updateModel}
       />
     </div>
   );
