@@ -114,28 +114,28 @@ function createChatModel(provider: Provider, model: string) {
       return new ChatAnthropic({
         model,
         anthropicApiKey: apiKey,
-        maxTokens: 2048,
+        maxTokens: 4096,
       });
 
     case "openai":
       return new ChatOpenAI({
         model,
         openAIApiKey: apiKey,
-        maxTokens: 2048,
+        maxTokens: 4096,
       });
 
     case "google":
       return new ChatGoogleGenerativeAI({
         model,
         apiKey,
-        maxOutputTokens: 2048,
+        maxOutputTokens: 4096,
       });
 
     case "xai":
       return new ChatXAI({
         model,
         apiKey,
-        maxTokens: 2048,
+        maxTokens: 4096,
       });
 
     case "openrouter":
@@ -145,7 +145,7 @@ function createChatModel(provider: Provider, model: string) {
           apiKey,
           baseURL: "https://openrouter.ai/api/v1",
         },
-        maxTokens: 2048,
+        maxTokens: 4096,
       });
 
     default:
