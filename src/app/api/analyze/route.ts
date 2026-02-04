@@ -7,6 +7,29 @@ import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
 import type { SentenceAnalysis, Provider } from "@/types/analysis";
 
+// CORS headers configuration
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*", // In production, replace with your specific origins
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+// Helper to create JSON response with CORS headers
+function jsonResponse(data: unknown, status = 200) {
+  return NextResponse.json(data, {
+    status,
+    headers: corsHeaders,
+  });
+}
+
+// Handle CORS preflight requests
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: corsHeaders,
+  });
+}
+
 // Cache for memoizing API responses
 interface CacheEntry {
   data: SentenceAnalysis;
@@ -158,31 +181,22 @@ export async function POST(request: NextRequest) {
     const { sentence, provider, model } = await request.json();
 
     if (!sentence || typeof sentence !== "string") {
-      return NextResponse.json(
-        { error: "Invalid sentence provided" },
-        { status: 400 },
-      );
+      return jsonResponse({ error: "Invalid sentence provided" }, 400);
     }
 
     if (!provider || typeof provider !== "string") {
-      return NextResponse.json(
-        { error: "Invalid provider specified" },
-        { status: 400 },
-      );
+      return jsonResponse({ error: "Invalid provider specified" }, 400);
     }
 
     if (!model || typeof model !== "string") {
-      return NextResponse.json(
-        { error: "Invalid model specified" },
-        { status: 400 },
-      );
+      return jsonResponse({ error: "Invalid model specified" }, 400);
     }
 
     // Check cache first (include provider and model in cache key)
     const cacheKey = `${provider}:${model}:${sentence}`;
     const cachedResponse = getCachedResponse(cacheKey);
     if (cachedResponse) {
-      return NextResponse.json(cachedResponse);
+      return jsonResponse(cachedResponse);
     }
 
     // Create chat model with provider factory
@@ -190,9 +204,9 @@ export async function POST(request: NextRequest) {
     try {
       chatModel = createChatModel(provider as Provider, model);
     } catch (error) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: error instanceof Error ? error.message : "Failed to create model" },
-        { status: 500 },
+        500,
       );
     }
 
@@ -268,12 +282,9 @@ Example: "<p>This sentence follows the <strong>SOV pattern</strong>. The topic <
     // Cache the successful response
     setCachedResponse(cacheKey, sanitizedAnalysis);
     
-    return NextResponse.json(sanitizedAnalysis);
+    return jsonResponse(sanitizedAnalysis);
   } catch (error) {
     console.error("Error analyzing sentence:", error);
-    return NextResponse.json(
-      { error: "Failed to analyze sentence" },
-      { status: 500 },
-    );
+    return jsonResponse({ error: "Failed to analyze sentence" }, 500);
   }
 }
