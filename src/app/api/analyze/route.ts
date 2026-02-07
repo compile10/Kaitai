@@ -5,7 +5,30 @@ import { ChatXAI } from "@langchain/xai";
 import { type NextRequest, NextResponse } from "next/server";
 import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
-import type { SentenceAnalysis, Provider } from "@/types/analysis";
+import type { SentenceAnalysis, Provider } from "@common/types";
+
+// CORS headers configuration
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*", // In production, replace with your specific origins
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+// Helper to create JSON response with CORS headers
+function jsonResponse(data: unknown, status = 200) {
+  return NextResponse.json(data, {
+    status,
+    headers: corsHeaders,
+  });
+}
+
+// Handle CORS preflight requests
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: corsHeaders,
+  });
+}
 
 // Cache for memoizing API responses
 interface CacheEntry {
@@ -55,7 +78,7 @@ function setCachedResponse(cacheKey: string, data: SentenceAnalysis) {
 
 // Define the Zod schema for structured output
 const analysisSchema = z.object({
-  originalSentence: z.string().describe("The original Japanese sentence"),
+  directTranslation: z.string().describe("A direct, literal English translation of the sentence that preserves the Japanese word order and structure as closely as possible, even if it sounds awkward in English"),
   words: z.array(
     z.object({
       id: z.string().describe("Unique identifier for this word/phrase"),
@@ -158,31 +181,22 @@ export async function POST(request: NextRequest) {
     const { sentence, provider, model } = await request.json();
 
     if (!sentence || typeof sentence !== "string") {
-      return NextResponse.json(
-        { error: "Invalid sentence provided" },
-        { status: 400 },
-      );
+      return jsonResponse({ error: "Invalid sentence provided" }, 400);
     }
 
     if (!provider || typeof provider !== "string") {
-      return NextResponse.json(
-        { error: "Invalid provider specified" },
-        { status: 400 },
-      );
+      return jsonResponse({ error: "Invalid provider specified" }, 400);
     }
 
     if (!model || typeof model !== "string") {
-      return NextResponse.json(
-        { error: "Invalid model specified" },
-        { status: 400 },
-      );
+      return jsonResponse({ error: "Invalid model specified" }, 400);
     }
 
     // Check cache first (include provider and model in cache key)
     const cacheKey = `${provider}:${model}:${sentence}`;
     const cachedResponse = getCachedResponse(cacheKey);
     if (cachedResponse) {
-      return NextResponse.json(cachedResponse);
+      return jsonResponse(cachedResponse);
     }
 
     // Create chat model with provider factory
@@ -190,9 +204,9 @@ export async function POST(request: NextRequest) {
     try {
       chatModel = createChatModel(provider as Provider, model);
     } catch (error) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: error instanceof Error ? error.message : "Failed to create model" },
-        { status: 500 },
+        500,
       );
     }
 
@@ -229,11 +243,12 @@ IMPORTANT RULES:
    - Topics (は) do NOT modify anything - they provide context only
 
 Please provide:
-1. Each word/phrase broken down with its reading and part of speech
-2. Particles attached to their words (not as separate entries)
-3. Mark the topic with "isTopic: true"
-4. For each word, which other words it modifies (using word IDs) - EXCEPT topics which should not modify anything
-5. A brief explanation of the sentence structure in HTML format
+1. A direct, literal translation of the sentence into English. Translate as literally as possible, preserving the Japanese word order and structure. It's okay if it sounds unnatural in English -- the goal is to show what the sentence is literally saying word-by-word.
+2. Each word/phrase broken down with its reading and part of speech
+3. Particles attached to their words (not as separate entries)
+4. Mark the topic with "isTopic: true"
+5. For each word, which other words it modifies (using word IDs) - EXCEPT topics which should not modify anything
+6. A brief explanation of the sentence structure in HTML format. Do not include a translation here.
 
 EXPLANATION FORMATTING:
 - Use HTML tags for better readability: <p>, <strong>, <em>, <ul>, <li>
@@ -268,12 +283,9 @@ Example: "<p>This sentence follows the <strong>SOV pattern</strong>. The topic <
     // Cache the successful response
     setCachedResponse(cacheKey, sanitizedAnalysis);
     
-    return NextResponse.json(sanitizedAnalysis);
+    return jsonResponse(sanitizedAnalysis);
   } catch (error) {
     console.error("Error analyzing sentence:", error);
-    return NextResponse.json(
-      { error: "Failed to analyze sentence" },
-      { status: 500 },
-    );
+    return jsonResponse({ error: "Failed to analyze sentence" }, 500);
   }
 }
