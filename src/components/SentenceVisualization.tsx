@@ -319,6 +319,16 @@ export default function SentenceVisualization({
 
   return (
     <div className="w-full max-w-4xl space-y-6">
+      {/* Direct Translation */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
+        <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">
+          Direct Translation
+        </h3>
+        <p className="text-gray-700 dark:text-gray-300 text-lg italic">
+          {analysis.directTranslation}
+        </p>
+      </div>
+
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
         <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
           Sentence Structure

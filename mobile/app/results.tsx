@@ -117,6 +117,15 @@ export default function ResultsScreen() {
           </ThemedText>
         </View>
 
+        <View className="mb-6 p-4 rounded-xl border bg-card dark:bg-cardDark border-muted dark:border-mutedDark">
+          <ThemedText type="defaultSemiBold" className="mb-2">
+            Direct Translation
+          </ThemedText>
+          <ThemedText className="text-base italic opacity-80">
+            {analysis.directTranslation}
+          </ThemedText>
+        </View>
+
         {analysis.isFragment && (
           <View className="p-4 rounded-xl border mb-6 gap-2 bg-warningBg dark:bg-warningBgDark border-warningBorder dark:border-warningBorderDark">
             <ThemedText type="defaultSemiBold" className="text-yellow-600">

@@ -79,6 +79,7 @@ function setCachedResponse(cacheKey: string, data: SentenceAnalysis) {
 // Define the Zod schema for structured output
 const analysisSchema = z.object({
   originalSentence: z.string().describe("The original Japanese sentence"),
+  directTranslation: z.string().describe("A direct, literal English translation of the sentence that preserves the Japanese word order and structure as closely as possible, even if it sounds awkward in English"),
   words: z.array(
     z.object({
       id: z.string().describe("Unique identifier for this word/phrase"),
@@ -243,11 +244,12 @@ IMPORTANT RULES:
    - Topics (は) do NOT modify anything - they provide context only
 
 Please provide:
-1. Each word/phrase broken down with its reading and part of speech
-2. Particles attached to their words (not as separate entries)
-3. Mark the topic with "isTopic: true"
-4. For each word, which other words it modifies (using word IDs) - EXCEPT topics which should not modify anything
-5. A brief explanation of the sentence structure in HTML format
+1. A direct, literal translation of the sentence into English. Translate as literally as possible, preserving the Japanese word order and structure. It's okay if it sounds unnatural in English -- the goal is to show what the sentence is literally saying word-by-word.
+2. Each word/phrase broken down with its reading and part of speech
+3. Particles attached to their words (not as separate entries)
+4. Mark the topic with "isTopic: true"
+5. For each word, which other words it modifies (using word IDs) - EXCEPT topics which should not modify anything
+6. A brief explanation of the sentence structure in HTML format. Do not include a translation here.
 
 EXPLANATION FORMATTING:
 - Use HTML tags for better readability: <p>, <strong>, <em>, <ul>, <li>

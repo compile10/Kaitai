@@ -21,6 +21,7 @@ export interface WordAnalysis {
 
 export interface SentenceAnalysis {
   originalSentence: string;
+  directTranslation: string;
   words: WordAnalysis[];
   explanation: string;
   isFragment: boolean;

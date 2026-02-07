@@ -15,6 +15,7 @@ export interface WordNode {
 
 export interface SentenceAnalysis {
   originalSentence: string;
+  directTranslation: string;
   words: WordNode[];
   explanation: string;
   isFragment: boolean; // True if this is a sentence fragment/incomplete sentence
