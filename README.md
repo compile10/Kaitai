@@ -1,7 +1,7 @@
 # 日本語 Sentence Analyzer (JPnalysis)
 <img width="986" height="994" alt="image" src="https://github.com/user-attachments/assets/ef6d63e0-dc00-40a1-8635-4071759008c4" />
 
-A Next.js application that analyzes Japanese sentence structure using AI. This tool visualizes how words and phrases relate to each other, showing grammatical relationships with interactive diagrams.
+An application that analyzes Japanese sentence structure using AI. This tool visualizes how words and phrases relate to each other, showing grammatical relationships with interactive diagrams. Available as a **Next.js web app** and a **React Native mobile app**.
 
 ## Features
 
@@ -25,13 +25,15 @@ A Next.js application that analyzes Japanese sentence structure using AI. This t
 
 ## Getting Started
 
-### 1. Install dependencies
+### Web App (Next.js)
+
+#### 1. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Set up environment variables
+#### 2. Set up environment variables
 
 Create a `.env.local` file in the root directory with at least one provider API key:
 
@@ -46,13 +48,46 @@ OPENROUTER_API_KEY=your_openrouter_api_key_here
 
 Replace the placeholder values with your actual API keys. You can use `.env.local.example` as a template.
 
-### 3. Run the development server
+#### 3. Run the development server
 
 ```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
+
+### Mobile App (React Native)
+
+The mobile client lives in the `mobile/` directory and is built with **Expo** (SDK 54) and **React Native**. It connects to the same Next.js API backend for sentence analysis.
+
+#### 1. Install dependencies
+
+```bash
+cd mobile
+npm install
+```
+
+#### 2. Start the Next.js backend
+
+The mobile app requires the Next.js API server to be running. In a separate terminal from the project root:
+
+```bash
+npm run dev
+```
+
+#### 3. Run the mobile app
+
+```bash
+cd mobile
+npx expo start
+```
+
+From the Expo CLI you can open the app in:
+- **iOS Simulator** — press `i`
+- **Android Emulator** — press `a`
+- **Physical device** — scan the QR code with Expo Go
+
+> **Note:** Physical devices cannot reach `localhost` on your machine. Update `mobile/constants/api.ts` with your machine's local IP address or use a tunneling service like ngrok. The Android emulator uses `10.0.2.2` to access the host machine's localhost, which is already configured.
 
 ## How It Works
 
@@ -83,29 +118,63 @@ Try these examples:
 ## Project Structure
 
 ```
-src/
+src/                                  # Next.js web app
 ├── app/
 │   ├── api/
 │   │   └── analyze/
-│   │       └── route.ts          # API endpoint with multi-provider support
-│   ├── page.tsx                   # Main page component
-│   └── globals.css                # Global styles
+│   │       └── route.ts              # API endpoint with multi-provider support
+│   ├── page.tsx                      # Main page component
+│   └── globals.css                   # Global styles
 ├── components/
-│   ├── SentenceInput.tsx          # Input form component
-│   ├── SentenceVisualization.tsx  # Visualization component with arrows
-│   ├── SettingsModal.tsx          # Provider and model selection modal
-│   └── ParticleModal.tsx          # Particle explanation modal
+│   ├── SentenceInput.tsx             # Input form component
+│   ├── SentenceVisualization.tsx     # Visualization component with arrows
+│   ├── SettingsModal.tsx             # Provider and model selection modal
+│   └── ParticleModal.tsx             # Particle explanation modal
 ├── hooks/
-│   └── useSettings.ts             # Settings management hook
+│   └── useSettings.ts               # Settings management hook
 └── types/
-    └── analysis.ts                # TypeScript types for analysis data
+    └── analysis.ts                   # TypeScript types for analysis data
+
+common/                               # Shared code between web and mobile
+├── api.ts                            # Shared API client (analyzeSentence)
+├── providers.ts                      # Provider/model configuration
+└── types.ts                          # Shared TypeScript types
+
+mobile/                               # React Native (Expo) mobile app
+├── app/
+│   ├── _layout.tsx                   # Root layout with navigation stack
+│   ├── index.tsx                     # Home screen with sentence input
+│   ├── results.tsx                   # Analysis results screen
+│   └── settings.tsx                  # Provider & model settings screen
+├── components/
+│   ├── themed-text.tsx               # Theme-aware text component
+│   └── themed-view.tsx               # Theme-aware view component
+├── constants/
+│   └── api.ts                        # Platform-aware API URL configuration
+├── hooks/
+│   ├── use-color-scheme.ts           # Color scheme detection hook
+│   └── use-theme-color.ts            # Theme color resolution hook
+├── stores/
+│   └── settings-store.ts             # Zustand store with SecureStore persistence
+└── package.json                      # Separate dependency manifest
 ```
 
 ## Technology Stack
 
+### Web App
 - **Framework**: Next.js 15 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
+- **UI**: React 19
+
+### Mobile App
+- **Framework**: React Native 0.81 with Expo SDK 54
+- **Routing**: Expo Router (file-based)
+- **Styling**: NativeWind (Tailwind CSS for React Native)
+- **State Management**: Zustand with Expo SecureStore persistence
+- **Platforms**: iOS, Android, and Web
+
+### Shared
 - **AI Providers**: 
   - Anthropic Claude (Sonnet 4.5, Opus 4.5, Haiku 4.5)
   - OpenAI (GPT-5.2, o3, GPT-4o)
@@ -113,7 +182,7 @@ src/
   - xAI Grok (4, 4 Heavy)
   - OpenRouter (Auto-routing)
 - **AI Integration**: LangChain
-- **UI**: React 19
+- **Language**: TypeScript
 
 ## API Endpoint
 
