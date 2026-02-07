@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "日本語 Sentence Analyzer - JPnalysis",
+  title: "Kaitai (解体) - Japanese Sentence Analyzer",
   description:
     "Visualize Japanese sentence structure with AI-powered analysis. Analyze grammar, particles, and word relationships.",
 };

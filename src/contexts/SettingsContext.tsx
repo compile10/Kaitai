@@ -8,8 +8,8 @@ export type { ModelInfo, Provider, ProviderConfig };
 export { PROVIDERS };
 
 const DEFAULT_PROVIDER: Provider = "anthropic";
-const STORAGE_KEY_PROVIDER = "jpnalysis-provider";
-const STORAGE_KEY_MODEL = "jpnalysis-model";
+const STORAGE_KEY_PROVIDER = "kaitai-provider";
+const STORAGE_KEY_MODEL = "kaitai-model";
 
 interface SettingsContextType {
   provider: Provider;

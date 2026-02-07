@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "jpnalysis",
-    "slug": "jpnalysis",
+    "name": "kaitai",
+    "slug": "kaitai",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "jpnalysis",
+    "scheme": "kaitai",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.jpnalysis"
+      "bundleIdentifier": "com.anonymous.kaitai"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +21,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.jpnalysis"
+      "package": "com.anonymous.kaitai"
     },
     "web": {
       "output": "static",
