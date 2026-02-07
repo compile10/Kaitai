@@ -1,14 +1,25 @@
 import { View, type ViewProps } from 'react-native';
 
-import { useThemeColor } from '@/hooks/use-theme-color';
-
+/**
+ * A View that uses the app's theme for its default background (light/dark).
+ * Accepts optional `className` (NativeWind) and `style`; other View props are passed through.
+ */
 export type ThemedViewProps = ViewProps & {
-  lightColor?: string;
-  darkColor?: string;
+  className?: string;
 };
 
-export function ThemedView({ style, lightColor, darkColor, ...otherProps }: ThemedViewProps) {
-  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
+const defaultBackgroundClass = 'bg-background dark:bg-backgroundDark';
 
-  return <View style={[{ backgroundColor }, style]} {...otherProps} />;
+export function ThemedView({
+  style,
+  className,
+  ...otherProps
+}: ThemedViewProps) {
+  return (
+    <View
+      className={[defaultBackgroundClass, className].filter(Boolean).join(' ')}
+      style={style}
+      {...otherProps}
+    />
+  );
 }

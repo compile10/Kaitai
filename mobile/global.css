@@ -1,0 +1,4 @@
+/* Tailwind v3 (NativeWind). Linter may warn v4 migration; we use v3. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
