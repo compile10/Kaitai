@@ -246,7 +246,7 @@ npm start
 
 ## License
 
-MIT
+ALL RIGHTS RESERVED
 
 ## Acknowledgments
 
