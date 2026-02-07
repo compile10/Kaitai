@@ -78,7 +78,6 @@ function setCachedResponse(cacheKey: string, data: SentenceAnalysis) {
 
 // Define the Zod schema for structured output
 const analysisSchema = z.object({
-  originalSentence: z.string().describe("The original Japanese sentence"),
   directTranslation: z.string().describe("A direct, literal English translation of the sentence that preserves the Japanese word order and structure as closely as possible, even if it sounds awkward in English"),
   words: z.array(
     z.object({

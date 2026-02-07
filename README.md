@@ -138,7 +138,7 @@ Analyzes a Japanese sentence and returns structured data.
 **Response:**
 ```json
 {
-  "originalSentence": "私は美しい花を見ました。",
+  "directTranslation": "I beautiful flower saw.",
   "words": [
     {
       "id": "1",
@@ -150,7 +150,8 @@ Analyzes a Japanese sentence and returns structured data.
     },
     // ... more words
   ],
-  "explanation": "This sentence describes..."
+  "explanation": "This sentence describes...",
+  "isFragment": false
 }
 ```
 

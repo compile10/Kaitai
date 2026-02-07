@@ -14,7 +14,6 @@ export interface WordNode {
 }
 
 export interface SentenceAnalysis {
-  originalSentence: string;
   directTranslation: string;
   words: WordNode[];
   explanation: string;

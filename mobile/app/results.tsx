@@ -111,7 +111,7 @@ export default function ResultsScreen() {
       >
         <View className="mt-2 mb-6">
           <ThemedText type="title" className="mt-2">
-            {analysis.originalSentence}
+            {sentence?.trim() || ''}
           </ThemedText>
         </View>
 
