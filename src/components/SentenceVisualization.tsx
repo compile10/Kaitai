@@ -14,7 +14,7 @@ import {
   useNodesState,
 } from "@xyflow/react";
 import { useCallback, useMemo, useState } from "react";
-import type { SentenceAnalysis, WordNode } from "@/types/analysis";
+import type { SentenceAnalysis, WordNode } from "@common/types";
 import "@xyflow/react/dist/style.css";
 import ParticleModal from "./ParticleModal";
 

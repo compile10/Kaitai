@@ -5,7 +5,7 @@ import { ChatXAI } from "@langchain/xai";
 import { type NextRequest, NextResponse } from "next/server";
 import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
-import type { SentenceAnalysis, Provider } from "@/types/analysis";
+import type { SentenceAnalysis, Provider } from "@common/types";
 
 // CORS headers configuration
 const corsHeaders = {

@@ -13,11 +13,9 @@ import RenderHTML from '@native-html/render';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import {
-  analyzeSentence,
-  type SentenceAnalysis,
-  type WordAnalysis,
-} from '@/services/api';
+import { analyzeSentence } from '@common/api';
+import type { SentenceAnalysis, WordNode } from '@common/types';
+import { buildApiUrl } from '@/constants/api';
 import { useSettingsStore, PROVIDER_MAP } from '@/stores/settings-store';
 
 export default function ResultsScreen() {
@@ -39,7 +37,7 @@ export default function ResultsScreen() {
     setError(null);
     setAnalysis(null);
     try {
-      const result = await analyzeSentence(sentence, provider, model);
+      const result = await analyzeSentence(buildApiUrl('analyze'), sentence, provider, model);
       setAnalysis(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -218,8 +216,8 @@ export default function ResultsScreen() {
 }
 
 interface WordCardProps {
-  word: WordAnalysis;
-  allWords: WordAnalysis[];
+  word: WordNode;
+  allWords: WordNode[];
   isTopic?: boolean;
 }
 
@@ -261,8 +259,8 @@ function WordCard({ word, allWords, isTopic }: WordCardProps) {
 }
 
 interface WordDetailItemProps {
-  word: WordAnalysis;
-  allWords: WordAnalysis[];
+  word: WordNode;
+  allWords: WordNode[];
   tintColor: string;
 }
 

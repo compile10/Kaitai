@@ -6,7 +6,8 @@ import SentenceInput from "@/components/SentenceInput";
 import SentenceVisualization from "@/components/SentenceVisualization";
 import SettingsModal from "@/components/SettingsModal";
 import { useSettings, PROVIDERS } from "@/contexts/SettingsContext";
-import type { SentenceAnalysis } from "@/types/analysis";
+import type { SentenceAnalysis } from "@common/types";
+import { analyzeSentence } from "@common/api";
 
 export default function Home() {
   const [analysis, setAnalysis] = useState<SentenceAnalysis | null>(null);
@@ -23,24 +24,7 @@ export default function Home() {
     setAnalysis(null);
 
     try {
-      const response = await fetch("/api/analyze", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sentence,
-          provider,
-          model,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to analyze sentence");
-      }
-
-      const data = await response.json();
+      const data = await analyzeSentence("/api/analyze", sentence, provider, model);
       console.log("Analysis received:", JSON.stringify(data, null, 2));
       setAnalysis(data);
     } catch (err) {
