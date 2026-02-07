@@ -1,8 +1,8 @@
-# AGENTS.md — JPnalysis
+# AGENTS.md — Kaitai (解体)
 
 ## What this project is
 
-JPnalysis is an AI-powered Japanese sentence analyzer that breaks down sentences into their grammatical components and visualizes the relationships between them. It ships as two clients — a Next.js web app and a React Native (Expo) mobile app — both sharing a common TypeScript layer and talking to a single Next.js API route that fans out to multiple LLM providers via LangChain.
+Kaitai (解体) is an AI-powered Japanese sentence analyzer that breaks down sentences into their grammatical components and visualizes the relationships between them. It ships as two clients — a Next.js web app and a React Native (Expo) mobile app — both sharing a common TypeScript layer and talking to a single Next.js API route that fans out to multiple LLM providers via LangChain.
 
 ## Repository layout
 
@@ -152,7 +152,7 @@ When modifying `common/`, changes affect **both** clients. Test both after editi
 
 ### State management
 
-- **Web**: React Context (`SettingsContext.tsx`) persists provider/model selection to `localStorage` under keys `jpnalysis-provider` and `jpnalysis-model`. Hydration is tracked via `isLoaded`.
+- **Web**: React Context (`SettingsContext.tsx`) persists provider/model selection to `localStorage` under keys `kaitai-provider` and `kaitai-model`. Hydration is tracked via `isLoaded`.
 - **Mobile**: Zustand store (`settings-store.ts`) persists to Expo SecureStore (encrypted). Hydration is tracked via `isHydrated`. Always check hydration before rendering settings-dependent UI.
 
 ### Styling conventions

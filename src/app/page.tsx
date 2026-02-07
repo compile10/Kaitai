@@ -48,7 +48,7 @@ export default function Home() {
               <Settings className="w-6 h-6" />
             </button>
             <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
-              日本語 Sentence Analyzer
+              Kaitai 解体
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400">
               Visualize Japanese sentence structure with AI-powered analysis

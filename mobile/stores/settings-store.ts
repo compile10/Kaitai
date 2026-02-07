@@ -47,7 +47,7 @@ export const useSettingsStore = create<SettingsState>()(
       setHydrated: (state: boolean) => set({ isHydrated: state }),
     }),
     {
-      name: 'jpnalysis-settings',
+      name: 'kaitai-settings',
       storage: createJSONStorage(() => secureStorage),
       onRehydrateStorage: () => (state) => {
         if (state && state.useCustomModel === undefined) {

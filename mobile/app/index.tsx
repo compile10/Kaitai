@@ -38,7 +38,7 @@ export default function HomeScreen() {
       </TouchableOpacity>
 
       <View className="flex-[2]" />
-      <ThemedText type="title">JPnalysis</ThemedText>
+      <ThemedText type="title">Kaitai 解体</ThemedText>
       <ThemedText type="subtitle" className="text-center">
         Understand Japanese sentences using AI.
       </ThemedText>
