@@ -9,14 +9,16 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
       {
         id: "claude-sonnet-4-5-20250929",
         name: "Claude Sonnet 4.5",
-        description: "Best balance of intelligence, speed, and cost for most use cases",
+        description:
+          "Best balance of intelligence, speed, and cost for most use cases",
         pricing: "$3 / $15 per MTok",
         speed: "Fast",
       },
       {
         id: "claude-opus-4-5-20251101",
         name: "Claude Opus 4.5",
-        description: "Premium model combining maximum intelligence with practical performance",
+        description:
+          "Premium model combining maximum intelligence with practical performance",
         pricing: "$5 / $25 per MTok",
         speed: "Moderate",
       },
@@ -37,21 +39,24 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
       {
         id: "gpt-5.2",
         name: "GPT-5.2",
-        description: "Best model for coding and agentic tasks across industries",
+        description:
+          "Best model for coding and agentic tasks across industries",
         pricing: "$1.75 / $14.00 per MTok",
         speed: "Fast",
       },
       {
         id: "gpt-5.2-pro",
         name: "GPT-5.2 Pro",
-        description: "Version of GPT-5.2 that produces smarter and more precise responses",
+        description:
+          "Version of GPT-5.2 that produces smarter and more precise responses",
         pricing: "$21.00 / $168.00 per MTok",
         speed: "Moderate",
       },
       {
         id: "gpt-5-mini",
         name: "GPT-5 Mini",
-        description: "Faster, cost-efficient version of GPT-5 for well-defined tasks",
+        description:
+          "Faster, cost-efficient version of GPT-5 for well-defined tasks",
         pricing: "$0.25 / $2.00 per MTok",
         speed: "Fast",
       },
@@ -65,7 +70,8 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
       {
         id: "gemini-3-flash-preview",
         name: "Gemini 3 Flash",
-        description: "Latest generation balanced model for speed and intelligence",
+        description:
+          "Latest generation balanced model for speed and intelligence",
         pricing: "$0.50 / $3.00 per MTok",
         speed: "Fastest",
       },
@@ -79,7 +85,8 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
       {
         id: "gemini-2.5-pro",
         name: "Gemini 2.5 Pro",
-        description: "Advanced thinking model with complex reasoning capabilities",
+        description:
+          "Advanced thinking model with complex reasoning capabilities",
         pricing: "$1.25 / $10.00 per MTok",
         speed: "Moderate",
       },
@@ -107,7 +114,8 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
       {
         id: "grok-4",
         name: "Grok 4",
-        description: "Latest flagship model with real-time search and multimodal capabilities",
+        description:
+          "Latest flagship model with real-time search and multimodal capabilities",
         pricing: "$3.00 / $15.00 per MTok",
         speed: "Fast",
       },
@@ -128,21 +136,24 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
       {
         id: "openrouter/auto",
         name: "Auto Router",
-        description: "Intelligent auto-routing to select the best model for each prompt",
+        description:
+          "Intelligent auto-routing to select the best model for each prompt",
         pricing: "Varies by model",
         speed: "Varies",
       },
       {
         id: "z-ai/glm-4.7",
         name: "Z.AI GLM 4.7",
-        description: "Enhanced programming and reasoning with 202K context window",
+        description:
+          "Enhanced programming and reasoning with 202K context window",
         pricing: "$0.40 / $1.50 per MTok",
         speed: "Fast",
       },
       {
         id: "mistralai/ministral-14b-2512",
         name: "Mistral Ministral 3 14B",
-        description: "Frontier model with vision capabilities and 262K context window",
+        description:
+          "Frontier model with vision capabilities and 262K context window",
         pricing: "$0.20 / $0.20 per MTok",
         speed: "Fast",
       },

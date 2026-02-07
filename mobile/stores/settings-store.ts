@@ -1,19 +1,20 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage, StateStorage } from 'zustand/middleware';
-import * as SecureStore from 'expo-secure-store';
-import type { Provider, ProviderConfig, ModelInfo } from '@common/types';
-import { PROVIDER_MAP } from '@common/providers';
+import { create } from "zustand";
+import { persist, createJSONStorage, StateStorage } from "zustand/middleware";
+import * as SecureStore from "expo-secure-store";
+import type { Provider, ProviderConfig, ModelInfo } from "@common/types";
+import { PROVIDER_MAP } from "@common/providers";
 
 export type { Provider, ProviderConfig, ModelInfo };
 export { PROVIDER_MAP };
 
-const DEFAULT_PROVIDER: Provider = 'anthropic';
+const DEFAULT_PROVIDER: Provider = "anthropic";
 const DEFAULT_MODEL = PROVIDER_MAP[DEFAULT_PROVIDER].defaultModel;
 
 // Custom storage adapter for expo-secure-store to implement Zustand's storage interface
 const secureStorage: StateStorage = {
   getItem: (name: string) => SecureStore.getItemAsync(name),
-  setItem: (name: string, value: string) => SecureStore.setItemAsync(name, value),
+  setItem: (name: string, value: string) =>
+    SecureStore.setItemAsync(name, value),
   removeItem: (name: string) => SecureStore.deleteItemAsync(name),
 };
 
@@ -38,7 +39,7 @@ export const useSettingsStore = create<SettingsState>()(
       setProvider: (provider: Provider) => {
         set({
           provider,
-          model: PROVIDER_MAP[provider]?.defaultModel ?? '',
+          model: PROVIDER_MAP[provider]?.defaultModel ?? "",
           useCustomModel: false,
         });
       },
@@ -47,7 +48,7 @@ export const useSettingsStore = create<SettingsState>()(
       setHydrated: (state: boolean) => set({ isHydrated: state }),
     }),
     {
-      name: 'kaitai-settings',
+      name: "kaitai-settings",
       storage: createJSONStorage(() => secureStorage),
       onRehydrateStorage: () => (state) => {
         if (state && state.useCustomModel === undefined) {
@@ -60,7 +61,6 @@ export const useSettingsStore = create<SettingsState>()(
         model: state.model,
         useCustomModel: state.useCustomModel,
       }),
-    }
-  )
+    },
+  ),
 );
-

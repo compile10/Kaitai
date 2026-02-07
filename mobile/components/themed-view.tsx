@@ -1,4 +1,4 @@
-import { View, type ViewProps } from 'react-native';
+import { View, type ViewProps } from "react-native";
 
 /**
  * A View that uses the app's theme for its default background (light/dark).
@@ -8,7 +8,7 @@ export type ThemedViewProps = ViewProps & {
   className?: string;
 };
 
-const defaultBackgroundClass = 'bg-background dark:bg-backgroundDark';
+const defaultBackgroundClass = "bg-background dark:bg-backgroundDark";
 
 export function ThemedView({
   style,
@@ -17,7 +17,7 @@ export function ThemedView({
 }: ThemedViewProps) {
   return (
     <View
-      className={[defaultBackgroundClass, className].filter(Boolean).join(' ')}
+      className={[defaultBackgroundClass, className].filter(Boolean).join(" ")}
       style={style}
       {...otherProps}
     />

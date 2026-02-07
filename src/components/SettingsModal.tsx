@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { PROVIDERS } from "@common/providers";
+import type { Provider } from "@common/types";
 import { Settings } from "lucide-react";
-import { useSettings, PROVIDERS } from "@/contexts/SettingsContext";
-import type { Provider } from "@/contexts/SettingsContext";
+import { useEffect, useState } from "react";
+import { useSettingsStore } from "@/stores/settings-store";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -11,8 +12,9 @@ interface SettingsModalProps {
 }
 
 export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
-  const { provider, model, updateProvider, updateModel, isLoaded } = useSettings();
-  
+  const { provider, model, setProvider, setModel, isHydrated } =
+    useSettingsStore();
+
   // Local draft state - initialized when modal opens
   const [draftProvider, setDraftProvider] = useState<Provider>(provider);
   const [draftModel, setDraftModel] = useState(model);
@@ -20,28 +22,28 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
   // Initialize draft state when modal opens
   useEffect(() => {
-    if (isOpen && isLoaded) {
+    if (isOpen && isHydrated) {
       setDraftProvider(provider);
       setDraftModel(model);
-      
+
       // Check if current model is custom (not in preset list)
       const providerConfig = PROVIDERS.find((p) => p.id === provider);
       const isPreset = providerConfig?.models.some((m) => m.id === model);
       setUseCustomModel(!isPreset);
     }
-  }, [isOpen, isLoaded, provider, model]);
+  }, [isOpen, isHydrated, provider, model]);
 
   // Handle keyboard and scroll lock
   useEffect(() => {
     if (!isOpen) return;
-    
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
-    
+
     document.addEventListener("keydown", handleEscape);
     document.body.style.overflow = "hidden";
-    
+
     return () => {
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "unset";
@@ -57,8 +59,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   };
 
   const handleSave = () => {
-    updateProvider(draftProvider);
-    updateModel(draftModel);
+    setProvider(draftProvider);
+    setModel(draftModel);
     onClose();
   };
 
@@ -93,11 +95,13 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
         {/* Content */}
         <div className="p-6 overflow-y-auto flex-1">
-          {!isLoaded ? (
+          {!isHydrated ? (
             <div className="flex items-center justify-center py-12">
               <div className="flex flex-col items-center gap-4">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
-                <p className="text-gray-600 dark:text-gray-400">Loading settings...</p>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Loading settings...
+                </p>
               </div>
             </div>
           ) : (
@@ -112,7 +116,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 </p>
                 <select
                   value={draftProvider}
-                  onChange={(e) => handleProviderChange(e.target.value as Provider)}
+                  onChange={(e) =>
+                    handleProviderChange(e.target.value as Provider)
+                  }
                   className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-blue-600 focus:outline-none transition-colors"
                 >
                   {PROVIDERS.map((p) => (
@@ -133,7 +139,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                       setUseCustomModel(e.target.checked);
                       if (!e.target.checked) {
                         // Keep current model if it's in presets, otherwise reset to default
-                        const isInPresets = models.some((m) => m.id === draftModel);
+                        const isInPresets = models.some(
+                          (m) => m.id === draftModel,
+                        );
                         if (!isInPresets) {
                           setDraftModel(providerConfig?.defaultModel || "");
                         }
@@ -146,7 +154,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                       Use Custom Model
                     </span>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Enter a specific model name instead of choosing from presets
+                      Enter a specific model name instead of choosing from
+                      presets
                     </p>
                   </div>
                 </label>
@@ -172,7 +181,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     Select Model
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Choose which model to use. Your preference will be saved locally.
+                    Choose which model to use. Your preference will be saved
+                    locally.
                   </p>
 
                   <div className="space-y-3">

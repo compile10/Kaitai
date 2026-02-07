@@ -1,26 +1,26 @@
-import { TextInput, View, TouchableOpacity } from 'react-native';
-import { useState } from 'react';
-import { router, type Href } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { TextInput, View, TouchableOpacity } from "react-native";
+import { useState } from "react";
+import { router, type Href } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { useThemeColor } from '@/hooks/use-theme-color';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { useThemeColor } from "@/hooks/use-theme-color";
 
 const EXAMPLE_SENTENCES = [
-  '私は美しい花を見ました。',
-  '猫が静かに部屋に入った。',
-  '彼女は新しい本を読んでいる。',
+  "私は美しい花を見ました。",
+  "猫が静かに部屋に入った。",
+  "彼女は新しい本を読んでいる。",
 ];
 
 export default function HomeScreen() {
-  const [searchValue, setSearchValue] = useState<string>('');
-  const iconColor = useThemeColor({}, 'icon');
+  const [searchValue, setSearchValue] = useState<string>("");
+  const iconColor = useThemeColor({}, "icon");
 
   const handleSearch = () => {
     if (searchValue.trim()) {
       router.push({
-        pathname: '/results',
+        pathname: "/results",
         params: { sentence: searchValue.trim() },
       });
     }
@@ -31,7 +31,7 @@ export default function HomeScreen() {
       {/* Settings Button */}
       <TouchableOpacity
         className="absolute top-12 right-5 p-2 z-10"
-        onPress={() => router.push('/settings' as Href)}
+        onPress={() => router.push("/settings" as Href)}
         accessibilityLabel="Settings"
       >
         <Ionicons name="settings-outline" size={24} color={iconColor} />
@@ -63,7 +63,7 @@ export default function HomeScreen() {
               key={index}
               className="px-3 py-2 rounded-2xl bg-gray-200 dark:bg-gray-700"
               onPress={() =>
-                router.push({ pathname: '/results', params: { sentence } })
+                router.push({ pathname: "/results", params: { sentence } })
               }
             >
               <ThemedText className="text-sm text-gray-800 dark:text-gray-200">

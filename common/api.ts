@@ -15,7 +15,7 @@ export class ApiError extends Error {
 
 /**
  * Analyze a Japanese sentence using the configured LLM provider
- * 
+ *
  * @param url - The API endpoint URL (platform-specific)
  * @param sentence - The Japanese sentence to analyze
  * @param provider - The LLM provider to use

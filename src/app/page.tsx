@@ -1,21 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { analyzeSentence } from "@common/api";
+import { PROVIDERS } from "@common/providers";
+import type { SentenceAnalysis } from "@common/types";
 import { Settings } from "lucide-react";
+import { useState } from "react";
 import SentenceInput from "@/components/SentenceInput";
 import SentenceVisualization from "@/components/SentenceVisualization";
 import SettingsModal from "@/components/SettingsModal";
-import { useSettings, PROVIDERS } from "@/contexts/SettingsContext";
-import type { SentenceAnalysis } from "@common/types";
-import { analyzeSentence } from "@common/api";
+import { useSettingsStore } from "@/stores/settings-store";
 
 export default function Home() {
   const [analysis, setAnalysis] = useState<SentenceAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const { provider, model } = useSettings();
-  
+  const { provider, model } = useSettingsStore();
+
   const currentProvider = PROVIDERS.find((p) => p.id === provider);
 
   const handleAnalyze = async (sentence: string) => {
@@ -24,7 +25,12 @@ export default function Home() {
     setAnalysis(null);
 
     try {
-      const data = await analyzeSentence("/api/analyze", sentence, provider, model);
+      const data = await analyzeSentence(
+        "/api/analyze",
+        sentence,
+        provider,
+        model,
+      );
       console.log("Analysis received:", JSON.stringify(data, null, 2));
       setAnalysis(data);
     } catch (err) {
@@ -72,7 +78,10 @@ export default function Home() {
             <div className="flex items-center justify-center space-x-2">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
               <p className="text-gray-600 dark:text-gray-400">
-                Analyzing with {currentProvider?.models.find((m) => m.id === model)?.name || model}...
+                Analyzing with{" "}
+                {currentProvider?.models.find((m) => m.id === model)?.name ||
+                  model}
+                ...
               </p>
             </div>
           )}

@@ -4,16 +4,16 @@ import {
   TouchableOpacity,
   TextInput,
   Switch,
-} from 'react-native';
+} from "react-native";
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { useThemeColor } from '@/hooks/use-theme-color';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { useThemeColor } from "@/hooks/use-theme-color";
 import {
   useSettingsStore,
   PROVIDER_MAP,
   type Provider,
-} from '@/stores/settings-store';
+} from "@/stores/settings-store";
 
 export default function SettingsScreen() {
   const {
@@ -26,8 +26,8 @@ export default function SettingsScreen() {
     isHydrated,
   } = useSettingsStore();
 
-  const tintColor = useThemeColor({}, 'tint');
-  const borderColor = useThemeColor({}, 'border');
+  const tintColor = useThemeColor({}, "tint");
+  const borderColor = useThemeColor({}, "border");
 
   const models = PROVIDER_MAP[provider]?.models ?? [];
 
@@ -40,7 +40,7 @@ export default function SettingsScreen() {
     if (!value) {
       const isPreset = models.some((m) => m.id === model);
       if (!isPreset) {
-        setModel(PROVIDER_MAP[provider]?.defaultModel ?? '');
+        setModel(PROVIDER_MAP[provider]?.defaultModel ?? "");
       }
     }
   };
@@ -70,8 +70,8 @@ export default function SettingsScreen() {
                 key={p.id}
                 className={`flex-row items-center p-4 rounded-xl border-2 ${
                   provider === p.id
-                    ? 'bg-gray-100 dark:bg-gray-800 border-tint dark:border-tintDark'
-                    : 'border-muted dark:border-mutedDark'
+                    ? "bg-gray-100 dark:bg-gray-800 border-tint dark:border-tintDark"
+                    : "border-muted dark:border-mutedDark"
                 }`}
                 onPress={() => handleProviderChange(p.id)}
               >
@@ -130,8 +130,8 @@ export default function SettingsScreen() {
                   key={m.id}
                   className={`p-4 rounded-xl border-2 ${
                     model === m.id
-                      ? 'bg-gray-100 dark:bg-gray-800 border-tint dark:border-tintDark'
-                      : 'bg-transparent border-muted dark:border-mutedDark'
+                      ? "bg-gray-100 dark:bg-gray-800 border-tint dark:border-tintDark"
+                      : "bg-transparent border-muted dark:border-mutedDark"
                   }`}
                   onPress={() => setModel(m.id)}
                 >

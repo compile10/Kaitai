@@ -69,7 +69,7 @@ function setCachedResponse(cacheKey: string, data: SentenceAnalysis) {
     data,
     timestamp: Date.now(),
   });
-  
+
   // Periodically clean up expired entries
   if (responseCache.size > 100) {
     cleanExpiredCache();
@@ -78,25 +78,72 @@ function setCachedResponse(cacheKey: string, data: SentenceAnalysis) {
 
 // Define the Zod schema for structured output
 const analysisSchema = z.object({
-  directTranslation: z.string().describe("A direct, literal English translation of the sentence that preserves the Japanese word order and structure as closely as possible, even if it sounds awkward in English"),
+  directTranslation: z
+    .string()
+    .describe(
+      "A direct, literal English translation of the sentence that preserves the Japanese word order and structure as closely as possible, even if it sounds awkward in English",
+    ),
   words: z.array(
     z.object({
       id: z.string().describe("Unique identifier for this word/phrase"),
-      text: z.string().describe("The actual text of the word/phrase in Japanese (NOT including particles - those go in attachedParticle)"),
-      reading: z.string().nullable().describe("Hiragana reading of the word (optional)"),
-      partOfSpeech: z.string().describe("Part of speech (e.g., noun, verb, adjective, particle, etc.)"),
-      modifies: z.array(z.string()).nullable().describe("Array of IDs of words/phrases that this word modifies or relates to"),
+      text: z
+        .string()
+        .describe(
+          "The actual text of the word/phrase in Japanese (NOT including particles - those go in attachedParticle)",
+        ),
+      reading: z
+        .string()
+        .nullable()
+        .describe("Hiragana reading of the word (optional)"),
+      partOfSpeech: z
+        .string()
+        .describe(
+          "Part of speech (e.g., noun, verb, adjective, particle, etc.)",
+        ),
+      modifies: z
+        .array(z.string())
+        .nullable()
+        .describe(
+          "Array of IDs of words/phrases that this word modifies or relates to",
+        ),
       position: z.number().describe("Position in the sentence (0-indexed)"),
-      attachedParticle: z.object({
-        text: z.string().describe("The particle text (e.g., は, を, に, が, etc.)"),
-        reading: z.string().nullable().describe("Hiragana reading of the particle (optional)"),
-        description: z.string().describe("A brief explanation of what this particle does in this specific sentence context (1-2 sentences)"),
-      }).nullable().describe("Particle attached to this word (if any). Do NOT create separate word entries for particles."),
-      isTopic: z.boolean().nullable().describe("True if this word is the sentence topic. Topics provide context but don't modify the main sentence."),
-    })
+      attachedParticle: z
+        .object({
+          text: z
+            .string()
+            .describe("The particle text (e.g., は, を, に, が, etc.)"),
+          reading: z
+            .string()
+            .nullable()
+            .describe("Hiragana reading of the particle (optional)"),
+          description: z
+            .string()
+            .describe(
+              "A brief explanation of what this particle does in this specific sentence context (1-2 sentences)",
+            ),
+        })
+        .nullable()
+        .describe(
+          "Particle attached to this word (if any). Do NOT create separate word entries for particles.",
+        ),
+      isTopic: z
+        .boolean()
+        .nullable()
+        .describe(
+          "True if this word is the sentence topic. Topics provide context but don't modify the main sentence.",
+        ),
+    }),
   ),
-  explanation: z.string().describe("Brief HTML-formatted explanation of the sentence structure. Use HTML tags like <p>, <strong>, <em>, <ul>, <li> for better formatting."),
-  isFragment: z.boolean().describe("True if this is a sentence fragment or incomplete sentence (e.g., missing a verb, incomplete thought, or not a grammatically complete sentence). False if it's a complete sentence."),
+  explanation: z
+    .string()
+    .describe(
+      "Brief HTML-formatted explanation of the sentence structure. Use HTML tags like <p>, <strong>, <em>, <ul>, <li> for better formatting.",
+    ),
+  isFragment: z
+    .boolean()
+    .describe(
+      "True if this is a sentence fragment or incomplete sentence (e.g., missing a verb, incomplete thought, or not a grammatically complete sentence). False if it's a complete sentence.",
+    ),
 });
 
 // Provider configuration
@@ -205,7 +252,10 @@ export async function POST(request: NextRequest) {
       chatModel = createChatModel(provider as Provider, model);
     } catch (error) {
       return jsonResponse(
-        { error: error instanceof Error ? error.message : "Failed to create model" },
+        {
+          error:
+            error instanceof Error ? error.message : "Failed to create model",
+        },
         500,
       );
     }
@@ -257,32 +307,32 @@ EXPLANATION FORMATTING:
 - Use lists for multiple points
 Example: "<p>This sentence follows the <strong>SOV pattern</strong>. The topic <strong>私</strong> is marked with は.</p>"`;
 
-    const analysis = await structuredModel.invoke(prompt) as SentenceAnalysis;
-    
+    const analysis = (await structuredModel.invoke(prompt)) as SentenceAnalysis;
+
     // Sanitize HTML content to prevent XSS attacks
     const sanitizedAnalysis: SentenceAnalysis = {
       ...analysis,
       explanation: sanitizeHtml(analysis.explanation, {
-        allowedTags: ['p', 'strong', 'em', 'ul', 'li', 'ol', 'br', 'span'],
+        allowedTags: ["p", "strong", "em", "ul", "li", "ol", "br", "span"],
         allowedAttributes: {},
       }),
-      words: analysis.words.map(word => ({
+      words: analysis.words.map((word) => ({
         ...word,
         attachedParticle: word.attachedParticle
           ? {
               ...word.attachedParticle,
               description: sanitizeHtml(word.attachedParticle.description, {
-                allowedTags: ['strong', 'em', 'br'],
+                allowedTags: ["strong", "em", "br"],
                 allowedAttributes: {},
               }),
             }
           : null,
       })),
     };
-    
+
     // Cache the successful response
     setCachedResponse(cacheKey, sanitizedAnalysis);
-    
+
     return jsonResponse(sanitizedAnalysis);
   } catch (error) {
     console.error("Error analyzing sentence:", error);

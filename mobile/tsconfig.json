@@ -3,12 +3,8 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@common/*": [
-        "../common/*"
-      ]
+      "@/*": ["./*"],
+      "@common/*": ["../common/*"]
     }
   },
   "include": [

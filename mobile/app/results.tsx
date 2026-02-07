@@ -1,22 +1,22 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from "react";
 import {
   View,
   ScrollView,
   ActivityIndicator,
   TouchableOpacity,
   useWindowDimensions,
-} from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import RenderHTML from '@native-html/render';
+} from "react-native";
+import { useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import RenderHTML from "@native-html/render";
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { useThemeColor } from '@/hooks/use-theme-color';
-import { analyzeSentence } from '@common/api';
-import type { SentenceAnalysis, WordNode } from '@common/types';
-import { buildApiUrl } from '@/constants/api';
-import { useSettingsStore, PROVIDER_MAP } from '@/stores/settings-store';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { useThemeColor } from "@/hooks/use-theme-color";
+import { analyzeSentence } from "@common/api";
+import type { SentenceAnalysis, WordNode } from "@common/types";
+import { buildApiUrl } from "@/constants/api";
+import { useSettingsStore, PROVIDER_MAP } from "@/stores/settings-store";
 
 export default function ResultsScreen() {
   const { sentence } = useLocalSearchParams<{ sentence: string }>();
@@ -28,8 +28,8 @@ export default function ResultsScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const textColor = useThemeColor({}, 'text');
-  const tintColor = useThemeColor({}, 'tint');
+  const textColor = useThemeColor({}, "text");
+  const tintColor = useThemeColor({}, "tint");
 
   const fetchAnalysis = useCallback(async () => {
     if (!sentence || !isHydrated) return;
@@ -37,10 +37,15 @@ export default function ResultsScreen() {
     setError(null);
     setAnalysis(null);
     try {
-      const result = await analyzeSentence(buildApiUrl('analyze'), sentence, provider, model);
+      const result = await analyzeSentence(
+        buildApiUrl("analyze"),
+        sentence,
+        provider,
+        model,
+      );
       setAnalysis(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +98,7 @@ export default function ResultsScreen() {
       <ThemedView className="flex-1">
         <ThemedText>No analysis available</ThemedText>
       </ThemedView>
-    ); 
+    );
   }
 
   const topicWords = analysis.words
@@ -105,13 +110,10 @@ export default function ResultsScreen() {
 
   return (
     <ThemedView className="flex-1">
-      <ScrollView
-        className="flex-1 px-5"
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
         <View className="mt-2 mb-6">
           <ThemedText type="title" className="mt-2">
-            {sentence?.trim() || ''}
+            {sentence?.trim() || ""}
           </ThemedText>
         </View>
 
@@ -147,13 +149,13 @@ export default function ResultsScreen() {
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View className="flex-row gap-3 pr-5">
                 {topicWords.map((word) => (
-                    <WordCard
-                      key={word.id}
-                      word={word}
-                      allWords={analysis.words}
-                      isTopic
-                    />
-                  ))}
+                  <WordCard
+                    key={word.id}
+                    word={word}
+                    allWords={analysis.words}
+                    isTopic
+                  />
+                ))}
               </View>
             </ScrollView>
           </View>
@@ -166,12 +168,8 @@ export default function ResultsScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View className="flex-row gap-3 pr-5">
               {mainWords.map((word) => (
-                  <WordCard
-                    key={word.id}
-                    word={word}
-                    allWords={analysis.words}
-                  />
-                ))}
+                <WordCard key={word.id} word={word} allWords={analysis.words} />
+              ))}
             </View>
           </ScrollView>
         </View>
@@ -186,7 +184,7 @@ export default function ResultsScreen() {
             baseStyle={{ color: textColor, fontSize: 15, lineHeight: 22 }}
             tagsStyles={{
               p: { marginBottom: 12 },
-              strong: { fontWeight: '700' },
+              strong: { fontWeight: "700" },
               ul: { marginLeft: 16 },
               li: { marginBottom: 4 },
             }}
@@ -199,13 +197,13 @@ export default function ResultsScreen() {
           </ThemedText>
           <View className="gap-2">
             {[...topicWords, ...mainWords].map((word) => (
-                <WordDetailItem
-                  key={word.id}
-                  word={word}
-                  allWords={analysis.words}
-                  tintColor={tintColor}
-                />
-              ))}
+              <WordDetailItem
+                key={word.id}
+                word={word}
+                allWords={analysis.words}
+                tintColor={tintColor}
+              />
+            ))}
           </View>
         </View>
 
@@ -223,27 +221,31 @@ interface WordCardProps {
 
 function WordCard({ word, allWords, isTopic }: WordCardProps) {
   const cardClass = isTopic
-    ? 'bg-topicBg dark:bg-topicBgDark border-topicBorder dark:border-topicBorderDark'
-    : 'bg-card dark:bg-cardDark border-muted dark:border-mutedDark';
+    ? "bg-topicBg dark:bg-topicBgDark border-topicBorder dark:border-topicBorderDark"
+    : "bg-card dark:bg-cardDark border-muted dark:border-mutedDark";
 
   return (
     <View className="relative">
       <View
         className={`p-4 rounded-xl border-2 min-w-[100px] max-w-[140px] items-center ${cardClass}`}
       >
-        <ThemedText className="text-xl font-bold text-center">{word.text}</ThemedText>
+        <ThemedText className="text-xl font-bold text-center">
+          {word.text}
+        </ThemedText>
         {word.reading && (
-          <ThemedText className="text-sm opacity-60 mt-1">{word.reading}</ThemedText>
+          <ThemedText className="text-sm opacity-60 mt-1">
+            {word.reading}
+          </ThemedText>
         )}
         <ThemedText className="text-xs font-semibold mt-2 text-blue-500">
           {word.partOfSpeech}
         </ThemedText>
         {word.modifies && word.modifies.length > 0 && (
           <ThemedText className="text-[11px] opacity-60 mt-2 text-center">
-            →{' '}
+            →{" "}
             {word.modifies
               .map((id) => allWords.find((w) => w.id === id)?.text || id)
-              .join(', ')}
+              .join(", ")}
           </ThemedText>
         )}
       </View>
@@ -264,11 +266,7 @@ interface WordDetailItemProps {
   tintColor: string;
 }
 
-function WordDetailItem({
-  word,
-  allWords,
-  tintColor,
-}: WordDetailItemProps) {
+function WordDetailItem({ word, allWords, tintColor }: WordDetailItemProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -292,17 +290,21 @@ function WordDetailItem({
           </ThemedText>
         )}
         {word.reading && (
-          <ThemedText className="text-sm opacity-60">({word.reading})</ThemedText>
+          <ThemedText className="text-sm opacity-60">
+            ({word.reading})
+          </ThemedText>
         )}
-        <ThemedText className="text-sm text-blue-500">{word.partOfSpeech}</ThemedText>
+        <ThemedText className="text-sm text-blue-500">
+          {word.partOfSpeech}
+        </ThemedText>
       </View>
 
       {word.modifies && word.modifies.length > 0 && (
         <ThemedText className="text-[13px] opacity-70 mt-2">
-          Modifies:{' '}
+          Modifies:{" "}
           {word.modifies
             .map((id) => allWords.find((w) => w.id === id)?.text || id)
-            .join(', ')}
+            .join(", ")}
         </ThemedText>
       )}
 
@@ -319,7 +321,7 @@ function WordDetailItem({
 
       {word.attachedParticle && (
         <ThemedText className="text-xs mt-2" style={{ color: tintColor }}>
-          {expanded ? 'Tap to collapse' : 'Tap for particle details'}
+          {expanded ? "Tap to collapse" : "Tap for particle details"}
         </ThemedText>
       )}
     </TouchableOpacity>
