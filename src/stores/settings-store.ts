@@ -40,6 +40,7 @@ export const useSettingsStore = create<SettingsState>()(
       storage: createJSONStorage(() =>
         typeof window !== "undefined" ? localStorage : noopStorage,
       ),
+      skipHydration: true,
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);
       },
