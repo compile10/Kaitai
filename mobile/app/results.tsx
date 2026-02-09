@@ -10,6 +10,7 @@ import { useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import RenderHTML from "@native-html/render";
 
+import { DependencyMap } from "@/components/dependency-map";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useThemeColor } from "@/hooks/use-theme-color";
@@ -101,12 +102,9 @@ export default function ResultsScreen() {
     );
   }
 
-  const topicWords = analysis.words
-    .filter((word) => word.isTopic)
-    .sort((a, b) => a.position - b.position);
-  const mainWords = analysis.words
-    .filter((word) => !word.isTopic)
-    .sort((a, b) => a.position - b.position);
+  const allWordsSorted = [...analysis.words].sort(
+    (a, b) => a.position - b.position,
+  );
 
   return (
     <ThemedView className="flex-1">
@@ -138,40 +136,11 @@ export default function ResultsScreen() {
           </View>
         )}
 
-        {topicWords.length > 0 && (
-          <View className="mb-6">
-            <ThemedText
-              type="defaultSemiBold"
-              className="text-violet-600 dark:text-violet-400 mb-3"
-            >
-              Topic (Context)
-            </ThemedText>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View className="flex-row gap-3 pr-5">
-                {topicWords.map((word) => (
-                  <WordCard
-                    key={word.id}
-                    word={word}
-                    allWords={analysis.words}
-                    isTopic
-                  />
-                ))}
-              </View>
-            </ScrollView>
-          </View>
-        )}
-
         <View className="mb-6">
           <ThemedText type="subtitle" className="mb-3">
             Sentence Structure
           </ThemedText>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View className="flex-row gap-3 pr-5">
-              {mainWords.map((word) => (
-                <WordCard key={word.id} word={word} allWords={analysis.words} />
-              ))}
-            </View>
-          </ScrollView>
+          <DependencyMap words={analysis.words} />
         </View>
 
         <View className="mb-6 p-4 rounded-xl border bg-card dark:bg-cardDark border-muted dark:border-mutedDark">
@@ -196,7 +165,7 @@ export default function ResultsScreen() {
             Word Details
           </ThemedText>
           <View className="gap-2">
-            {[...topicWords, ...mainWords].map((word) => (
+            {allWordsSorted.map((word) => (
               <WordDetailItem
                 key={word.id}
                 word={word}
@@ -210,53 +179,6 @@ export default function ResultsScreen() {
         <View className="h-10" />
       </ScrollView>
     </ThemedView>
-  );
-}
-
-interface WordCardProps {
-  word: WordNode;
-  allWords: WordNode[];
-  isTopic?: boolean;
-}
-
-function WordCard({ word, allWords, isTopic }: WordCardProps) {
-  const cardClass = isTopic
-    ? "bg-topicBg dark:bg-topicBgDark border-topicBorder dark:border-topicBorderDark"
-    : "bg-card dark:bg-cardDark border-muted dark:border-mutedDark";
-
-  return (
-    <View className="relative">
-      <View
-        className={`p-4 rounded-xl border-2 min-w-[100px] max-w-[140px] items-center ${cardClass}`}
-      >
-        <ThemedText className="text-xl font-bold text-center">
-          {word.text}
-        </ThemedText>
-        {word.reading && (
-          <ThemedText className="text-sm opacity-60 mt-1">
-            {word.reading}
-          </ThemedText>
-        )}
-        <ThemedText className="text-xs font-semibold mt-2 text-blue-500">
-          {word.partOfSpeech}
-        </ThemedText>
-        {word.modifies && word.modifies.length > 0 && (
-          <ThemedText className="text-[11px] opacity-60 mt-2 text-center">
-            →{" "}
-            {word.modifies
-              .map((id) => allWords.find((w) => w.id === id)?.text || id)
-              .join(", ")}
-          </ThemedText>
-        )}
-      </View>
-      {word.attachedParticle && (
-        <View className="absolute top-2 -right-2 bg-orange-500 px-2 py-1 rounded-md">
-          <ThemedText className="text-white font-bold text-sm">
-            {word.attachedParticle.text}
-          </ThemedText>
-        </View>
-      )}
-    </View>
   );
 }
 

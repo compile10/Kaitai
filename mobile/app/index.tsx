@@ -3,6 +3,7 @@ import { useState } from "react";
 import { router, type Href } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
+import Logo from "@/assets/images/logo.svg";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useThemeColor } from "@/hooks/use-theme-color";
@@ -38,8 +39,8 @@ export default function HomeScreen() {
       </TouchableOpacity>
 
       <View className="flex-[2]" />
-      <ThemedText type="title">Kaitai 解体</ThemedText>
-      <ThemedText type="subtitle" className="text-center">
+      <Logo width={260} height={66} />
+      <ThemedText type="subtitle" className="text-center mt-2">
         Understand Japanese sentences using AI.
       </ThemedText>
       <TextInput
