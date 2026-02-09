@@ -15,7 +15,7 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { analyzeSentence } from "@common/api";
-import type { SentenceAnalysis, WordNode } from "@common/types";
+import type { SentenceAnalysis } from "@common/types";
 import { buildApiUrl } from "@/constants/api";
 import { useSettingsStore, PROVIDER_MAP } from "@/stores/settings-store";
 
@@ -102,10 +102,6 @@ export default function ResultsScreen() {
     );
   }
 
-  const allWordsSorted = [...analysis.words].sort(
-    (a, b) => a.position - b.position,
-  );
-
   return (
     <ThemedView className="flex-1">
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
@@ -162,14 +158,13 @@ export default function ResultsScreen() {
 
         <View className="mb-6">
           <ThemedText type="subtitle" className="mb-3">
-            Word Details
+            Grammar Points
           </ThemedText>
           <View className="gap-2">
-            {allWordsSorted.map((word) => (
-              <WordDetailItem
-                key={word.id}
-                word={word}
-                allWords={analysis.words}
+            {analysis.grammarPoints.map((point, index) => (
+              <GrammarPointItem
+                key={`${point.title}-${index}`}
+                grammarPoint={point}
                 tintColor={tintColor}
               />
             ))}
@@ -182,13 +177,12 @@ export default function ResultsScreen() {
   );
 }
 
-interface WordDetailItemProps {
-  word: WordNode;
-  allWords: WordNode[];
+interface GrammarPointItemProps {
+  grammarPoint: { title: string; explanation: string };
   tintColor: string;
 }
 
-function WordDetailItem({ word, allWords, tintColor }: WordDetailItemProps) {
+function GrammarPointItem({ grammarPoint, tintColor }: GrammarPointItemProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -197,53 +191,20 @@ function WordDetailItem({ word, allWords, tintColor }: WordDetailItemProps) {
       onPress={() => setExpanded(!expanded)}
       activeOpacity={0.7}
     >
-      <View className="flex-row items-center flex-wrap gap-2">
-        {word.isTopic && (
-          <View className="bg-violet-600 px-1.5 py-0.5 rounded">
-            <ThemedText className="text-white text-[10px] font-bold">
-              TOPIC
-            </ThemedText>
-          </View>
-        )}
-        <ThemedText type="defaultSemiBold">{word.text}</ThemedText>
-        {word.attachedParticle && (
-          <ThemedText className="font-semibold text-orange-500">
-            {word.attachedParticle.text}
-          </ThemedText>
-        )}
-        {word.reading && (
-          <ThemedText className="text-sm opacity-60">
-            ({word.reading})
-          </ThemedText>
-        )}
-        <ThemedText className="text-sm text-blue-500">
-          {word.partOfSpeech}
+      <View className="flex-row items-center justify-between gap-3">
+        <ThemedText type="defaultSemiBold" className="flex-1">
+          {grammarPoint.title}
         </ThemedText>
+        <Ionicons
+          name={expanded ? "chevron-up" : "chevron-down"}
+          size={20}
+          color={tintColor}
+        />
       </View>
 
-      {word.modifies && word.modifies.length > 0 && (
-        <ThemedText className="text-[13px] opacity-70 mt-2">
-          Modifies:{" "}
-          {word.modifies
-            .map((id) => allWords.find((w) => w.id === id)?.text || id)
-            .join(", ")}
-        </ThemedText>
-      )}
-
-      {expanded && word.attachedParticle && (
-        <View className="mt-3 pt-3 border-t border-muted dark:border-mutedDark">
-          <ThemedText className="font-semibold mb-1">
-            Particle 「{word.attachedParticle.text}」:
-          </ThemedText>
-          <ThemedText className="text-sm opacity-80 leading-5">
-            {word.attachedParticle.description}
-          </ThemedText>
-        </View>
-      )}
-
-      {word.attachedParticle && (
-        <ThemedText className="text-xs mt-2" style={{ color: tintColor }}>
-          {expanded ? "Tap to collapse" : "Tap for particle details"}
+      {expanded && (
+        <ThemedText className="text-sm opacity-80 leading-5 mt-3">
+          {grammarPoint.explanation}
         </ThemedText>
       )}
     </TouchableOpacity>

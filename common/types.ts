@@ -13,11 +13,17 @@ export interface WordNode {
   isTopic: boolean | null; // True if this is the sentence topic
 }
 
+export interface GrammarPoint {
+  title: string; // e.g. "は (Topic Marker)", "て-form (Connective)"
+  explanation: string; // Plain text, 2-3 sentences explaining this grammar point in context
+}
+
 export interface SentenceAnalysis {
   directTranslation: string;
   words: WordNode[];
   explanation: string;
   isFragment: boolean; // True if this is a sentence fragment/incomplete sentence
+  grammarPoints: GrammarPoint[];
 }
 
 // Provider types

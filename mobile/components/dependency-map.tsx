@@ -177,9 +177,7 @@ export function DependencyMap({ words }: DependencyMapProps) {
           opacity,
         };
       })
-      .filter(
-        (a): a is NonNullable<typeof a> => a !== null,
-      );
+      .filter((a): a is NonNullable<typeof a> => a !== null);
   }, [arcs, cardLayouts, sortedWords.length, selectedId]);
 
   const hasLayouts = Object.keys(cardLayouts).length === sortedWords.length;

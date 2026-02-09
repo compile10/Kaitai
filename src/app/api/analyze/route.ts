@@ -144,6 +144,24 @@ const analysisSchema = z.object({
     .describe(
       "True if this is a sentence fragment or incomplete sentence (e.g., missing a verb, incomplete thought, or not a grammatically complete sentence). False if it's a complete sentence.",
     ),
+  grammarPoints: z
+    .array(
+      z.object({
+        title: z
+          .string()
+          .describe(
+            "Grammar point title (e.g., 'は (Topic Marker)', 'て-form (Connective)', 'Potential Form')",
+          ),
+        explanation: z
+          .string()
+          .describe(
+            "2-3 sentences, plain text (no HTML), explaining how this grammar point functions, with an example from this specific sentence",
+          ),
+      }),
+    )
+    .describe(
+      "List of grammar points found in the sentence. Identify all significant grammatical structures, particles, verb forms, sentence patterns, etc.",
+    ),
 });
 
 // Provider configuration
@@ -299,6 +317,10 @@ Please provide:
 4. Mark the topic with "isTopic: true"
 5. For each word, which other words it modifies (using word IDs) - EXCEPT topics which should not modify anything
 6. A brief explanation of the sentence structure in HTML format. Do not include a translation here.
+7. A list of grammar points found in the sentence. For each grammar point:
+   - Provide a clear, concise title (e.g., "は (Topic Marker)", "て-form (Connective)", "Potential Form")
+   - Write a 2-3 sentence explanation in plain text (no HTML) describing how this grammar point functions, an example from THIS specific sentence
+   - Include all significant grammatical structures: particles, verb forms, conjugations, sentence patterns, etc.
 
 EXPLANATION FORMATTING:
 - Use HTML tags for better readability: <p>, <strong>, <em>, <ul>, <li>
