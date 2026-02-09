@@ -171,6 +171,49 @@ const edgeTypes = {
   custom: CustomEdge,
 };
 
+// Grammar Point expandable item component
+function GrammarPointItem({
+  grammarPoint,
+}: {
+  grammarPoint: { title: string; explanation: string };
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <button
+      type="button"
+      onClick={() => setIsExpanded(!isExpanded)}
+      className="w-full text-left p-3 bg-gray-50 dark:bg-gray-900 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <span className="font-semibold text-gray-900 dark:text-gray-100">
+          {grammarPoint.title}
+        </span>
+        <svg
+          className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform ${
+            isExpanded ? "rotate-180" : ""
+          }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </div>
+      {isExpanded && (
+        <p className="mt-2 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+          {grammarPoint.explanation}
+        </p>
+      )}
+    </button>
+  );
+}
+
 export default function SentenceVisualization({
   analysis,
 }: SentenceVisualizationProps) {
@@ -431,55 +474,12 @@ export default function SentenceVisualization({
 
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
         <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
-          Word Details
+          Grammar Points
         </h3>
         <div className="space-y-2">
-          {analysis.words
-            .sort((a, b) => a.position - b.position)
-            .map((word) => (
-              <div
-                key={word.id}
-                className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded"
-              >
-                <div className="flex-1">
-                  {word.isTopic && (
-                    <span className="text-xs font-medium text-purple-600 dark:text-purple-400 mr-2 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 rounded">
-                      TOPIC
-                    </span>
-                  )}
-                  <span className="font-semibold text-gray-900 dark:text-gray-100">
-                    {word.text}
-                  </span>
-                  {word.attachedParticle && (
-                    <span className="text-sm font-semibold text-orange-600 dark:text-orange-400 ml-1">
-                      {word.attachedParticle.text}
-                    </span>
-                  )}
-                  {word.reading && (
-                    <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">
-                      ({word.reading}
-                      {word.attachedParticle?.reading &&
-                        ` + ${word.attachedParticle.reading}`}
-                      )
-                    </span>
-                  )}
-                  <span className="text-sm text-blue-600 dark:text-blue-400 ml-2">
-                    - {word.partOfSpeech}
-                  </span>
-                </div>
-                {word.modifies && word.modifies.length > 0 && (
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Modifies:{" "}
-                    {word.modifies
-                      .map(
-                        (id) =>
-                          analysis.words.find((w) => w.id === id)?.text || id,
-                      )
-                      .join(", ")}
-                  </div>
-                )}
-              </div>
-            ))}
+          {analysis.grammarPoints.map((point, index) => (
+            <GrammarPointItem key={`${point.title}-${index}`} grammarPoint={point} />
+          ))}
         </div>
       </div>
 
