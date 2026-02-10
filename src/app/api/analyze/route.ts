@@ -2,6 +2,8 @@ import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatXAI } from "@langchain/xai";
+import { ChatCerebras } from "@langchain/cerebras";
+import { ChatFireworks } from "@langchain/community/chat_models/fireworks";
 import { type NextRequest, NextResponse } from "next/server";
 import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
@@ -186,6 +188,14 @@ const PROVIDER_CONFIG = {
     name: "OpenRouter",
     envKey: "OPENROUTER_API_KEY",
   },
+  cerebras: {
+    name: "Cerebras",
+    envKey: "CEREBRAS_API_KEY",
+  },
+  fireworks: {
+    name: "Fireworks AI",
+    envKey: "FIREWORKS_API_KEY",
+  },
 } as const;
 
 // Provider factory function
@@ -233,6 +243,20 @@ function createChatModel(provider: Provider, model: string) {
           apiKey,
           baseURL: "https://openrouter.ai/api/v1",
         },
+        maxTokens: 4096,
+      });
+
+    case "cerebras":
+      return new ChatCerebras({
+        model,
+        apiKey,
+        maxTokens: 4096,
+      });
+
+    case "fireworks":
+      return new ChatFireworks({
+        model,
+        apiKey,
         maxTokens: 4096,
       });
 

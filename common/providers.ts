@@ -159,6 +159,57 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
       },
     ],
   },
+  cerebras: {
+    id: "cerebras",
+    name: "Cerebras",
+    defaultModel: "gpt-oss-120b",
+    models: [
+      {
+        id: "gpt-oss-120b",
+        name: "GPT OSS 120B",
+        description: "Largest Cerebras model with excellent quality and speed",
+        pricing: "$0.25 / $0.69 per MTok",
+        speed: "~3000 tok/s",
+      },
+      {
+        id: "llama3.1-8b",
+        name: "Llama 3.1 8B",
+        description: "Lightweight model, fastest inference speed",
+        pricing: "$0.10 / $0.10 per MTok",
+        speed: "~2200 tok/s",
+      },
+    ],
+  },
+  fireworks: {
+    id: "fireworks",
+    name: "Fireworks AI",
+    defaultModel: "accounts/fireworks/models/deepseek-v3p2",
+    models: [
+      {
+        id: "accounts/fireworks/models/deepseek-v3p2",
+        name: "Deepseek V3.2",
+        description:
+          "Large model with top-tier quality for complex reasoning and analysis",
+        pricing: "$0.50 / $1.40 per MTok",
+        speed: "Fast",
+      },
+      {
+        id: "accounts/fireworks/models/gpt-oss-120b",
+        name: "GPT-OSS 120B",
+        description: "Medium model with excellent balance of quality and speed",
+        pricing: "$0.15 / $0.60 per MTok",
+        speed: "Fast",
+      },
+      {
+        id: "accounts/fireworks/models/llama-v3p3-70b-instruct",
+        name: "Llama 3.3 70B",
+        description:
+          "Medium model optimized for fast inference and good quality",
+        pricing: "$0.10 / $0.10 per MTok",
+        speed: "Fastest",
+      },
+    ],
+  },
 };
 
 export const PROVIDERS: ProviderConfig[] = Object.values(PROVIDER_MAP);

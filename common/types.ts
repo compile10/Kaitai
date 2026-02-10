@@ -27,7 +27,14 @@ export interface SentenceAnalysis {
 }
 
 // Provider types
-export type Provider = "anthropic" | "openai" | "google" | "xai" | "openrouter";
+export type Provider =
+  | "anthropic"
+  | "openai"
+  | "google"
+  | "xai"
+  | "openrouter"
+  | "cerebras"
+  | "fireworks";
 
 export interface ModelInfo {
   id: string;

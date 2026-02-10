@@ -478,7 +478,10 @@ export default function SentenceVisualization({
         </h3>
         <div className="space-y-2">
           {analysis.grammarPoints.map((point, index) => (
-            <GrammarPointItem key={`${point.title}-${index}`} grammarPoint={point} />
+            <GrammarPointItem
+              key={`${point.title}-${index}`}
+              grammarPoint={point}
+            />
           ))}
         </div>
       </div>

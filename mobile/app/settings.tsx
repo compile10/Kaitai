@@ -6,6 +6,7 @@ import {
   Switch,
 } from "react-native";
 
+import { BottomSheetPicker } from "@/components/bottom-sheet-picker";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useThemeColor } from "@/hooks/use-theme-color";
@@ -14,6 +15,11 @@ import {
   PROVIDER_MAP,
   type Provider,
 } from "@/stores/settings-store";
+
+const PROVIDER_OPTIONS = Object.values(PROVIDER_MAP).map((p) => ({
+  id: p.id,
+  label: p.name,
+}));
 
 export default function SettingsScreen() {
   const {
@@ -31,8 +37,8 @@ export default function SettingsScreen() {
 
   const models = PROVIDER_MAP[provider]?.models ?? [];
 
-  const handleProviderChange = (newProvider: Provider) => {
-    setProvider(newProvider);
+  const handleProviderChange = (id: string) => {
+    setProvider(id as Provider);
   };
 
   const handleUseCustomModelChange = (value: boolean) => {
@@ -64,26 +70,12 @@ export default function SettingsScreen() {
             Choose which AI provider to use for sentence analysis.
           </ThemedText>
 
-          <View className="gap-2">
-            {Object.values(PROVIDER_MAP).map((p) => (
-              <TouchableOpacity
-                key={p.id}
-                className={`flex-row items-center p-4 rounded-xl border-2 ${
-                  provider === p.id
-                    ? "bg-gray-100 dark:bg-gray-800 border-tint dark:border-tintDark"
-                    : "border-muted dark:border-mutedDark"
-                }`}
-                onPress={() => handleProviderChange(p.id)}
-              >
-                <View className="w-5 h-5 rounded-full border-2 border-gray-400 items-center justify-center">
-                  {provider === p.id && (
-                    <View className="w-2.5 h-2.5 rounded-full bg-tint dark:bg-tintDark" />
-                  )}
-                </View>
-                <ThemedText className="ml-3">{p.name}</ThemedText>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <BottomSheetPicker
+            title="Select Provider"
+            options={PROVIDER_OPTIONS}
+            selectedId={provider}
+            onSelect={handleProviderChange}
+          />
         </View>
 
         <View className="mb-6">
