@@ -4,7 +4,9 @@ import { analyzeSentence } from "@common/api";
 import { PROVIDERS } from "@common/providers";
 import type { SentenceAnalysis } from "@common/types";
 import { Settings } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
+import logo from "@common/assets/branding/logo.svg";
 import SentenceInput from "@/components/SentenceInput";
 import SentenceVisualization from "@/components/SentenceVisualization";
 import SettingsModal from "@/components/SettingsModal";
@@ -53,9 +55,14 @@ export default function Home() {
             >
               <Settings className="w-6 h-6" />
             </button>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">
-              Kaitai 解体
-            </h1>
+            <Image
+              src={logo}
+              alt="Kaitai 解体"
+              width={260}
+              height={66}
+              className="mx-auto"
+              priority
+            />
             <p className="text-lg text-gray-600 dark:text-gray-400">
               Visualize Japanese sentence structure with AI-powered analysis
             </p>

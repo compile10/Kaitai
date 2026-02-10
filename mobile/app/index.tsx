@@ -3,7 +3,7 @@ import { useState } from "react";
 import { router, type Href } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-import Logo from "@/assets/images/logo.svg";
+import Logo from "@common/assets/branding/logo.svg";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useThemeColor } from "@/hooks/use-theme-color";
