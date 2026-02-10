@@ -1,4 +1,4 @@
-# AGENTS.md — Kaitai (解体)
+# CLAUDE.md — Kaitai (解体)
 
 ## What this project is
 
