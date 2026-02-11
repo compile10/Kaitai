@@ -45,7 +45,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Kaitai to access your photos to analyze Japanese text in images."
+          "photosPermission": "Allow Kaitai to access your photos to analyze Japanese text in images.",
+          "cameraPermission": "Allow Kaitai to use your camera to photograph Japanese text for analysis."
         }
       ]
     ],

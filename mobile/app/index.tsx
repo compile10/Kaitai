@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 
 import Logo from "@common/assets/branding/logo.svg";
+import { BottomSheet } from "@/components/bottom-sheet";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useThemeColor } from "@/hooks/use-theme-color";
@@ -15,8 +16,23 @@ const EXAMPLE_SENTENCES = [
   "彼女は新しい本を読んでいる。",
 ];
 
+function navigateToImageResults(asset: ImagePicker.ImagePickerAsset) {
+  const fileName = asset.fileName ?? asset.uri.split("/").pop() ?? "image.jpg";
+  const mimeType = asset.mimeType ?? "image/jpeg";
+
+  router.push({
+    pathname: "/results",
+    params: {
+      imageUri: asset.uri,
+      imageMimeType: mimeType,
+      imageFileName: fileName,
+    },
+  });
+}
+
 export default function HomeScreen() {
-  const [searchValue, setSearchValue] = useState<string>("");
+  const [searchValue, setSearchValue] = useState("");
+  const [sheetVisible, setSheetVisible] = useState(false);
   const iconColor = useThemeColor({}, "icon");
 
   const handleSearch = () => {
@@ -28,7 +44,36 @@ export default function HomeScreen() {
     }
   };
 
-  const handleImagePick = async () => {
+  const handleCamera = async () => {
+    setSheetVisible(false);
+
+    const permissionResult =
+      await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      Alert.alert(
+        "Permission Required",
+        "Please allow camera access to photograph Japanese text for analysis.",
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ["images"],
+      allowsEditing: false,
+      quality: 0.8,
+    });
+
+    if (result.canceled || result.assets.length === 0) {
+      return;
+    }
+
+    navigateToImageResults(result.assets[0]);
+  };
+
+  const handleGallery = async () => {
+    setSheetVisible(false);
+
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -50,18 +95,7 @@ export default function HomeScreen() {
       return;
     }
 
-    const asset = result.assets[0];
-    const fileName = asset.fileName ?? asset.uri.split("/").pop() ?? "image.jpg";
-    const mimeType = asset.mimeType ?? "image/jpeg";
-
-    router.push({
-      pathname: "/results",
-      params: {
-        imageUri: asset.uri,
-        imageMimeType: mimeType,
-        imageFileName: fileName,
-      },
-    });
+    navigateToImageResults(result.assets[0]);
   };
 
   return (
@@ -83,7 +117,7 @@ export default function HomeScreen() {
       <View className="mt-5 w-[80%] flex-row items-stretch gap-2 h-11">
         <TextInput
           value={searchValue}
-          className="flex-1 h-full px-3 border border-gray-500 rounded-md text-base text-gray-900 dark:text-gray-100 bg-transparent"
+          className="flex-1 h-full px-3 border border-gray-500 rounded-md text-base text-center text-gray-900 dark:text-gray-100 bg-transparent"
           onChangeText={setSearchValue}
           placeholder="Insert the sentence..."
           placeholderTextColor="#687076"
@@ -92,8 +126,8 @@ export default function HomeScreen() {
         />
         <TouchableOpacity
           className="w-11 h-11 rounded-md border border-gray-500 items-center justify-center"
-          onPress={handleImagePick}
-          accessibilityLabel="Analyze image"
+          onPress={() => setSheetVisible(true)}
+          accessibilityLabel="Add image"
         >
           <Ionicons name="add" size={24} color={iconColor} />
         </TouchableOpacity>
@@ -122,6 +156,30 @@ export default function HomeScreen() {
       </View>
 
       <View className="flex-[2]" />
+
+      {/* Image Source Action Sheet */}
+      <BottomSheet
+        visible={sheetVisible}
+        onClose={() => setSheetVisible(false)}
+        title="Add Image"
+      >
+        <TouchableOpacity
+          className="flex-row items-center px-4 py-3.5 mx-2 rounded-xl active:bg-gray-100 dark:active:bg-gray-800"
+          onPress={handleCamera}
+          activeOpacity={0.6}
+        >
+          <Ionicons name="camera-outline" size={22} color={iconColor} />
+          <ThemedText className="ml-3 text-base">Take Photo</ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="flex-row items-center px-4 py-3.5 mx-2 rounded-xl active:bg-gray-100 dark:active:bg-gray-800"
+          onPress={handleGallery}
+          activeOpacity={0.6}
+        >
+          <Ionicons name="images-outline" size={22} color={iconColor} />
+          <ThemedText className="ml-3 text-base">Photo Library</ThemedText>
+        </TouchableOpacity>
+      </BottomSheet>
     </ThemedView>
   );
 }
