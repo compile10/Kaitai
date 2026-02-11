@@ -37,6 +37,7 @@ export const API_BASE_URL = __DEV__ ? getDevApiUrl() : PROD_API_URL;
  */
 export const API_ENDPOINTS = {
   analyze: "/api/analyze",
+  analyzeImage: "/api/analyze-image",
 } as const;
 
 /**

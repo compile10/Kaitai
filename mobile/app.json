@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "kaitai",
+    "name": "Kaitai",
     "slug": "kaitai",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -41,7 +41,13 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Kaitai to access your photos to analyze Japanese text in images."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

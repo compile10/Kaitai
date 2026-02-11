@@ -20,37 +20,78 @@ import { buildApiUrl } from "@/constants/api";
 import { useSettingsStore, PROVIDER_MAP } from "@/stores/settings-store";
 
 export default function ResultsScreen() {
-  const { sentence } = useLocalSearchParams<{ sentence: string }>();
+  const { sentence, imageUri, imageMimeType, imageFileName } =
+    useLocalSearchParams<{
+      sentence?: string;
+      imageUri?: string;
+      imageMimeType?: string;
+      imageFileName?: string;
+    }>();
   const { width } = useWindowDimensions();
 
   const { provider, model, isHydrated } = useSettingsStore();
 
   const [analysis, setAnalysis] = useState<SentenceAnalysis | null>(null);
+  const [extractedSentence, setExtractedSentence] = useState<string | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const isImageMode = Boolean(imageUri);
 
   const textColor = useThemeColor({}, "text");
   const tintColor = useThemeColor({}, "tint");
 
   const fetchAnalysis = useCallback(async () => {
-    if (!sentence || !isHydrated) return;
+    if (!isHydrated) return;
+    if (!imageUri && !sentence) return;
+
     setIsLoading(true);
     setError(null);
     setAnalysis(null);
+    setExtractedSentence(null);
+
     try {
-      const result = await analyzeSentence(
-        buildApiUrl("analyze"),
-        sentence,
-        provider,
-        model,
-      );
-      setAnalysis(result);
+      if (imageUri) {
+        const formData = new FormData();
+        formData.append("image", {
+          uri: imageUri,
+          type: imageMimeType || "image/jpeg",
+          name: imageFileName || "image.jpg",
+        } as unknown as Blob);
+        formData.append("provider", provider);
+        formData.append("model", model);
+
+        const response = await fetch(buildApiUrl("analyzeImage"), {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to analyze image");
+        }
+
+        setExtractedSentence(data.sentence);
+        setAnalysis(data.analysis);
+      } else {
+        setExtractedSentence(sentence || null);
+        const result = await analyzeSentence(
+          buildApiUrl("analyze"),
+          sentence!,
+          provider,
+          model,
+        );
+        setAnalysis(result);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
-  }, [sentence, provider, model, isHydrated]);
+  }, [sentence, imageUri, imageMimeType, imageFileName, provider, model, isHydrated]);
 
   useEffect(() => {
     fetchAnalysis();
@@ -65,7 +106,9 @@ export default function ResultsScreen() {
         <View className="flex-1 justify-center items-center gap-4">
           <ActivityIndicator size="large" color={tintColor} />
           <ThemedText className="opacity-70">
-            Analyzing with {currentModel?.name || model}...
+            {isImageMode
+              ? "Reading your sentence from your photo..."
+              : `Breaking down your sentence...`}
           </ThemedText>
         </View>
       </ThemedView>
@@ -106,8 +149,8 @@ export default function ResultsScreen() {
     <ThemedView className="flex-1">
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
         <View className="mt-2 mb-6">
-          <ThemedText type="title" className="mt-2">
-            {sentence?.trim() || ""}
+          <ThemedText type="title" className="mt-1">
+            {extractedSentence}
           </ThemedText>
         </View>
 

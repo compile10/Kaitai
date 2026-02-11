@@ -1,7 +1,8 @@
-import { TextInput, View, TouchableOpacity } from "react-native";
+import { TextInput, View, TouchableOpacity, Alert } from "react-native";
 import { useState } from "react";
 import { router, type Href } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 
 import Logo from "@common/assets/branding/logo.svg";
 import { ThemedText } from "@/components/themed-text";
@@ -27,6 +28,42 @@ export default function HomeScreen() {
     }
   };
 
+  const handleImagePick = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      Alert.alert(
+        "Permission Required",
+        "Please allow access to your photo library to analyze images.",
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: false,
+      quality: 0.8,
+    });
+
+    if (result.canceled || result.assets.length === 0) {
+      return;
+    }
+
+    const asset = result.assets[0];
+    const fileName = asset.fileName ?? asset.uri.split("/").pop() ?? "image.jpg";
+    const mimeType = asset.mimeType ?? "image/jpeg";
+
+    router.push({
+      pathname: "/results",
+      params: {
+        imageUri: asset.uri,
+        imageMimeType: mimeType,
+        imageFileName: fileName,
+      },
+    });
+  };
+
   return (
     <ThemedView className="flex-1 items-center px-5">
       {/* Settings Button */}
@@ -43,15 +80,24 @@ export default function HomeScreen() {
       <ThemedText type="subtitle" className="text-center mt-2">
         Understand Japanese sentences using AI.
       </ThemedText>
-      <TextInput
-        value={searchValue}
-        className="mt-5 w-[80%] p-3 border border-gray-500 rounded-md text-base text-gray-900 dark:text-gray-100 bg-transparent"
-        onChangeText={setSearchValue}
-        placeholder="Insert the sentence..."
-        placeholderTextColor="#687076"
-        returnKeyType="search"
-        onSubmitEditing={handleSearch}
-      />
+      <View className="mt-5 w-[80%] flex-row items-stretch gap-2 h-11">
+        <TextInput
+          value={searchValue}
+          className="flex-1 h-full px-3 border border-gray-500 rounded-md text-base text-gray-900 dark:text-gray-100 bg-transparent"
+          onChangeText={setSearchValue}
+          placeholder="Insert the sentence..."
+          placeholderTextColor="#687076"
+          returnKeyType="search"
+          onSubmitEditing={handleSearch}
+        />
+        <TouchableOpacity
+          className="w-11 h-11 rounded-md border border-gray-500 items-center justify-center"
+          onPress={handleImagePick}
+          accessibilityLabel="Analyze image"
+        >
+          <Ionicons name="add" size={24} color={iconColor} />
+        </TouchableOpacity>
+      </View>
 
       {/* Example Sentences */}
       <View className="mt-6 w-full items-center">
