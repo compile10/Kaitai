@@ -117,7 +117,7 @@ export default function HomeScreen() {
       <View className="mt-5 w-[80%] flex-row items-stretch gap-2 h-11">
         <TextInput
           value={searchValue}
-          className="flex-1 h-full px-3 border border-gray-500 rounded-md text-base text-center text-gray-900 dark:text-gray-100 bg-transparent"
+          className="flex-1 h-full px-3 border border-gray-500 rounded-md text-gray-900 dark:text-gray-100 bg-transparent"
           onChangeText={setSearchValue}
           placeholder="Insert the sentence..."
           placeholderTextColor="#687076"
