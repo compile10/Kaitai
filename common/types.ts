@@ -26,6 +26,11 @@ export interface SentenceAnalysis {
   grammarPoints: GrammarPoint[];
 }
 
+export interface ImageAnalysisResponse {
+  sentence: string;
+  analysis: SentenceAnalysis;
+}
+
 // Provider types
 export type Provider =
   | "anthropic"

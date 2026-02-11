@@ -1,12 +1,13 @@
 "use client";
 
-import { analyzeSentence } from "@common/api";
+import { analyzeImage, analyzeSentence } from "@common/api";
+import logo from "@common/assets/branding/logo.svg";
 import { PROVIDERS } from "@common/providers";
 import type { SentenceAnalysis } from "@common/types";
 import { Settings } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import logo from "@common/assets/branding/logo.svg";
+import ImageUploadModal from "@/components/ImageUploadModal";
 import SentenceInput from "@/components/SentenceInput";
 import SentenceVisualization from "@/components/SentenceVisualization";
 import SettingsModal from "@/components/SettingsModal";
@@ -17,6 +18,9 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [extractedSentence, setExtractedSentence] = useState<string>();
   const { provider, model } = useSettingsStore();
 
   const currentProvider = PROVIDERS.find((p) => p.id === provider);
@@ -39,6 +43,29 @@ export default function Home() {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleImageAnalyze = async (file: File) => {
+    setIsImageLoading(true);
+    setError(null);
+    setAnalysis(null);
+
+    try {
+      const data = await analyzeImage(
+        "/api/analyze-image",
+        file,
+        provider,
+        model,
+      );
+      console.log("Image analysis received:", JSON.stringify(data, null, 2));
+      setAnalysis(data.analysis);
+      setExtractedSentence(data.sentence);
+      setIsImageModalOpen(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to analyze image");
+    } finally {
+      setIsImageLoading(false);
     }
   };
 
@@ -69,7 +96,12 @@ export default function Home() {
           </div>
 
           {/* Input Form */}
-          <SentenceInput onAnalyze={handleAnalyze} isLoading={isLoading} />
+          <SentenceInput
+            onAnalyze={handleAnalyze}
+            onImageClick={() => setIsImageModalOpen(true)}
+            isLoading={isLoading || isImageLoading}
+            externalSentence={extractedSentence}
+          />
 
           {/* Error Message */}
           {error && (
@@ -81,25 +113,24 @@ export default function Home() {
           )}
 
           {/* Loading State */}
-          {isLoading && (
+          {(isLoading || isImageLoading) && (
             <div className="flex items-center justify-center space-x-2">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
               <p className="text-gray-600 dark:text-gray-400">
-                Analyzing with{" "}
-                {currentProvider?.models.find((m) => m.id === model)?.name ||
-                  model}
-                ...
+                {isImageLoading
+                  ? "Extracting text from image and analyzing..."
+                  : `Analyzing with ${currentProvider?.models.find((m) => m.id === model)?.name || model}...`}
               </p>
             </div>
           )}
 
           {/* Analysis Results */}
-          {analysis && !isLoading && (
+          {analysis && !isLoading && !isImageLoading && (
             <SentenceVisualization analysis={analysis} />
           )}
 
           {/* Instructions */}
-          {!analysis && !isLoading && !error && (
+          {!analysis && !isLoading && !isImageLoading && !error && (
             <div className="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
               <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
                 How it works
@@ -145,6 +176,14 @@ export default function Home() {
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
+      />
+
+      {/* Image Upload Modal */}
+      <ImageUploadModal
+        isOpen={isImageModalOpen}
+        onClose={() => !isImageLoading && setIsImageModalOpen(false)}
+        onSubmit={handleImageAnalyze}
+        isLoading={isImageLoading}
       />
     </div>
   );

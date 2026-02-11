@@ -30,6 +30,7 @@ IMPORTANT RULES:
    - Adverbs modify verbs/adjectives
    - Objects (を) modify verbs
    - Topics (は) do NOT modify anything - they provide context only
+   - Subjects (が) modify the verb or an adjective they are attached to
 
 Please provide:
 1. A direct, literal translation of the sentence into English. Translate as literally as possible, preserving the Japanese word order and structure. It's okay if it sounds unnatural in English -- the goal is to show what the sentence is literally saying word-by-word.

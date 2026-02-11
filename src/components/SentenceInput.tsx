@@ -1,17 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { ImagePlus } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface SentenceInputProps {
   onAnalyze: (sentence: string) => void;
+  onImageClick: () => void;
   isLoading: boolean;
+  /** When set externally (e.g. from image extraction), updates the input field */
+  externalSentence?: string;
 }
 
 export default function SentenceInput({
   onAnalyze,
+  onImageClick,
   isLoading,
+  externalSentence,
 }: SentenceInputProps) {
   const [sentence, setSentence] = useState("");
+
+  // Sync input field when an external sentence is provided (e.g. extracted from image)
+  useEffect(() => {
+    if (externalSentence) {
+      setSentence(externalSentence);
+    }
+  }, [externalSentence]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,13 +60,25 @@ export default function SentenceInput({
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={isLoading || !sentence.trim()}
-          className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-        >
-          {isLoading ? "Analyzing..." : "Analyze Sentence"}
-        </button>
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            disabled={isLoading || !sentence.trim()}
+            className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          >
+            {isLoading ? "Analyzing..." : "Analyze Sentence"}
+          </button>
+          <button
+            type="button"
+            onClick={onImageClick}
+            disabled={isLoading}
+            className="px-4 py-3 border-2 border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400 font-medium rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:border-gray-400 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            title="Analyze image"
+          >
+            <ImagePlus className="w-5 h-5" />
+            <span className="hidden sm:inline">Image</span>
+          </button>
+        </div>
       </form>
 
       <div className="mt-6">
