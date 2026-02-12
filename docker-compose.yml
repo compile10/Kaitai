@@ -1,0 +1,39 @@
+# This docker-compose.yml file is used to for local development.
+# Do not use this file for production or for self-hosting. It is not secure.
+
+services:
+  # ── Next.js dev server (SSR) ──────────────────
+  web:
+    build:
+      context: .
+      target: dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount source for hot-reload; exclude node_modules
+      # so the container uses its own installed copy.
+      - ./src:/app/src
+      - ./common:/app/common
+      - ./public:/app/public
+      - ./next.config.ts:/app/next.config.ts
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./postcss.config.mjs:/app/postcss.config.mjs
+      - ./biome.json:/app/biome.json
+    env_file:
+      - .env.local
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/kaitai
+    depends_on:
+      mongo:
+        condition: service_started
+
+  # ── MongoDB ───────────────────────────────────
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
