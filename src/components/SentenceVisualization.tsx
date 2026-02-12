@@ -260,7 +260,7 @@ export default function SentenceVisualization({
         type: "wordNode",
         position: { x: startX + i * spacing, y: 100 },
         data: { word, onParticleClick: handleParticleClick },
-        width: 150,
+        width: 130,
         height: 80,
         sourcePosition: Position.Right,
         targetPosition: Position.Left,
