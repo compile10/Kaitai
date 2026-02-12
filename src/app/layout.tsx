@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { StoreHydration } from "@/components/StoreHydration";
+import { SettingsStoreProvider } from "@/providers/settings-store-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,10 +28,8 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        suppressHydrationWarning
       >
-        <StoreHydration />
-        {children}
+        <SettingsStoreProvider>{children}</SettingsStoreProvider>
       </body>
     </html>
   );

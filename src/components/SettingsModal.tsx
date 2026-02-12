@@ -4,7 +4,10 @@ import { PROVIDERS } from "@common/providers";
 import type { Provider } from "@common/types";
 import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useSettingsStore } from "@/stores/settings-store";
+import {
+  useIsHydrated,
+  useSettingsStore,
+} from "@/providers/settings-store-provider";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -12,8 +15,11 @@ interface SettingsModalProps {
 }
 
 export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
-  const { provider, model, setProvider, setModel, isHydrated } =
-    useSettingsStore();
+  const provider = useSettingsStore((s) => s.provider);
+  const model = useSettingsStore((s) => s.model);
+  const setProvider = useSettingsStore((s) => s.setProvider);
+  const setModel = useSettingsStore((s) => s.setModel);
+  const isHydrated = useIsHydrated();
 
   // Local draft state - initialized when modal opens
   const [draftProvider, setDraftProvider] = useState<Provider>(provider);
