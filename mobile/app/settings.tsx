@@ -1,19 +1,18 @@
 import {
-  View,
   ScrollView,
-  TouchableOpacity,
-  TextInput,
   Switch,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-
 import { BottomSheetPicker } from "@/components/bottom-sheet-picker";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import {
-  useSettingsStore,
   PROVIDER_MAP,
   type Provider,
+  useSettingsStore,
 } from "@/stores/settings-store";
 
 const PROVIDER_OPTIONS = Object.values(PROVIDER_MAP).map((p) => ({
@@ -53,14 +52,14 @@ export default function SettingsScreen() {
 
   if (!isHydrated) {
     return (
-      <ThemedView className="flex-1">
+      <ThemedView className="flex-1" edges={['left', 'right']}>
         <ThemedText>Loading settings...</ThemedText>
       </ThemedView>
     );
   }
 
   return (
-    <ThemedView className="flex-1">
+    <ThemedView className="flex-1" edges={['left', 'right']}>
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
         <View className="mb-6 mt-5">
           <ThemedText type="subtitle" className="mb-2">

@@ -1,8 +1,7 @@
-import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Tabs } from "expo-router";
 import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme() ?? "light";
@@ -22,14 +21,14 @@ export default function TabLayout() {
           backgroundColor: Colors[colorScheme].background,
         },
         headerTintColor: Colors[colorScheme].text,
-        tabBarShowLabel: false,
+        tabBarShowLabel: true,
+        headerShown: false,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
-          headerShown: false,
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "home" : "home-outline"}
@@ -40,12 +39,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="more"
         options={{
-          title: "Settings",
+          title: "More",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "settings" : "settings-outline"}
+              name={focused ? "person" : "person-outline"}
               size={24}
               color={color}
             />

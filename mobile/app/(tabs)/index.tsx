@@ -99,7 +99,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <ThemedView className="flex-1 items-center px-5">
+    <ThemedView className="flex-1 items-center px-5" edges={['top', 'left', 'right']}>
       <View className="flex-[1.2]" />
       <Logo width={300} height={76} />
       <ThemedText type="subtitle" className="text-center mt-2">

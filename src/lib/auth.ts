@@ -1,3 +1,4 @@
+import { expo } from "@better-auth/expo";
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { nextCookies } from "better-auth/next-js";
@@ -15,5 +16,12 @@ export const auth = betterAuth({
       maxAge: 5 * 60, // 5 minutes
     },
   },
-  plugins: [nextCookies()], // must be last
+  trustedOrigins: [
+    "kaitai://",
+    ...(process.env.NODE_ENV === "development" ? ["exp://", "exp://**"] : []),
+  ],
+  plugins: [
+    expo(),
+    nextCookies(), // must be last
+  ],
 });

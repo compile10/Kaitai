@@ -8,8 +8,8 @@ WORKDIR /app
 # Dependencies — install once, cache the layer
 # ──────────────────────────────────────────────
 FROM base AS deps
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package.json package-lock.json .npmrc ./
+RUN npm ci --legacy-peer-deps
 
 # ──────────────────────────────────────────────
 # Dev — used by docker-compose for local dev
