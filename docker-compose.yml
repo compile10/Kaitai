@@ -22,18 +22,30 @@ services:
     env_file:
       - .env.local
     environment:
-      - MONGODB_URI=mongodb://mongo:27017/kaitai
+      - MONGODB_URI=mongodb://mongo:27017/kaitai?replicaSet=rs0&directConnection=true
+      - BETTER_AUTH_URL=http://localhost:3000
     depends_on:
       mongo:
-        condition: service_started
+        condition: service_healthy
 
-  # ── MongoDB ───────────────────────────────────
+  # ── MongoDB (single-node replica set for transaction support) ──
   mongo:
     image: mongo:7
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    healthcheck:
+      test: >
+        mongosh --quiet --eval "
+          try { rs.status().ok }
+          catch(e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] }); }
+        "
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
 
 volumes:
   mongo-data:
