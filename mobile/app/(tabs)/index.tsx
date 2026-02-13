@@ -1,6 +1,6 @@
 import { TextInput, View, TouchableOpacity, Alert } from "react-native";
 import { useState } from "react";
-import { router, type Href } from "expo-router";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 
@@ -100,15 +100,6 @@ export default function HomeScreen() {
 
   return (
     <ThemedView className="flex-1 items-center px-5">
-      {/* Settings Button */}
-      <TouchableOpacity
-        className="absolute top-12 right-5 p-2 z-10"
-        onPress={() => router.push("/settings" as Href)}
-        accessibilityLabel="Settings"
-      >
-        <Ionicons name="settings-outline" size={24} color={iconColor} />
-      </TouchableOpacity>
-
       <View className="flex-[1.2]" />
       <Logo width={300} height={76} />
       <ThemedText type="subtitle" className="text-center mt-2">
