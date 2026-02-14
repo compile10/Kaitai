@@ -46,7 +46,7 @@ export default async function Home() {
               priority
             />
             <p className="text-lg text-gray-600 dark:text-gray-400">
-              Visualize Japanese sentence structure with AI-powered analysis
+              Breaking the language barrier.
             </p>
           </div>
 
