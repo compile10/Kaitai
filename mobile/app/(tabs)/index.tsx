@@ -133,7 +133,7 @@ export default function HomeScreen() {
           {EXAMPLE_SENTENCES.map((sentence, index) => (
             <TouchableOpacity
               key={index}
-              className="px-3 py-2 rounded-2xl bg-black dark:bg-white"
+              className="px-3 py-2 rounded-2xl bg-gray-500 dark:bg-white"
               onPress={() =>
                 router.push({ pathname: "/results", params: { sentence } })
               }
