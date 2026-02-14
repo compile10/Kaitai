@@ -105,10 +105,10 @@ export default function HomeScreen() {
       <ThemedText type="subtitle" className="text-center mt-2">
         Understand Japanese sentences using AI.
       </ThemedText>
-      <View className="mt-5 w-[90%] flex-row items-stretch gap-2 h-16">
+      <View className="mt-5 w-[90%] flex-row items-stretch gap-2 h-12">
         <TextInput
           value={searchValue}
-          className="flex-1 h-full px-3 border border-gray-500 rounded-md   text-gray-900 dark:text-gray-100 bg-transparent"
+          className="flex-1 h-full px-3 border border-gray-500 rounded-md text-gray-900 dark:text-gray-100 bg-transparent"
           onChangeText={setSearchValue}
           placeholder="Insert the sentence..."
           placeholderTextColor="#687076"
@@ -116,7 +116,7 @@ export default function HomeScreen() {
           onSubmitEditing={handleSearch}
         />
         <TouchableOpacity
-          className="w-16 h-16 rounded-md border border-gray-500 items-center justify-center"
+          className="w-12 h-12 rounded-md border border-gray-500 items-center justify-center"
           onPress={() => setSheetVisible(true)}
           accessibilityLabel="Add image"
         >
