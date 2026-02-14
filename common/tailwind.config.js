@@ -24,7 +24,7 @@ const colors = {
   },
   dark: {
     text: "#ECEDEE",
-    background: "#1c1917",  // stone-900
+    background: "#000000",  // pure black
     tint: "#dc2626",        // red-600
     icon: "#a8a29e",        // stone-400
     tabIconDefault: "#a8a29e",
