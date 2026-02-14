@@ -2,30 +2,12 @@ import { ALLOWED_MIME_TYPES, MAX_IMAGE_SIZE } from "@common/image";
 import type { Provider } from "@common/types";
 import { HumanMessage } from "@langchain/core/messages";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { NextResponse } from "next/server";
 import { analyzeSentence } from "@/lib/analysis";
-
-// CORS headers configuration
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*", // In production, replace with your specific origins
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-// Helper to create JSON response with CORS headers
-function jsonResponse(data: unknown, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: corsHeaders,
-  });
-}
+import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
 
 // Handle CORS preflight requests
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: corsHeaders,
-  });
+  return corsPreflightResponse();
 }
 
 /**
@@ -100,7 +82,10 @@ export async function POST(request: Request) {
     }
 
     if (imageFile.size > MAX_IMAGE_SIZE) {
-      return jsonResponse({ error: "Image exceeds maximum size of 20MB" }, 400);
+      return jsonResponse(
+        { error: "Image exceeds maximum size of 20MB" },
+        400,
+      );
     }
 
     // Validate provider and model

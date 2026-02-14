@@ -24,4 +24,7 @@ export const auth = betterAuth({
     expo(),
     nextCookies(), // must be last
   ],
+  experimental: {
+    joins: true,
+  },
 });

@@ -1,32 +1,15 @@
 import type { Provider } from "@common/types";
-import { type NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import {
   analyzeSentence,
   getCachedResponse,
   setCachedResponse,
 } from "@/lib/analysis";
-
-// CORS headers configuration
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*", // In production, replace with your specific origins
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
-
-// Helper to create JSON response with CORS headers
-function jsonResponse(data: unknown, status = 200) {
-  return NextResponse.json(data, {
-    status,
-    headers: corsHeaders,
-  });
-}
+import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
 
 // Handle CORS preflight requests
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: corsHeaders,
-  });
+  return corsPreflightResponse();
 }
 
 export async function POST(request: NextRequest) {
