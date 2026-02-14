@@ -1,87 +1,42 @@
-"use client";
-
-import { analyzeImage, analyzeSentence } from "@common/api";
 import logo from "@common/assets/branding/logo.svg";
-import { PROVIDERS } from "@common/providers";
-import type { SentenceAnalysis } from "@common/types";
-import { Settings } from "lucide-react";
+import { headers } from "next/headers";
 import Image from "next/image";
-import { useState } from "react";
-import ImageUploadModal from "@/components/ImageUploadModal";
-import SentenceInput from "@/components/SentenceInput";
-import SentenceVisualization from "@/components/SentenceVisualization";
-import SettingsModal from "@/components/SettingsModal";
-import { useSettingsStore } from "@/stores/settings-store";
+import Link from "next/link";
+import HomeContent from "@/components/HomeContent";
+import SignInDialog from "@/components/SignInDialog";
+import UserMenu from "@/components/UserMenu";
+import { auth } from "@/lib/auth";
 
-export default function Home() {
-  const [analysis, setAnalysis] = useState<SentenceAnalysis | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [isImageLoading, setIsImageLoading] = useState(false);
-  const [extractedSentence, setExtractedSentence] = useState<string>();
-  const { provider, model } = useSettingsStore();
-
-  const currentProvider = PROVIDERS.find((p) => p.id === provider);
-
-  const handleAnalyze = async (sentence: string) => {
-    setIsLoading(true);
-    setError(null);
-    setAnalysis(null);
-
-    try {
-      const data = await analyzeSentence(
-        "/api/analyze",
-        sentence,
-        provider,
-        model,
-      );
-      console.log("Analysis received:", JSON.stringify(data, null, 2));
-      setAnalysis(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleImageAnalyze = async (file: File) => {
-    setIsImageLoading(true);
-    setError(null);
-    setAnalysis(null);
-
-    try {
-      const data = await analyzeImage(
-        "/api/analyze-image",
-        file,
-        provider,
-        model,
-      );
-      console.log("Image analysis received:", JSON.stringify(data, null, 2));
-      setAnalysis(data.analysis);
-      setExtractedSentence(data.sentence);
-      setIsImageModalOpen(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to analyze image");
-    } finally {
-      setIsImageLoading(false);
-    }
-  };
+export default async function Home() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-background">
+      {/* Top navigation bar */}
+      <header className="border-b border-gray-200 dark:border-gray-700 bg-background">
+        <div className="container mx-auto px-4 h-14 flex items-center justify-end">
+          {session ? (
+            <UserMenu name={session.user.name} email={session.user.email} />
+          ) : (
+            <nav className="flex items-center gap-2">
+              <SignInDialog />
+              <Link
+                href="/sign-up"
+                className="text-sm px-4 py-1.5 bg-tint hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
+              >
+                Sign up
+              </Link>
+            </nav>
+          )}
+        </div>
+      </header>
+
       <main className="container mx-auto px-4 py-12">
         <div className="flex flex-col items-center space-y-8">
-          {/* Header */}
-          <div className="text-center space-y-2 relative w-full max-w-2xl">
-            <button
-              onClick={() => setIsSettingsOpen(true)}
-              className="absolute right-0 top-0 p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-              aria-label="Settings"
-            >
-              <Settings className="w-6 h-6" />
-            </button>
+          {/* Server-rendered header */}
+          <div className="text-center space-y-2 w-full max-w-2xl">
             <Image
               src={logo}
               alt="Kaitai 解体"
@@ -95,96 +50,15 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Input Form */}
-          <SentenceInput
-            onAnalyze={handleAnalyze}
-            onImageClick={() => setIsImageModalOpen(true)}
-            isLoading={isLoading || isImageLoading}
-            externalSentence={extractedSentence}
-          />
-
-          {/* Error Message */}
-          {error && (
-            <div className="w-full max-w-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-              <p className="text-red-800 dark:text-red-200">
-                <strong>Error:</strong> {error}
-              </p>
-            </div>
-          )}
-
-          {/* Loading State */}
-          {(isLoading || isImageLoading) && (
-            <div className="flex items-center justify-center space-x-2">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-              <p className="text-gray-600 dark:text-gray-400">
-                {isImageLoading
-                  ? "Extracting text from image and analyzing..."
-                  : `Analyzing with ${currentProvider?.models.find((m) => m.id === model)?.name || model}...`}
-              </p>
-            </div>
-          )}
-
-          {/* Analysis Results */}
-          {analysis && !isLoading && !isImageLoading && (
-            <SentenceVisualization analysis={analysis} />
-          )}
-
-          {/* Instructions */}
-          {!analysis && !isLoading && !isImageLoading && !error && (
-            <div className="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
-              <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
-                How it works
-              </h3>
-              <ul className="space-y-2 text-gray-700 dark:text-gray-300">
-                <li className="flex items-start">
-                  <span className="mr-2">1.</span>
-                  <span>
-                    Enter a Japanese sentence in the input field above
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="mr-2">2.</span>
-                  <span>
-                    Click "Analyze Sentence" to send it to AI for analysis
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="mr-2">3.</span>
-                  <span>
-                    View the visual representation showing how words modify each
-                    other
-                  </span>
-                </li>
-                <li className="flex items-start">
-                  <span className="mr-2">4.</span>
-                  <span>
-                    Read the detailed explanation of the sentence structure
-                  </span>
-                </li>
-              </ul>
-            </div>
-          )}
+          {/* Client-rendered interactive content */}
+          <HomeContent />
         </div>
       </main>
 
-      {/* Footer */}
+      {/* Server-rendered footer */}
       <footer className="text-center py-8 text-gray-600 dark:text-gray-400 text-sm">
         <p>Powered by AI and Next.js</p>
       </footer>
-
-      {/* Settings Modal */}
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-      />
-
-      {/* Image Upload Modal */}
-      <ImageUploadModal
-        isOpen={isImageModalOpen}
-        onClose={() => !isImageLoading && setIsImageModalOpen(false)}
-        onSubmit={handleImageAnalyze}
-        isLoading={isImageLoading}
-      />
     </div>
   );
 }

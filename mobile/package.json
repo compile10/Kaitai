@@ -10,13 +10,17 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@better-auth/expo": "^1.4.18",
     "@expo/vector-icons": "^15.0.3",
     "@native-html/render": "^1.0.0-alpha.0",
+    "@react-navigation/bottom-tabs": "^7.13.0",
     "@react-navigation/native": "^7.1.8",
+    "better-auth": "^1.4.18",
     "expo": "~54.0.33",
     "expo-dev-client": "~6.0.20",
     "expo-image-picker": "~17.0.10",
     "expo-linking": "~8.0.11",
+    "expo-network": "^8.0.8",
     "expo-router": "~6.0.23",
     "expo-secure-store": "~15.0.8",
     "expo-splash-screen": "~31.0.13",

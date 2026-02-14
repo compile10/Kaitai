@@ -54,7 +54,7 @@ export default function SentenceInput({
             id="sentence"
             value={sentence}
             onChange={(e) => setSentence(e.target.value)}
-            className="w-full px-4 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            className="w-full px-4 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             placeholder="例：私は美しい花を見ました。"
             disabled={isLoading}
           />
@@ -64,7 +64,7 @@ export default function SentenceInput({
           <button
             type="submit"
             disabled={isLoading || !sentence.trim()}
-            className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 px-6 py-3 bg-tint text-white font-medium rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? "Analyzing..." : "Analyze Sentence"}
           </button>
@@ -72,7 +72,7 @@ export default function SentenceInput({
             type="button"
             onClick={onImageClick}
             disabled={isLoading}
-            className="px-4 py-3 border-2 border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400 font-medium rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:border-gray-400 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            className="px-4 py-3 border-2 border-tint text-tint dark:text-tintDark dark:border-tintDark font-medium rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 disabled:border-gray-400 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             title="Analyze image"
           >
             <ImagePlus className="w-5 h-5" />

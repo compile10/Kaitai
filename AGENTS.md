@@ -16,16 +16,18 @@ Kaitai (解体) is an AI-powered Japanese sentence analyzer that breaks down sen
 ├── src/                     # Next.js 15 web app (App Router)
 │   ├── app/
 │   │   ├── api/analyze/route.ts   # POST /api/analyze — the only API endpoint
-│   │   ├── layout.tsx             # Root layout (fonts, SettingsProvider)
-│   │   └── page.tsx               # Main page (input + visualization)
+│   │   ├── layout.tsx             # Root layout (fonts, SettingsStoreProvider)
+│   │   └── page.tsx               # Main page (server component: header + footer shell)
 │   ├── components/
+│   │   ├── HomeContent.tsx         # Client component with interactive page logic
 │   │   ├── ParticleModal.tsx       # Particle explanation popup
 │   │   ├── SentenceInput.tsx       # Text input + example sentence buttons
-│   │   ├── SentenceVisualization.tsx  # React Flow graph + word details
-│   │   ├── SettingsModal.tsx       # Provider/model selection modal
-│   │   └── StoreHydration.tsx      # Client-side Zustand rehydration component
+│   │   ├── SentenceVisualization.tsx  # React Flow graph + word details (SSR-ready node dims)
+│   │   └── SettingsModal.tsx       # Provider/model selection modal
+│   ├── providers/
+│   │   └── settings-store-provider.tsx  # Zustand context provider + useSettingsStore hook
 │   └── stores/
-│       └── settings-store.ts       # Zustand store for provider/model (localStorage)
+│       └── settings-store.ts       # Zustand vanilla store factory (createSettingsStore)
 │
 ├── mobile/                  # React Native app (Expo SDK 54, Expo Router)
 │   ├── app/                 # File-based routing
@@ -155,7 +157,7 @@ When modifying `common/`, changes affect **both** clients. Test both after editi
 
 ### State management
 
-- **Web**: Zustand store (`src/stores/settings-store.ts`) persists provider/model selection to `localStorage` under the key `kaitai-settings` via Zustand's `persist` middleware. Hydration is triggered by the `StoreHydration` client component rendered in the root layout. Uses noop storage on the server for SSR compatibility.
+- **Web**: Zustand vanilla store factory (`src/stores/settings-store.ts`) + context provider (`src/providers/settings-store-provider.tsx`). The store persists provider/model selection to `localStorage` under the key `kaitai-settings` via Zustand's `persist` middleware with `skipHydration: true`. The `SettingsStoreProvider` (rendered in the root layout) creates the store instance, manages rehydration via `useEffect`, and exposes the store through React Context. Components access state via `useSettingsStore(selector)` and hydration status via `useIsHydrated()`. This follows the [Zustand recommended Next.js pattern](https://zustand.docs.pmnd.rs/guides/nextjs) for proper SSR support and per-request store isolation.
 - **Mobile**: Zustand store (`mobile/stores/settings-store.ts`) persists to Expo SecureStore (encrypted). Hydration is tracked via `isHydrated`. Supports a `useCustomModel` toggle for custom model input. Always check hydration before rendering settings-dependent UI.
 
 ### Styling conventions
@@ -260,5 +262,5 @@ Edit `mobile/constants/api.ts`. The `buildApiUrl()` function handles platform de
 - **CORS is wide open**: `Access-Control-Allow-Origin: *` is fine for dev but must be restricted for production.
 - **SecureStore size limits**: Expo SecureStore has a 2KB value limit per key on some platforms. The settings store is small, but be cautious adding large values.
 - **HTML from LLMs**: The API sanitizes HTML in `explanation` and particle descriptions. If you add new HTML-containing fields, add them to the sanitization step.
-- **No SSR for visualization**: `SentenceVisualization.tsx`, `SettingsModal.tsx`, and `StoreHydration.tsx` are client components (`"use client"`). React Flow does not support server rendering.
+- **SSR architecture**: `page.tsx` is a server component that renders the static shell (header, footer). Interactive logic lives in client components (`HomeContent.tsx`, `SentenceVisualization.tsx`, `SettingsModal.tsx`, etc.). React Flow v12 supports SSR — nodes have explicit `width`/`height` dimensions for server-side rendering without client measurement.
 - **Grammar points from LLMs**: The API returns `grammarPoints` (title + explanation) as part of the analysis. Grammar point explanations are sanitized to plain text.

@@ -15,6 +15,7 @@ config.transformer = {
 };
 config.resolver = {
   ...config.resolver,
+  unstable_enablePackageExports: true,
   assetExts: config.resolver.assetExts.filter((ext) => ext !== "svg"),
   sourceExts: [...config.resolver.sourceExts, "svg"],
   // Ensure files from common/ (outside mobile/) can resolve packages from mobile/node_modules

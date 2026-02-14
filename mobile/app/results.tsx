@@ -13,7 +13,7 @@ import RenderHTML from "@native-html/render";
 import { DependencyMap } from "@/components/dependency-map";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useThemeColor } from "@/hooks/use-theme-color";
+import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 import { analyzeSentence } from "@common/api";
 import type { SentenceAnalysis } from "@common/types";
 import { buildApiUrl } from "@/constants/api";
@@ -40,8 +40,8 @@ export default function ResultsScreen() {
 
   const isImageMode = Boolean(imageUri);
 
-  const textColor = useThemeColor({}, "text");
-  const tintColor = useThemeColor({}, "tint");
+  const textColor = useRawCSSTheme("text");
+  const tintColor = useRawCSSTheme("tint");
 
   const fetchAnalysis = useCallback(async () => {
     if (!isHydrated) return;
@@ -102,7 +102,7 @@ export default function ResultsScreen() {
 
   if (isLoading || !isHydrated) {
     return (
-      <ThemedView className="flex-1">
+      <ThemedView className="flex-1" edges={['left', 'right']}>
         <View className="flex-1 justify-center items-center gap-4">
           <ActivityIndicator size="large" color={tintColor} />
           <ThemedText className="opacity-70">
@@ -117,7 +117,7 @@ export default function ResultsScreen() {
 
   if (error) {
     return (
-      <ThemedView className="flex-1 justify-center pb-32">
+      <ThemedView className="flex-1 justify-center pb-32" edges={['left', 'right']}>
         <View className="mx-5 p-5 rounded-xl border gap-3 bg-errorBg dark:bg-errorBgDark border-errorBorder dark:border-errorBorderDark">
           <View className="flex-row items-center gap-2">
             <Ionicons name="alert-circle" size={22} color="#dc2626" />
@@ -139,14 +139,14 @@ export default function ResultsScreen() {
 
   if (!analysis) {
     return (
-      <ThemedView className="flex-1">
+      <ThemedView className="flex-1" edges={['left', 'right']}>
         <ThemedText>No analysis available</ThemedText>
       </ThemedView>
     );
   }
 
   return (
-    <ThemedView className="flex-1">
+    <ThemedView className="flex-1" edges={['left', 'right']}>
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
         <View className="mt-2 mb-6">
           <ThemedText type="title" className="mt-1">

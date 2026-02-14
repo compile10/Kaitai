@@ -1,0 +1,51 @@
+# This docker-compose.yml file is used to for local development.
+# Do not use this file for production or for self-hosting. It is not secure.
+
+services:
+  # ── Next.js dev server (SSR) ──────────────────
+  web:
+    build:
+      context: .
+      target: dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount source for hot-reload; exclude node_modules
+      # so the container uses its own installed copy.
+      - ./src:/app/src
+      - ./common:/app/common
+      - ./public:/app/public
+      - ./next.config.ts:/app/next.config.ts
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./postcss.config.mjs:/app/postcss.config.mjs
+      - ./biome.json:/app/biome.json
+    env_file:
+      - .env.local
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/kaitai?replicaSet=rs0&directConnection=true
+      - BETTER_AUTH_URL=http://localhost:3000
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  # ── MongoDB (single-node replica set for transaction support) ──
+  mongo:
+    image: mongo:7
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: >
+        mongosh --quiet --eval "
+          try { rs.status().ok }
+          catch(e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] }); }
+        "
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  mongo-data:

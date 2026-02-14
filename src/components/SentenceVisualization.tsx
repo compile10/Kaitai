@@ -76,7 +76,7 @@ function WordNodeComponent({ data }: { data: WordNodeData }) {
             {word.reading}
           </div>
         )}
-        <div className="text-xs text-blue-600 dark:text-blue-400 font-medium text-center">
+        <div className="text-xs text-tint dark:text-tintDark font-medium text-center">
           {word.partOfSpeech}
         </div>
       </div>
@@ -183,7 +183,7 @@ function GrammarPointItem({
     <button
       type="button"
       onClick={() => setIsExpanded(!isExpanded)}
-      className="w-full text-left p-3 bg-gray-50 dark:bg-gray-900 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+      className="w-full text-left p-3 bg-gray-50 dark:bg-gray-900 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
     >
       <div className="flex items-center justify-between gap-3">
         <span className="font-semibold text-gray-900 dark:text-gray-100">
@@ -260,6 +260,8 @@ export default function SentenceVisualization({
         type: "wordNode",
         position: { x: startX + i * spacing, y: 100 },
         data: { word, onParticleClick: handleParticleClick },
+        width: 130,
+        height: 80,
         sourcePosition: Position.Right,
         targetPosition: Position.Left,
       });
@@ -323,7 +325,7 @@ export default function SentenceVisualization({
             {word.reading}
           </div>
         )}
-        <div className="text-xs text-blue-600 dark:text-blue-400 font-medium text-center">
+        <div className="text-xs text-tint dark:text-tintDark font-medium text-center">
           {word.partOfSpeech}
         </div>
       </div>

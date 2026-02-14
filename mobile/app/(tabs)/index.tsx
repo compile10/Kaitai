@@ -1,6 +1,6 @@
 import { TextInput, View, TouchableOpacity, Alert } from "react-native";
 import { useState } from "react";
-import { router, type Href } from "expo-router";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 
@@ -8,7 +8,7 @@ import Logo from "@common/assets/branding/logo.svg";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useThemeColor } from "@/hooks/use-theme-color";
+import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 
 const EXAMPLE_SENTENCES = [
   "私は美しい花を見ました。",
@@ -33,7 +33,7 @@ function navigateToImageResults(asset: ImagePicker.ImagePickerAsset) {
 export default function HomeScreen() {
   const [searchValue, setSearchValue] = useState("");
   const [sheetVisible, setSheetVisible] = useState(false);
-  const iconColor = useThemeColor({}, "icon");
+  const iconColor = useRawCSSTheme("icon");
 
   const handleSearch = () => {
     if (searchValue.trim()) {
@@ -99,25 +99,16 @@ export default function HomeScreen() {
   };
 
   return (
-    <ThemedView className="flex-1 items-center px-5">
-      {/* Settings Button */}
-      <TouchableOpacity
-        className="absolute top-12 right-5 p-2 z-10"
-        onPress={() => router.push("/settings" as Href)}
-        accessibilityLabel="Settings"
-      >
-        <Ionicons name="settings-outline" size={24} color={iconColor} />
-      </TouchableOpacity>
-
+    <ThemedView className="flex-1 items-center px-5" edges={['top', 'left', 'right']}>
       <View className="flex-[1.2]" />
       <Logo width={300} height={76} />
       <ThemedText type="subtitle" className="text-center mt-2">
         Understand Japanese sentences using AI.
       </ThemedText>
-      <View className="mt-5 w-[90%] flex-row items-stretch gap-2 h-16">
+      <View className="mt-5 w-[90%] flex-row items-stretch gap-2 h-12">
         <TextInput
           value={searchValue}
-          className="flex-1 h-full px-3 border border-gray-500 rounded-md   text-gray-900 dark:text-gray-100 bg-transparent"
+          className="flex-1 h-full px-3 border border-gray-500 rounded-md text-gray-900 dark:text-gray-100 bg-transparent"
           onChangeText={setSearchValue}
           placeholder="Insert the sentence..."
           placeholderTextColor="#687076"
@@ -125,7 +116,7 @@ export default function HomeScreen() {
           onSubmitEditing={handleSearch}
         />
         <TouchableOpacity
-          className="w-16 h-16 rounded-md border border-gray-500 items-center justify-center"
+          className="w-12 h-12 rounded-md border border-gray-500 items-center justify-center"
           onPress={() => setSheetVisible(true)}
           accessibilityLabel="Add image"
         >
