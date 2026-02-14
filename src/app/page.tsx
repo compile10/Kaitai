@@ -13,9 +13,9 @@ export default async function Home() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-background">
       {/* Top navigation bar */}
-      <header className="border-b border-gray-200 dark:border-gray-700 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm">
+      <header className="border-b border-gray-200 dark:border-gray-700 bg-background">
         <div className="container mx-auto px-4 h-14 flex items-center justify-end">
           {session ? (
             <UserMenu name={session.user.name} email={session.user.email} />

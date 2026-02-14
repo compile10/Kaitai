@@ -50,7 +50,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <Card className="w-full max-w-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-xl rounded-2xl">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-gray-900 dark:text-gray-100">
