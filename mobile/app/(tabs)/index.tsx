@@ -106,7 +106,7 @@ export default function HomeScreen() {
       <View className="flex-[1]" />
       <Logo width={300} height={76} />
       <ThemedText type="subtitle" className="text-center mt-2">
-        Understand Japanese sentences using AI.
+        Breaking the language barrier.
       </ThemedText>
       <View className="mt-5 w-[90%] flex-row items-stretch gap-2 h-12">
         <TextInput
@@ -156,13 +156,6 @@ export default function HomeScreen() {
         className="absolute -right-6 bottom-[40px]"
         pointerEvents="none"
       >
-        {/* Shadow: black-tinted copy offset behind the image */}
-        <Image
-          source={require("@/assets/images/sakura_edited_hd.webp")}
-          className="absolute -top-[3px] left-[-3px] w-[280px] h-[280px]"
-          style={{ tintColor: shadowTint }}
-          resizeMode="contain"
-        />
         <Image
           source={require("@/assets/images/sakura_edited_hd.webp")}
           className="w-[280px] h-[280px]"
