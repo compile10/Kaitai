@@ -85,7 +85,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-blue-600 dark:bg-blue-700 px-6 py-4 flex items-center justify-between">
+        <div className="bg-tint dark:bg-tintDark px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Settings className="w-6 h-6 text-white" />
             <div className="text-xl font-semibold text-white">Settings</div>
@@ -104,7 +104,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           {!isHydrated ? (
             <div className="flex items-center justify-center py-12">
               <div className="flex flex-col items-center gap-4">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-tint" />
                 <p className="text-gray-600 dark:text-gray-400">
                   Loading settings...
                 </p>
@@ -125,7 +125,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   onChange={(e) =>
                     handleProviderChange(e.target.value as Provider)
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-blue-600 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-tint focus:outline-none transition-colors"
                 >
                   {PROVIDERS.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -153,7 +153,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         }
                       }
                     }}
-                    className="w-5 h-5 text-blue-600 focus:ring-blue-500 rounded"
+                    className="w-5 h-5 text-tint focus:ring-red-500 rounded"
                   />
                   <div>
                     <span className="text-base font-semibold text-gray-900 dark:text-gray-100">
@@ -178,7 +178,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     value={draftModel}
                     onChange={(e) => setDraftModel(e.target.value)}
                     placeholder="e.g., claude-opus-4-5-20251101"
-                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-blue-600 focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-tint focus:outline-none transition-colors"
                   />
                 </div>
               ) : (
@@ -197,7 +197,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         key={m.id}
                         className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all ${
                           draftModel === m.id
-                            ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20"
+                            ? "border-tint bg-red-50 dark:bg-red-900/20"
                             : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                         }`}
                       >
@@ -207,7 +207,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                           value={m.id}
                           checked={draftModel === m.id}
                           onChange={(e) => setDraftModel(e.target.value)}
-                          className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500"
+                          className="mt-1 h-4 w-4 text-tint focus:ring-red-500"
                         />
                         <div className="ml-3 flex-1">
                           <div className="flex items-center justify-between">
@@ -248,7 +248,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
+            className="px-4 py-2 bg-tint hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
           >
             Save
           </button>

@@ -145,7 +145,7 @@ export default function ImageUploadModal({
         showCloseButton={false}
         className="max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border-0 shadow-2xl bg-white dark:bg-gray-800"
       >
-        <DialogHeader className="bg-blue-600 dark:bg-blue-700 px-6 py-4 flex flex-row items-center justify-between space-y-0 rounded-t-lg">
+        <DialogHeader className="bg-tint dark:bg-tintDark px-6 py-4 flex flex-row items-center justify-between space-y-0 rounded-t-lg">
           <div className="flex items-center gap-3">
             <ImagePlus className="w-6 h-6 text-white" />
             <DialogTitle className="text-xl font-semibold text-white">
@@ -219,7 +219,7 @@ export default function ImageUploadModal({
               onClick={() => fileInputRef.current?.click()}
               className={`relative flex flex-col items-center justify-center gap-4 p-10 border-2 border-dashed rounded-lg cursor-pointer transition-all w-full ${
                 isDragOver
-                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                  ? "border-blue-500 bg-red-50 dark:bg-red-900/20"
                   : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/50"
               }`}
             >

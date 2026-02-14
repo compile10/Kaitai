@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useThemeColor } from "@/hooks/use-theme-color";
 import { authClient } from "@/lib/auth-client";
 
 export default function SignUpScreen() {
@@ -20,8 +19,6 @@ export default function SignUpScreen() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const tintColor = useThemeColor({}, "tint");
-  const borderColor = useThemeColor({}, "border");
 
   const handleSignUp = async () => {
     if (!name.trim() || !email.trim() || !password.trim()) {
@@ -78,8 +75,7 @@ export default function SignUpScreen() {
               autoCapitalize="words"
               autoCorrect={false}
               autoComplete="name"
-              className="p-4 rounded-xl border-2 text-base text-text dark:text-textDark bg-transparent"
-              style={{ borderColor }}
+              className="p-4 rounded-xl border-2 border-muted dark:border-mutedDark text-base text-text dark:text-textDark bg-transparent"
             />
           </View>
 
@@ -97,8 +93,7 @@ export default function SignUpScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               autoComplete="email"
-              className="p-4 rounded-xl border-2 text-base text-text dark:text-textDark bg-transparent"
-              style={{ borderColor }}
+              className="p-4 rounded-xl border-2 border-muted dark:border-mutedDark text-base text-text dark:text-textDark bg-transparent"
             />
           </View>
 
@@ -114,8 +109,7 @@ export default function SignUpScreen() {
               placeholderTextColor="#9ca3af"
               secureTextEntry
               autoComplete="new-password"
-              className="p-4 rounded-xl border-2 text-base text-text dark:text-textDark bg-transparent"
-              style={{ borderColor }}
+              className="p-4 rounded-xl border-2 border-muted dark:border-mutedDark text-base text-text dark:text-textDark bg-transparent"
             />
           </View>
 
@@ -130,11 +124,7 @@ export default function SignUpScreen() {
 
           {/* Sign Up Button */}
           <TouchableOpacity
-            className="w-full py-4 rounded-xl items-center mt-2"
-            style={{
-              backgroundColor: tintColor,
-              opacity: isLoading ? 0.6 : 1,
-            }}
+            className={`w-full py-4 rounded-xl items-center mt-2 bg-tint dark:bg-tintDark ${isLoading ? "opacity-60" : ""}`}
             onPress={handleSignUp}
             disabled={isLoading}
             activeOpacity={0.7}
@@ -154,8 +144,7 @@ export default function SignUpScreen() {
               activeOpacity={0.6}
             >
               <ThemedText
-                className="text-sm font-semibold"
-                style={{ color: tintColor }}
+                className="text-sm font-semibold text-tint dark:text-tintDark"
               >
                 Sign In
               </ThemedText>

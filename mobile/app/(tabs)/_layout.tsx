@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+
+const { colors: Colors } = require("@common/tailwind.config");
 
 export default function TabLayout() {
   const colorScheme = useColorScheme() ?? "light";

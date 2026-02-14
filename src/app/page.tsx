@@ -24,7 +24,7 @@ export default async function Home() {
               <SignInDialog />
               <Link
                 href="/sign-up"
-                className="text-sm px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                className="text-sm px-4 py-1.5 bg-tint hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
               >
                 Sign up
               </Link>

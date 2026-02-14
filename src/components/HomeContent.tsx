@@ -104,7 +104,7 @@ export default function HomeContent() {
       {/* Loading State */}
       {(isLoading || isImageLoading) && (
         <div className="flex items-center justify-center space-x-2">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-tint" />
           <p className="text-gray-600 dark:text-gray-400">
             {isImageLoading
               ? "Extracting text from image and analyzing..."

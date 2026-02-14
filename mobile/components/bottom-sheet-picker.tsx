@@ -3,7 +3,6 @@ import { View, TouchableOpacity } from "react-native";
 
 import { BottomSheet } from "@/components/bottom-sheet";
 import { ThemedText } from "@/components/themed-text";
-import { useThemeColor } from "@/hooks/use-theme-color";
 
 export interface PickerOption {
   id: string;
@@ -24,7 +23,6 @@ export function BottomSheetPicker({
   onSelect,
 }: BottomSheetPickerProps) {
   const [visible, setVisible] = useState(false);
-  const tintColor = useThemeColor({}, "tint");
 
   const selectedLabel =
     options.find((o) => o.id === selectedId)?.label ?? title;
@@ -60,16 +58,15 @@ export function BottomSheetPicker({
             activeOpacity={0.6}
           >
             <View
-              className="w-5 h-5 rounded-full border-2 items-center justify-center mr-3"
-              style={{
-                borderColor:
-                  selectedId === option.id ? tintColor : "#9ca3af",
-              }}
+              className={`w-5 h-5 rounded-full border-2 items-center justify-center mr-3 ${
+                selectedId === option.id
+                  ? "border-tint dark:border-tintDark"
+                  : "border-gray-400"
+              }`}
             >
               {selectedId === option.id && (
                 <View
-                  className="w-2.5 h-2.5 rounded-full"
-                  style={{ backgroundColor: tintColor }}
+                  className="w-2.5 h-2.5 rounded-full bg-tint dark:bg-tintDark"
                 />
               )}
             </View>

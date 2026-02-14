@@ -3,14 +3,13 @@ import { router } from "expo-router";
 import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useThemeColor } from "@/hooks/use-theme-color";
+import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 import { authClient } from "@/lib/auth-client";
 
 export default function MoreScreen() {
   const { data: session, isPending } = authClient.useSession();
-  const tintColor = useThemeColor({}, "tint");
-  const iconColor = useThemeColor({}, "icon");
-  const borderColor = useThemeColor({}, "border");
+  const tintColor = useRawCSSTheme("tint");
+  const iconColor = useRawCSSTheme("icon");
 
   const handleSignOut = async () => {
     await authClient.signOut();
@@ -37,8 +36,7 @@ export default function MoreScreen() {
         {/* User profile header */}
         <View className="items-center pt-10 pb-6 px-5">
           <View
-            className="w-20 h-20 rounded-full items-center justify-center mb-4"
-            style={{ backgroundColor: tintColor }}
+            className="w-20 h-20 rounded-full items-center justify-center mb-4 bg-tint dark:bg-tintDark"
           >
             <ThemedText className="text-3xl font-bold text-white">
               {initial}
@@ -54,8 +52,7 @@ export default function MoreScreen() {
         <View className="px-5 mt-2">
           {/* Settings row */}
           <TouchableOpacity
-            className="flex-row items-center py-4 border-b"
-            style={{ borderBottomColor: borderColor }}
+            className="flex-row items-center py-4 border-b border-muted dark:border-mutedDark"
             onPress={() => router.push("/settings")}
             activeOpacity={0.6}
           >
@@ -93,8 +90,7 @@ export default function MoreScreen() {
 
       <View className="w-full mt-8 gap-3">
         <TouchableOpacity
-          className="w-full py-4 rounded-xl items-center"
-          style={{ backgroundColor: tintColor }}
+          className="w-full py-4 rounded-xl items-center bg-tint dark:bg-tintDark"
           onPress={() => router.push("/sign-in")}
           activeOpacity={0.7}
         >
@@ -104,14 +100,12 @@ export default function MoreScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="w-full py-4 rounded-xl items-center border-2"
-          style={{ borderColor: tintColor }}
+          className="w-full py-4 rounded-xl items-center border-2 border-tint dark:border-tintDark"
           onPress={() => router.push("/sign-up")}
           activeOpacity={0.7}
         >
           <ThemedText
-            className="text-base font-semibold"
-            style={{ color: tintColor }}
+            className="text-base font-semibold text-tint dark:text-tintDark"
           >
             Create Account
           </ThemedText>

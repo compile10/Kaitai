@@ -3,7 +3,7 @@ import { View, TouchableOpacity, LayoutChangeEvent } from "react-native";
 import Svg, { Path, Circle } from "react-native-svg";
 
 import { ThemedText } from "@/components/themed-text";
-import { useThemeColor } from "@/hooks/use-theme-color";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import type { WordNode } from "@common/types";
 
 // Arc colors — visually distinct, accessible palette
@@ -43,7 +43,7 @@ export function DependencyMap({ words }: DependencyMapProps) {
   );
   const layoutsRef = useRef<Record<string, CardLayout>>({});
 
-  const isDark = useThemeColor({}, "background") === "#151718";
+  const isDark = useColorScheme() === "dark";
 
   // Collect layouts in a ref and flush to state once all cards have measured
   const handleCardLayout = useCallback(

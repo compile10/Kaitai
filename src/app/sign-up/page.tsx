@@ -78,7 +78,7 @@ export default function SignUpPage() {
                 required
                 autoComplete="name"
                 placeholder="Your name"
-                className="px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-blue-600 focus:ring-0 focus:outline-none transition-colors"
+                className="px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-tint focus:ring-0 focus:outline-none transition-colors"
               />
             </Field>
 
@@ -97,7 +97,7 @@ export default function SignUpPage() {
                 required
                 autoComplete="email"
                 placeholder="you@example.com"
-                className="px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-blue-600 focus:ring-0 focus:outline-none transition-colors"
+                className="px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-tint focus:ring-0 focus:outline-none transition-colors"
               />
             </Field>
 
@@ -117,7 +117,7 @@ export default function SignUpPage() {
                 minLength={8}
                 autoComplete="new-password"
                 placeholder="Minimum 8 characters"
-                className="px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-blue-600 focus:ring-0 focus:outline-none transition-colors"
+                className="px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-tint focus:ring-0 focus:outline-none transition-colors"
               />
               <FieldDescription>
                 Must be at least 8 characters long.
@@ -129,7 +129,7 @@ export default function SignUpPage() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-lg transition-colors"
+              className="w-full py-2.5 bg-tint hover:bg-red-700 disabled:bg-red-400 text-white font-medium rounded-lg transition-colors"
             >
               {isLoading ? "Creating account..." : "Sign up"}
             </Button>
@@ -141,7 +141,7 @@ export default function SignUpPage() {
             Already have an account?{" "}
             <Link
               href="/"
-              className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+              className="text-tint dark:text-tintDark hover:underline font-medium"
             >
               Sign in
             </Link>

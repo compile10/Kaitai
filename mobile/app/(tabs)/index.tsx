@@ -8,7 +8,7 @@ import Logo from "@common/assets/branding/logo.svg";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useThemeColor } from "@/hooks/use-theme-color";
+import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 
 const EXAMPLE_SENTENCES = [
   "私は美しい花を見ました。",
@@ -33,7 +33,7 @@ function navigateToImageResults(asset: ImagePicker.ImagePickerAsset) {
 export default function HomeScreen() {
   const [searchValue, setSearchValue] = useState("");
   const [sheetVisible, setSheetVisible] = useState(false);
-  const iconColor = useThemeColor({}, "icon");
+  const iconColor = useRawCSSTheme("icon");
 
   const handleSearch = () => {
     if (searchValue.trim()) {

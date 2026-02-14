@@ -8,7 +8,7 @@ import {
 import { BottomSheetPicker } from "@/components/bottom-sheet-picker";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useThemeColor } from "@/hooks/use-theme-color";
+import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 import {
   PROVIDER_MAP,
   type Provider,
@@ -31,8 +31,8 @@ export default function SettingsScreen() {
     isHydrated,
   } = useSettingsStore();
 
-  const tintColor = useThemeColor({}, "tint");
-  const borderColor = useThemeColor({}, "border");
+  const tintColor = useRawCSSTheme("tint");
+  const borderColor = useRawCSSTheme("border");
 
   const models = PROVIDER_MAP[provider]?.models ?? [];
 

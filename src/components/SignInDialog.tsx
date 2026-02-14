@@ -71,7 +71,7 @@ export default function SignInDialog() {
         <DialogTitle className="sr-only">Sign In</DialogTitle>
 
         {/* Header */}
-        <div className="bg-blue-600 dark:bg-blue-700 px-6 py-4 flex items-center justify-between">
+        <div className="bg-tint dark:bg-tintDark px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <LogInIcon className="w-6 h-6 text-white" />
             <div className="text-xl font-semibold text-white">Sign In</div>
@@ -113,7 +113,7 @@ export default function SignInDialog() {
                 required
                 autoComplete="email"
                 placeholder="you@example.com"
-                className="px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-blue-600 focus:ring-0 focus:outline-none transition-colors"
+                className="px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-tint focus:ring-0 focus:outline-none transition-colors"
               />
             </Field>
 
@@ -132,7 +132,7 @@ export default function SignInDialog() {
                 required
                 autoComplete="current-password"
                 placeholder="Enter your password"
-                className="px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-blue-600 focus:ring-0 focus:outline-none transition-colors"
+                className="px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-tint focus:ring-0 focus:outline-none transition-colors"
               />
             </Field>
 
@@ -144,7 +144,7 @@ export default function SignInDialog() {
                 Don&apos;t have an account?{" "}
                 <Link
                   href="/sign-up"
-                  className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                  className="text-tint dark:text-tintDark hover:underline font-medium"
                 >
                   Sign up
                 </Link>
@@ -160,7 +160,7 @@ export default function SignInDialog() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors font-medium"
+                  className="px-4 py-2 bg-tint hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg transition-colors font-medium"
                 >
                   {isLoading ? "Signing in..." : "Sign in"}
                 </button>

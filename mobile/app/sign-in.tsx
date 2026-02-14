@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useThemeColor } from "@/hooks/use-theme-color";
 import { authClient } from "@/lib/auth-client";
 
 export default function SignInScreen() {
@@ -18,9 +17,6 @@ export default function SignInScreen() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  const tintColor = useThemeColor({}, "tint");
-  const borderColor = useThemeColor({}, "border");
 
   const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) {
@@ -77,8 +73,7 @@ export default function SignInScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               autoComplete="email"
-              className="p-4 rounded-xl border-2 text-base text-text dark:text-textDark bg-transparent"
-              style={{ borderColor}}
+              className="p-4 rounded-xl border-2 border-muted dark:border-mutedDark text-base text-text dark:text-textDark bg-transparent"
             />
           </View>
 
@@ -94,8 +89,7 @@ export default function SignInScreen() {
               placeholderTextColor="#9ca3af"
               secureTextEntry
               autoComplete="current-password"
-              className="p-4 rounded-xl border-2 text-base text-text dark:text-textDark bg-transparent"
-              style={{ borderColor }}
+              className="p-4 rounded-xl border-2 border-muted dark:border-mutedDark text-base text-text dark:text-textDark bg-transparent"
             />
           </View>
 
@@ -110,11 +104,7 @@ export default function SignInScreen() {
 
           {/* Sign In Button */}
           <TouchableOpacity
-            className="w-full py-4 rounded-xl items-center mt-2"
-            style={{
-              backgroundColor: tintColor,
-              opacity: isLoading ? 0.6 : 1,
-            }}
+            className={`w-full py-4 rounded-xl items-center mt-2 bg-tint dark:bg-tintDark ${isLoading ? "opacity-60" : ""}`}
             onPress={handleSignIn}
             disabled={isLoading}
             activeOpacity={0.7}
@@ -134,8 +124,7 @@ export default function SignInScreen() {
               activeOpacity={0.6}
             >
               <ThemedText
-                className="text-sm font-semibold"
-                style={{ color: tintColor }}
+                className="text-sm font-semibold text-tint dark:text-tintDark"
               >
                 Sign Up
               </ThemedText>

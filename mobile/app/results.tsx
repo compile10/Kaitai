@@ -13,7 +13,7 @@ import RenderHTML from "@native-html/render";
 import { DependencyMap } from "@/components/dependency-map";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useThemeColor } from "@/hooks/use-theme-color";
+import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 import { analyzeSentence } from "@common/api";
 import type { SentenceAnalysis } from "@common/types";
 import { buildApiUrl } from "@/constants/api";
@@ -40,8 +40,8 @@ export default function ResultsScreen() {
 
   const isImageMode = Boolean(imageUri);
 
-  const textColor = useThemeColor({}, "text");
-  const tintColor = useThemeColor({}, "tint");
+  const textColor = useRawCSSTheme("text");
+  const tintColor = useRawCSSTheme("tint");
 
   const fetchAnalysis = useCallback(async () => {
     if (!isHydrated) return;

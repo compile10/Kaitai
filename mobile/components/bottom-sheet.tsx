@@ -13,7 +13,7 @@ import Animated, {
 import { scheduleOnRN } from "react-native-worklets";
 
 import { ThemedText } from "@/components/themed-text";
-import { useThemeColor } from "@/hooks/use-theme-color";
+import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const DISMISS_THRESHOLD = 100;
@@ -32,7 +32,7 @@ export function BottomSheet({
   children,
 }: BottomSheetProps) {
   const translateY = useSharedValue(SCREEN_HEIGHT);
-  const bgColor = useThemeColor({}, "background");
+  const bgColor = useRawCSSTheme("background");
 
   useEffect(() => {
     if (visible) {
