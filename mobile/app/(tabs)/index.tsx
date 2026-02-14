@@ -1,4 +1,4 @@
-import { TextInput, View, TouchableOpacity, Alert } from "react-native";
+import { TextInput, View, TouchableOpacity, Alert, Image } from "react-native";
 import { useState } from "react";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,6 +8,7 @@ import Logo from "@common/assets/branding/logo.svg";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 
 const EXAMPLE_SENTENCES = [
@@ -33,7 +34,9 @@ function navigateToImageResults(asset: ImagePicker.ImagePickerAsset) {
 export default function HomeScreen() {
   const [searchValue, setSearchValue] = useState("");
   const [sheetVisible, setSheetVisible] = useState(false);
+  const colorScheme = useColorScheme();
   const iconColor = useRawCSSTheme("icon");
+  const shadowTint = colorScheme === "dark" ? "#FFFFFF" : "#000000";
 
   const handleSearch = () => {
     if (searchValue.trim()) {
@@ -100,7 +103,7 @@ export default function HomeScreen() {
 
   return (
     <ThemedView className="flex-1 items-center px-5" edges={['top', 'left', 'right']}>
-      <View className="flex-[1.2]" />
+      <View className="flex-[1]" />
       <Logo width={300} height={76} />
       <ThemedText type="subtitle" className="text-center mt-2">
         Understand Japanese sentences using AI.
@@ -147,6 +150,25 @@ export default function HomeScreen() {
       </View>
 
       <View className="flex-[3]" />
+
+      {/* Decorative sakura background */}
+      <View
+        className="absolute -right-6 bottom-[40px]"
+        pointerEvents="none"
+      >
+        {/* Shadow: black-tinted copy offset behind the image */}
+        <Image
+          source={require("@/assets/images/sakura_edited_hd.webp")}
+          className="absolute -top-[3px] left-[-3px] w-[280px] h-[280px]"
+          style={{ tintColor: shadowTint }}
+          resizeMode="contain"
+        />
+        <Image
+          source={require("@/assets/images/sakura_edited_hd.webp")}
+          className="w-[280px] h-[280px]"
+          resizeMode="contain"
+        />
+      </View>
 
       {/* Image Source Action Sheet */}
       <BottomSheet
