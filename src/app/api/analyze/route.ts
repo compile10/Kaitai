@@ -5,7 +5,9 @@ import {
   getCachedResponse,
   setCachedResponse,
 } from "@/lib/analysis";
+import { auth } from "@/lib/auth";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
+import { saveToHistory } from "@/lib/history";
 
 // Handle CORS preflight requests
 export async function OPTIONS() {
@@ -14,6 +16,11 @@ export async function OPTIONS() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Get session (null if unauthenticated)
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
     const { sentence, provider, model } = await request.json();
 
     // Validate input
@@ -45,6 +52,21 @@ export async function POST(request: NextRequest) {
 
     // Cache the successful response
     setCachedResponse(cacheKey, analysis);
+
+    // Save to history if the user is authenticated (best-effort)
+    if (session) {
+      try {
+        await saveToHistory(
+          session.user.id,
+          sentence,
+          provider,
+          model,
+          analysis,
+        );
+      } catch (e) {
+        console.error("Failed to save history:", e);
+      }
+    }
 
     return jsonResponse(analysis);
   } catch (error) {

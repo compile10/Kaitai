@@ -55,3 +55,20 @@ export interface ProviderConfig {
   models: ModelInfo[];
   defaultModel: string;
 }
+
+// History types
+export interface HistoryEntry {
+  id: string;
+  sentence: string;
+  provider: string;
+  model: string;
+  createdAt: string; // ISO date string
+}
+
+export interface PaginatedHistory {
+  items: HistoryEntry[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}

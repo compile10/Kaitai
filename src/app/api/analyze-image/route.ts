@@ -3,7 +3,9 @@ import type { Provider } from "@common/types";
 import { HumanMessage } from "@langchain/core/messages";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { analyzeSentence } from "@/lib/analysis";
+import { auth } from "@/lib/auth";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
+import { saveToHistory } from "@/lib/history";
 
 // Handle CORS preflight requests
 export async function OPTIONS() {
@@ -58,6 +60,11 @@ async function extractSentenceFromImage(
 
 export async function POST(request: Request) {
   try {
+    // Get session (null if unauthenticated)
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
     // Parse multipart form data
     // Type assertion: @types/node v20 re-declares FormData without DOM .get() method
     const formData = (await request.formData()) as unknown as {
@@ -82,10 +89,7 @@ export async function POST(request: Request) {
     }
 
     if (imageFile.size > MAX_IMAGE_SIZE) {
-      return jsonResponse(
-        { error: "Image exceeds maximum size of 20MB" },
-        400,
-      );
+      return jsonResponse({ error: "Image exceeds maximum size of 20MB" }, 400);
     }
 
     // Validate provider and model
@@ -135,6 +139,20 @@ export async function POST(request: Request) {
       provider as Provider,
       model,
     );
+
+    if (session) {
+      try {
+        await saveToHistory(
+          session.user.id,
+          sentence,
+          provider as string,
+          model as string,
+          analysis,
+        );
+      } catch (e) {
+        console.error("Failed to save history:", e);
+      }
+    }
 
     // Return both the extracted sentence and its analysis
     return jsonResponse({ sentence, analysis });
