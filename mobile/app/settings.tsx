@@ -25,9 +25,11 @@ export default function SettingsScreen() {
     provider,
     model,
     useCustomModel,
+    expertMode,
     setProvider,
     setModel,
     setUseCustomModel,
+    setExpertMode,
     isHydrated,
   } = useSettingsStore();
 
@@ -154,6 +156,26 @@ export default function SettingsScreen() {
             </View>
           </View>
         )}
+
+        {/* Display section */}
+        <View className="mb-6 mt-2">
+          <ThemedText type="subtitle" className="mb-4">
+            Display
+          </ThemedText>
+          <View className="flex-row items-center">
+            <View className="flex-1">
+              <ThemedText type="defaultSemiBold">Expert Mode</ThemedText>
+              <ThemedText className="text-[13px] opacity-70 mt-1">
+                Show provider and model details in history
+              </ThemedText>
+            </View>
+            <Switch
+              value={expertMode}
+              onValueChange={setExpertMode}
+              trackColor={{ false: borderColor, true: tintColor }}
+            />
+          </View>
+        </View>
       </ScrollView>
     </ThemedView>
   );

@@ -61,6 +61,17 @@ export default function MoreScreen() {
             <Ionicons name="chevron-forward" size={20} color={iconColor} />
           </TouchableOpacity>
 
+          {/* History row */}
+          <TouchableOpacity
+            className="flex-row items-center py-4 border-b border-muted dark:border-mutedDark"
+            onPress={() => router.push("/history")}
+            activeOpacity={0.6}
+          >
+            <Ionicons name="time-outline" size={22} color={iconColor} />
+            <ThemedText className="flex-1 ml-3 text-base">History</ThemedText>
+            <Ionicons name="chevron-forward" size={20} color={iconColor} />
+          </TouchableOpacity>
+
           {/* Sign out */}
           <TouchableOpacity
             className="flex-row items-center py-4 mt-6"

@@ -39,19 +39,15 @@ export async function POST(request: NextRequest) {
     // Check cache first (include provider and model in cache key)
     const cacheKey = `${provider}:${model}:${sentence}`;
     const cachedResponse = getCachedResponse(cacheKey);
-    if (cachedResponse) {
-      return jsonResponse(cachedResponse);
+
+    const analysis =
+      cachedResponse ??
+      (await analyzeSentence(sentence, provider as Provider, model));
+
+    // Cache the successful response (no-op if it was already cached)
+    if (!cachedResponse) {
+      setCachedResponse(cacheKey, analysis);
     }
-
-    // Perform the analysis
-    const analysis = await analyzeSentence(
-      sentence,
-      provider as Provider,
-      model,
-    );
-
-    // Cache the successful response
-    setCachedResponse(cacheKey, analysis);
 
     // Save to history if the user is authenticated (best-effort)
     if (session) {

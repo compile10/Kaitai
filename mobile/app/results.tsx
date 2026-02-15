@@ -14,18 +14,20 @@ import { DependencyMap } from "@/components/dependency-map";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
-import { analyzeSentence } from "@common/api";
 import type { SentenceAnalysis } from "@common/types";
-import { buildApiUrl } from "@/constants/api";
+import { buildApiUrl, buildHistoryEntryUrl } from "@/constants/api";
+import { authFetch } from "@/lib/auth-fetch";
 import { useSettingsStore, PROVIDER_MAP } from "@/stores/settings-store";
 
 export default function ResultsScreen() {
-  const { sentence, imageUri, imageMimeType, imageFileName } =
+  const { sentence, imageUri, imageMimeType, imageFileName, historyId, historyTitle } =
     useLocalSearchParams<{
       sentence?: string;
       imageUri?: string;
       imageMimeType?: string;
       imageFileName?: string;
+      historyId?: string;
+      historyTitle?: string;
     }>();
   const { width } = useWindowDimensions();
 
@@ -39,12 +41,38 @@ export default function ResultsScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const isImageMode = Boolean(imageUri);
+  const isHistoryMode = Boolean(historyId);
 
   const textColor = useRawCSSTheme("text");
   const tintColor = useRawCSSTheme("tint");
 
   const fetchAnalysis = useCallback(async () => {
     if (!isHydrated) return;
+
+    // History mode: fetch pre-computed analysis by ID
+    if (historyId) {
+      setIsLoading(true);
+      setError(null);
+      setAnalysis(null);
+      setExtractedSentence(historyTitle || null);
+
+      try {
+        const res = await authFetch(buildHistoryEntryUrl(historyId));
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to load history entry");
+        }
+
+        setAnalysis(data.analysis);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
     if (!imageUri && !sentence) return;
 
     setIsLoading(true);
@@ -63,7 +91,7 @@ export default function ResultsScreen() {
         formData.append("provider", provider);
         formData.append("model", model);
 
-        const response = await fetch(buildApiUrl("analyzeImage"), {
+        const response = await authFetch(buildApiUrl("analyzeImage"), {
           method: "POST",
           body: formData,
         });
@@ -78,20 +106,27 @@ export default function ResultsScreen() {
         setAnalysis(data.analysis);
       } else {
         setExtractedSentence(sentence || null);
-        const result = await analyzeSentence(
-          buildApiUrl("analyze"),
-          sentence!,
-          provider,
-          model,
-        );
-        setAnalysis(result);
+
+        const response = await authFetch(buildApiUrl("analyze"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sentence, provider, model }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to analyze sentence");
+        }
+
+        setAnalysis(data as SentenceAnalysis);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
-  }, [sentence, imageUri, imageMimeType, imageFileName, provider, model, isHydrated]);
+  }, [sentence, imageUri, imageMimeType, imageFileName, provider, model, isHydrated, historyId, historyTitle]);
 
   useEffect(() => {
     fetchAnalysis();
@@ -106,9 +141,11 @@ export default function ResultsScreen() {
         <View className="flex-1 justify-center items-center gap-4">
           <ActivityIndicator size="large" color={tintColor} />
           <ThemedText className="opacity-70">
-            {isImageMode
-              ? "Reading your sentence from your photo..."
-              : `Breaking down your sentence...`}
+            {isHistoryMode
+              ? "Loading analysis..."
+              : isImageMode
+                ? "Reading your sentence from your photo..."
+                : "Breaking down your sentence..."}
           </ThemedText>
         </View>
       </ThemedView>

@@ -38,6 +38,7 @@ export const API_BASE_URL = __DEV__ ? getDevApiUrl() : PROD_API_URL;
 export const API_ENDPOINTS = {
   analyze: "/api/analyze",
   analyzeImage: "/api/analyze-image",
+  history: "/api/history",
 } as const;
 
 /**
@@ -45,4 +46,11 @@ export const API_ENDPOINTS = {
  */
 export const buildApiUrl = (endpoint: keyof typeof API_ENDPOINTS): string => {
   return `${API_BASE_URL}${API_ENDPOINTS[endpoint]}`;
+};
+
+/**
+ * Build a full API URL for a history entry by ID
+ */
+export const buildHistoryEntryUrl = (id: string): string => {
+  return `${API_BASE_URL}/api/history/${id}`;
 };

@@ -22,10 +22,12 @@ interface SettingsState {
   provider: Provider;
   model: string;
   useCustomModel: boolean;
+  expertMode: boolean;
   isHydrated: boolean;
   setProvider: (provider: Provider) => void;
   setModel: (model: string) => void;
   setUseCustomModel: (value: boolean) => void;
+  setExpertMode: (value: boolean) => void;
   setHydrated: (state: boolean) => void;
 }
 
@@ -35,6 +37,7 @@ export const useSettingsStore = create<SettingsState>()(
       provider: DEFAULT_PROVIDER,
       model: DEFAULT_MODEL,
       useCustomModel: false,
+      expertMode: false,
       isHydrated: false,
       setProvider: (provider: Provider) => {
         set({
@@ -45,6 +48,7 @@ export const useSettingsStore = create<SettingsState>()(
       },
       setModel: (model: string) => set({ model }),
       setUseCustomModel: (useCustomModel: boolean) => set({ useCustomModel }),
+      setExpertMode: (expertMode: boolean) => set({ expertMode }),
       setHydrated: (state: boolean) => set({ isHydrated: state }),
     }),
     {
@@ -54,12 +58,16 @@ export const useSettingsStore = create<SettingsState>()(
         if (state && state.useCustomModel === undefined) {
           state.setUseCustomModel(false);
         }
+        if (state && state.expertMode === undefined) {
+          state.setExpertMode(false);
+        }
         state?.setHydrated(true);
       },
       partialize: (state) => ({
         provider: state.provider,
         model: state.model,
         useCustomModel: state.useCustomModel,
+        expertMode: state.expertMode,
       }),
     },
   ),
