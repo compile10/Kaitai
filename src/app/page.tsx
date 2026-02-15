@@ -40,8 +40,8 @@ export default async function Home() {
             <Image
               src={logo}
               alt="Kaitai 解体"
-              width={260}
-              height={66}
+              width={360}
+              height={92}
               className="mx-auto"
               priority
             />
