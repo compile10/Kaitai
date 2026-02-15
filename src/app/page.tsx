@@ -13,7 +13,23 @@ export default async function Home() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative z-10">
+      {/* Decorative triangle image — bottom-right corner */}
+      <div
+        className="fixed bottom-0 right-0 w-[50vw] h-[60vh] z-0 pointer-events-none"
+        style={{ clipPath: "polygon(100% 0%, 100% 100%, 0% 100%)" }}
+      >
+        <Image
+          src="/harold-wainwright-4JHvZQSMkD4-unsplash.jpg"
+          alt=""
+          fill
+          sizes="50vw"
+          quality={80}
+          className="object-cover"
+          priority={false}
+        />
+      </div>
+
       {/* Top navigation bar */}
       <header className="border-b border-gray-200 dark:border-gray-700 bg-background">
         <div className="container mx-auto px-4 h-14 flex items-center justify-end">
