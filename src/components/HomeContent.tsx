@@ -77,7 +77,7 @@ export default function HomeContent() {
         <button
           type="button"
           onClick={() => setIsSettingsOpen(true)}
-          className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+          className="p-2 text-muted-foreground hover:text-foreground transition-colors"
           aria-label="Settings"
         >
           <Settings className="w-6 h-6" />
@@ -104,8 +104,8 @@ export default function HomeContent() {
       {/* Loading State */}
       {(isLoading || isImageLoading) && (
         <div className="flex items-center justify-center space-x-2">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-tint" />
-          <p className="text-gray-600 dark:text-gray-400">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+          <p className="text-muted-foreground">
             {isImageLoading
               ? "Extracting text from image and analyzing..."
               : `Analyzing with ${currentProvider?.models.find((m) => m.id === model)?.name || model}...`}
@@ -120,11 +120,11 @@ export default function HomeContent() {
 
       {/* Instructions */}
       {!analysis && !isLoading && !isImageLoading && !error && (
-        <div className="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
-          <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
+        <div className="w-full max-w-2xl bg-card rounded-lg p-6 shadow-lg">
+          <h3 className="text-lg font-semibold mb-3 text-foreground">
             How it works
           </h3>
-          <ul className="space-y-2 text-gray-700 dark:text-gray-300">
+          <ul className="space-y-2 text-muted-foreground">
             <li className="flex items-start">
               <span className="mr-2">1.</span>
               <span>

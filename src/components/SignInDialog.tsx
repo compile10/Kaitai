@@ -58,7 +58,7 @@ export default function SignInDialog() {
       <DialogTrigger asChild>
         <button
           type="button"
-          className="text-sm px-4 py-1.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="text-sm px-4 py-1.5 text-muted-foreground hover:text-foreground font-medium rounded-lg hover:bg-accent transition-colors"
         >
           Sign in
         </button>
@@ -66,20 +66,20 @@ export default function SignInDialog() {
 
       <DialogContent
         showCloseButton={false}
-        className="overflow-hidden p-0 sm:max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700"
+        className="overflow-hidden p-0 sm:max-w-md bg-card text-card-foreground border-border"
       >
         <DialogTitle className="sr-only">Sign In</DialogTitle>
 
         {/* Header */}
-        <div className="bg-tint dark:bg-tintDark px-6 py-4 flex items-center justify-between">
+        <div className="bg-primary px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <LogInIcon className="w-6 h-6 text-white" />
-            <div className="text-xl font-semibold text-white">Sign In</div>
+            <LogInIcon className="w-6 h-6 text-primary-foreground" />
+            <div className="text-xl font-semibold text-primary-foreground">Sign In</div>
           </div>
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="w-8 h-8 flex items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors text-2xl font-bold leading-none"
+            className="w-8 h-8 flex items-center justify-center rounded-full text-primary-foreground hover:bg-white/20 transition-colors text-2xl font-bold leading-none"
             aria-label="Close"
           >
             ×
@@ -89,10 +89,10 @@ export default function SignInDialog() {
         {/* Content */}
         <div className="p-6">
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
+            <h3 className="text-lg font-semibold text-foreground mb-1">
               Welcome back
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-muted-foreground">
               Enter your credentials to access Kaitai (解体).
             </p>
           </div>
@@ -101,7 +101,7 @@ export default function SignInDialog() {
             <Field>
               <FieldLabel
                 htmlFor="signin-email"
-                className="text-sm font-semibold text-gray-900 dark:text-gray-100"
+                className="text-sm font-semibold text-foreground"
               >
                 Email
               </FieldLabel>
@@ -113,14 +113,14 @@ export default function SignInDialog() {
                 required
                 autoComplete="email"
                 placeholder="you@example.com"
-                className="px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-tint focus:ring-0 focus:outline-none transition-colors"
+                className="px-4 py-3 border-2 border-input rounded-lg bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-0 focus:outline-none transition-colors"
               />
             </Field>
 
             <Field>
               <FieldLabel
                 htmlFor="signin-password"
-                className="text-sm font-semibold text-gray-900 dark:text-gray-100"
+                className="text-sm font-semibold text-foreground"
               >
                 Password
               </FieldLabel>
@@ -132,19 +132,19 @@ export default function SignInDialog() {
                 required
                 autoComplete="current-password"
                 placeholder="Enter your password"
-                className="px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-tint focus:ring-0 focus:outline-none transition-colors"
+                className="px-4 py-3 border-2 border-input rounded-lg bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-0 focus:outline-none transition-colors"
               />
             </Field>
 
             {error && <FieldError>{error}</FieldError>}
 
             {/* Footer */}
-            <div className="bg-gray-50 dark:bg-gray-900 -mx-6 -mb-6 px-6 py-4 mt-6 flex items-center justify-between border-t border-gray-200 dark:border-gray-700">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="bg-muted -mx-6 -mb-6 px-6 py-4 mt-6 flex items-center justify-between border-t border-border">
+              <p className="text-sm text-muted-foreground">
                 Don&apos;t have an account?{" "}
                 <Link
                   href="/sign-up"
-                  className="text-tint dark:text-tintDark hover:underline font-medium"
+                  className="text-primary hover:underline font-medium"
                 >
                   Sign up
                 </Link>
@@ -153,14 +153,14 @@ export default function SignInDialog() {
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg transition-colors font-medium"
+                  className="px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-4 py-2 bg-tint hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg transition-colors font-medium"
+                  className="px-4 py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-lg transition-colors font-medium"
                 >
                   {isLoading ? "Signing in..." : "Sign in"}
                 </button>

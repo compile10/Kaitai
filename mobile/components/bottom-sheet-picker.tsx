@@ -35,7 +35,7 @@ export function BottomSheetPicker({
   return (
     <>
       <TouchableOpacity
-        className="flex-row items-center justify-between p-4 rounded-xl border-2 border-muted dark:border-mutedDark bg-card dark:bg-cardDark"
+        className="flex-row items-center justify-between p-4 rounded-xl border-2 border-border dark:border-border-dark bg-card dark:bg-card-dark"
         onPress={() => setVisible(true)}
         activeOpacity={0.7}
       >
@@ -60,13 +60,13 @@ export function BottomSheetPicker({
             <View
               className={`w-5 h-5 rounded-full border-2 items-center justify-center mr-3 ${
                 selectedId === option.id
-                  ? "border-tint dark:border-tintDark"
+                  ? "border-primary dark:border-primary-dark"
                   : "border-gray-400"
               }`}
             >
               {selectedId === option.id && (
                 <View
-                  className="w-2.5 h-2.5 rounded-full bg-tint dark:bg-tintDark"
+                  className="w-2.5 h-2.5 rounded-full bg-primary dark:bg-primary-dark"
                 />
               )}
             </View>

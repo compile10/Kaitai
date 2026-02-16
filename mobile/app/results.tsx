@@ -43,8 +43,8 @@ export default function ResultsScreen() {
   const isImageMode = Boolean(imageUri);
   const isHistoryMode = Boolean(historyId);
 
-  const textColor = useRawCSSTheme("text");
-  const tintColor = useRawCSSTheme("tint");
+  const textColor = useRawCSSTheme("foreground");
+  const tintColor = useRawCSSTheme("primary");
 
   const fetchAnalysis = useCallback(async () => {
     if (!isHydrated) return;
@@ -155,7 +155,7 @@ export default function ResultsScreen() {
   if (error) {
     return (
       <ThemedView className="flex-1 justify-center pb-32" edges={['left', 'right']}>
-        <View className="mx-5 p-5 rounded-xl border gap-3 bg-errorBg dark:bg-errorBgDark border-errorBorder dark:border-errorBorderDark">
+        <View className="mx-5 p-5 rounded-xl border gap-3 bg-error-bg dark:bg-error-bg-dark border-error-border dark:border-error-border-dark">
           <View className="flex-row items-center gap-2">
             <Ionicons name="alert-circle" size={22} color="#dc2626" />
             <ThemedText type="defaultSemiBold" className="text-red-600">
@@ -164,7 +164,7 @@ export default function ResultsScreen() {
           </View>
           <ThemedText className="opacity-80">{error}</ThemedText>
           <TouchableOpacity
-            className="p-3 rounded-lg items-center mt-2 bg-tint dark:bg-tintDark"
+            className="p-3 rounded-lg items-center mt-2 bg-primary dark:bg-primary-dark"
             onPress={fetchAnalysis}
           >
             <ThemedText className="text-white font-semibold">Retry</ThemedText>
@@ -191,7 +191,7 @@ export default function ResultsScreen() {
           </ThemedText>
         </View>
 
-        <View className="mb-6 p-4 rounded-xl border bg-card dark:bg-cardDark border-muted dark:border-mutedDark">
+        <View className="mb-6 p-4 rounded-xl border bg-card dark:bg-card-dark border-border dark:border-border-dark">
           <ThemedText type="defaultSemiBold" className="mb-2">
             Direct Translation
           </ThemedText>
@@ -201,7 +201,7 @@ export default function ResultsScreen() {
         </View>
 
         {analysis.isFragment && (
-          <View className="p-4 rounded-xl border mb-6 gap-2 bg-warningBg dark:bg-warningBgDark border-warningBorder dark:border-warningBorderDark">
+          <View className="p-4 rounded-xl border mb-6 gap-2 bg-warning-bg dark:bg-warning-bg-dark border-warning-border dark:border-warning-border-dark">
             <ThemedText type="defaultSemiBold" className="text-yellow-600">
               Sentence Fragment
             </ThemedText>
@@ -219,7 +219,7 @@ export default function ResultsScreen() {
           <DependencyMap words={analysis.words} />
         </View>
 
-        <View className="mb-6 p-4 rounded-xl border bg-card dark:bg-cardDark border-muted dark:border-mutedDark">
+        <View className="mb-6 p-4 rounded-xl border bg-card dark:bg-card-dark border-border dark:border-border-dark">
           <ThemedText type="subtitle" className="mb-3">
             Explanation
           </ThemedText>
@@ -267,7 +267,7 @@ function GrammarPointItem({ grammarPoint, tintColor }: GrammarPointItemProps) {
 
   return (
     <TouchableOpacity
-      className="p-4 rounded-xl border bg-card dark:bg-cardDark border-muted dark:border-mutedDark"
+      className="p-4 rounded-xl border bg-card dark:bg-card-dark border-border dark:border-border-dark"
       onPress={() => setExpanded(!expanded)}
       activeOpacity={0.7}
     >

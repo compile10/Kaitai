@@ -19,13 +19,13 @@ export default function UserMenu({ name, email }: UserMenuProps) {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-sm text-gray-600 dark:text-gray-400">
+      <span className="text-sm text-muted-foreground">
         {name || email}
       </span>
       <button
         type="button"
         onClick={handleSignOut}
-        className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+        className="p-2 text-muted-foreground hover:text-foreground transition-colors"
         aria-label="Sign out"
         title="Sign out"
       >

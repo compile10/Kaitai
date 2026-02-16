@@ -45,7 +45,7 @@ export default function SentenceInput({
         <div>
           <label
             htmlFor="sentence"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            className="block text-sm font-medium text-muted-foreground mb-2"
           >
             Enter a Japanese sentence:
           </label>
@@ -54,7 +54,7 @@ export default function SentenceInput({
             id="sentence"
             value={sentence}
             onChange={(e) => setSentence(e.target.value)}
-            className="w-full px-4 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            className="w-full px-4 py-3 text-lg border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent bg-background text-foreground"
             placeholder="例：私は美しい花を見ました。"
             disabled={isLoading}
           />
@@ -64,7 +64,7 @@ export default function SentenceInput({
           <button
             type="submit"
             disabled={isLoading || !sentence.trim()}
-            className="flex-1 px-6 py-3 bg-tint text-white font-medium rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 px-6 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? "Analyzing..." : "Analyze Sentence"}
           </button>
@@ -72,7 +72,7 @@ export default function SentenceInput({
             type="button"
             onClick={onImageClick}
             disabled={isLoading}
-            className="px-4 py-3 border-2 border-tint text-tint dark:text-tintDark dark:border-tintDark font-medium rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 disabled:border-gray-400 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            className="px-4 py-3 border-2 border-primary text-primary font-medium rounded-lg hover:bg-primary/10 disabled:border-muted-foreground disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             title="Analyze image"
           >
             <ImagePlus className="w-5 h-5" />
@@ -82,7 +82,7 @@ export default function SentenceInput({
       </form>
 
       <div className="mt-6">
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+        <p className="text-sm text-muted-foreground mb-2">
           Try these examples:
         </p>
         <div className="flex flex-wrap gap-2">
@@ -92,7 +92,7 @@ export default function SentenceInput({
               type="button"
               onClick={() => setSentence(example)}
               disabled={isLoading}
-              className="px-3 py-1 text-sm bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1 text-sm bg-secondary text-secondary-foreground rounded hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {example}
             </button>

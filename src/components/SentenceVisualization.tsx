@@ -63,20 +63,20 @@ function WordNodeComponent({ data }: { data: WordNodeData }) {
       <div
         className={`border-2 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow ${
           word.isTopic
-            ? "bg-purple-50 dark:bg-purple-900/20 border-purple-300 dark:border-purple-700"
-            : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+            ? "bg-topic-bg border-topic-border"
+            : "bg-card border-border"
         }`}
         style={{ minWidth: "120px", maxWidth: "150px" }}
       >
-        <div className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1 text-center">
+        <div className="text-xl font-bold text-foreground mb-1 text-center">
           {word.text}
         </div>
         {word.reading && (
-          <div className="text-sm text-gray-600 dark:text-gray-400 mb-2 text-center">
+          <div className="text-sm text-muted-foreground mb-2 text-center">
             {word.reading}
           </div>
         )}
-        <div className="text-xs text-tint dark:text-tintDark font-medium text-center">
+        <div className="text-xs text-primary font-medium text-center">
           {word.partOfSpeech}
         </div>
       </div>
@@ -183,14 +183,14 @@ function GrammarPointItem({
     <button
       type="button"
       onClick={() => setIsExpanded(!isExpanded)}
-      className="w-full text-left p-3 bg-gray-50 dark:bg-gray-900 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+      className="w-full text-left p-3 bg-muted rounded hover:bg-accent transition-colors"
     >
       <div className="flex items-center justify-between gap-3">
-        <span className="font-semibold text-gray-900 dark:text-gray-100">
+        <span className="font-semibold text-foreground">
           {grammarPoint.title}
         </span>
         <svg
-          className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform ${
+          className={`w-5 h-5 text-muted-foreground transition-transform ${
             isExpanded ? "rotate-180" : ""
           }`}
           fill="none"
@@ -206,7 +206,7 @@ function GrammarPointItem({
         </svg>
       </div>
       {isExpanded && (
-        <p className="mt-2 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
           {grammarPoint.explanation}
         </p>
       )}
@@ -312,20 +312,20 @@ export default function SentenceVisualization({
       <div
         className={`border-2 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow ${
           word.isTopic
-            ? "bg-purple-50 dark:bg-purple-900/20 border-purple-300 dark:border-purple-700"
-            : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+            ? "bg-topic-bg border-topic-border"
+            : "bg-card border-border"
         }`}
         style={{ maxWidth: "150px" }}
       >
-        <div className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1 text-center">
+        <div className="text-xl font-bold text-foreground mb-1 text-center">
           {word.text}
         </div>
         {word.reading && (
-          <div className="text-sm text-gray-600 dark:text-gray-400 mb-2 text-center">
+          <div className="text-sm text-muted-foreground mb-2 text-center">
             {word.reading}
           </div>
         )}
-        <div className="text-xs text-tint dark:text-tintDark font-medium text-center">
+        <div className="text-xs text-primary font-medium text-center">
           {word.partOfSpeech}
         </div>
       </div>
@@ -365,23 +365,23 @@ export default function SentenceVisualization({
   return (
     <div className="w-full max-w-4xl space-y-6">
       {/* Direct Translation */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
-        <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">
+      <div className="bg-card rounded-lg p-6 shadow-lg">
+        <h3 className="text-lg font-semibold mb-2 text-foreground">
           Direct Translation
         </h3>
-        <p className="text-gray-700 dark:text-gray-300 text-lg italic">
+        <p className="text-muted-foreground text-lg italic">
           {analysis.directTranslation}
         </p>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
-        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+      <div className="bg-card rounded-lg p-6 shadow-lg">
+        <h3 className="text-lg font-semibold mb-4 text-foreground">
           Sentence Structure
         </h3>
 
         {/* Fragment Warning */}
         {analysis.isFragment && (
-          <div className="mb-4 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 p-4">
+          <div className="mb-4 bg-warning-bg border-l-4 border-warning-border p-4">
             <div className="flex items-center">
               <svg
                 className="w-5 h-5 text-yellow-600 dark:text-yellow-500 mr-2"
@@ -408,7 +408,7 @@ export default function SentenceVisualization({
 
         {/* Topic Section */}
         {topicWords.length > 0 && (
-          <div className="mb-6 pb-4 border-b-2 border-dashed border-purple-300 dark:border-purple-700">
+          <div className="mb-6 pb-4 border-b-2 border-dashed border-topic-border">
             <div className="text-sm font-medium text-purple-600 dark:text-purple-400 mb-2">
               Topic (Context)
             </div>
@@ -421,7 +421,7 @@ export default function SentenceVisualization({
         )}
 
         {/* React Flow Visualization */}
-        <div className="relative h-[400px] bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden">
+        <div className="relative h-[400px] bg-muted rounded-lg overflow-hidden">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -442,7 +442,7 @@ export default function SentenceVisualization({
           </ReactFlow>
         </div>
 
-        <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+        <div className="mt-4 text-sm text-muted-foreground">
           <p>
             <strong>Purple boxes:</strong> Topic - provides context but doesn't
             modify the sentence
@@ -464,8 +464,8 @@ export default function SentenceVisualization({
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
-        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+      <div className="bg-card rounded-lg p-6 shadow-lg">
+        <h3 className="text-lg font-semibold mb-4 text-foreground">
           Explanation
         </h3>
         <div
@@ -474,8 +474,8 @@ export default function SentenceVisualization({
         />
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
-        <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
+      <div className="bg-card rounded-lg p-6 shadow-lg">
+        <h3 className="text-lg font-semibold mb-3 text-foreground">
           Grammar Points
         </h3>
         <div className="space-y-2">

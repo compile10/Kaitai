@@ -1,41 +1,63 @@
 @import "tailwindcss";
 @config "../../common/tailwind.config.js";
 
-:root {
-  --background: #fff;
-  --foreground: #1c1917;
-}
+/* Class-based dark mode for next-themes */
+@custom-variant dark (&:is(.dark *));
 
+/* ---------------------------------------------------------------------------
+   Map every CSS custom-property injected by the common Tailwind plugin to the
+   Tailwind v4 color system.  NO hex values — values come from var() refs.
+   ------------------------------------------------------------------------ */
 @theme inline {
+  /* shadcn semantic tokens */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* app-specific custom tokens */
+  --color-error-bg: var(--error-bg);
+  --color-error-border: var(--error-border);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-border: var(--warning-border);
+  --color-topic-bg: var(--topic-bg);
+  --color-topic-border: var(--topic-border);
+
+  /* fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #000000;
-    --foreground: #ECEDEE;
-  }
-}
-
+/* ---------------------------------------------------------------------------
+   Base body styles
+   ------------------------------------------------------------------------ */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Custom prose styles for HTML-formatted content */
+/* ---------------------------------------------------------------------------
+   Custom prose styles for HTML-formatted LLM content
+   ------------------------------------------------------------------------ */
 .prose {
-  color: #4b5563;
+  color: var(--prose-text);
   font-size: 0.95rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  .prose {
-    color: #e5e7eb;
-  }
 }
 
 .prose p {
@@ -47,32 +69,19 @@ body {
   margin-bottom: 0;
 }
 
-/* Japanese text and key terms - blue highlight */
+/* Japanese text and key terms — blue highlight */
 .prose strong {
   font-weight: 600;
-  color: #2563eb;
-  background: rgba(37, 99, 235, 0.08);
+  color: var(--prose-strong);
+  background: var(--prose-strong-bg);
   padding: 0.1em 0.3em;
   border-radius: 0.25em;
 }
 
-@media (prefers-color-scheme: dark) {
-  .prose strong {
-    color: #93c5fd;
-    background: rgba(147, 197, 253, 0.15);
-  }
-}
-
-/* Emphasis text - purple accent */
+/* Emphasis text — purple accent */
 .prose em {
   font-style: italic;
-  color: #6366f1;
-}
-
-@media (prefers-color-scheme: dark) {
-  .prose em {
-    color: #c4b5fd;
-  }
+  color: var(--prose-em);
 }
 
 .prose ul {
@@ -97,28 +106,24 @@ body {
 
 /* Bullet colors */
 .prose li::marker {
-  color: #9ca3af;
+  color: var(--prose-marker);
 }
 
-@media (prefers-color-scheme: dark) {
-  .prose li::marker {
-    color: #9ca3af;
-  }
-}
-
-/* React Flow styling */
+/* ---------------------------------------------------------------------------
+   React Flow styling
+   ------------------------------------------------------------------------ */
 :root {
   --rf-edge-stroke-width: 2px;
 }
 
 .react-flow__edge-path {
-  stroke: #3b82f6 !important;
+  stroke: var(--rf-edge) !important;
   stroke-width: 2px !important;
   opacity: 1 !important;
 }
 
 .react-flow__arrowhead {
-  fill: #3b82f6 !important;
+  fill: var(--rf-edge) !important;
 }
 
 .react-flow__edge-path-selector {
@@ -133,33 +138,17 @@ body {
 }
 
 .react-flow .react-flow__controls .react-flow__controls-button {
-  background: white;
-  border: 1px solid #d1d5db;
-  color: #1f2937;
+  background: var(--rf-controls-bg);
+  border: 1px solid var(--rf-controls-border);
+  color: var(--rf-controls-text);
   width: 32px;
   height: 32px;
 }
 
 .react-flow .react-flow__controls .react-flow__controls-button:hover {
-  background: #f3f4f6;
+  background: var(--rf-controls-hover);
 }
 
 .react-flow .react-flow__controls .react-flow__controls-button svg {
-  fill: #1f2937;
-}
-
-@media (prefers-color-scheme: dark) {
-  .react-flow .react-flow__controls .react-flow__controls-button {
-    background: #374151;
-    border-color: #4b5563;
-    color: #e5e7eb;
-  }
-
-  .react-flow .react-flow__controls .react-flow__controls-button:hover {
-    background: #4b5563;
-  }
-
-  .react-flow .react-flow__controls .react-flow__controls-button svg {
-    fill: #e5e7eb;
-  }
+  fill: var(--rf-controls-text);
 }

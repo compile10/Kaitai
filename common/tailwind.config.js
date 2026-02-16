@@ -1,76 +1,153 @@
 /**
- * Shared Tailwind theme -- single source of truth for both web and mobile.
- * Web: loaded via @config directive in globals.css (Tailwind v4)
+ * Shared Tailwind theme — single source of truth for both web and mobile.
+ *
+ * Web:    loaded via @config directive in globals.css (Tailwind v4)
  * Mobile: loaded via presets array in mobile/tailwind.config.js (NativeWind/v3)
- * JS consumers: import { colors } from "@common/tailwind.config"
+ * JS:     import { colors } from "@common/tailwind.config"
+ *
+ * The Tailwind plugin injects :root / .dark CSS custom-properties so the web
+ * client gets dynamic dark-mode via next-themes without any hex values in
+ * globals.css.  Mobile ignores the injected variables and uses the static
+ * theme.extend.colors values with dark: prefix classes instead.
  */
+
+// ---------------------------------------------------------------------------
+// Color palette  (all hex values live HERE and nowhere else)
+// ---------------------------------------------------------------------------
 
 const colors = {
   light: {
-    text: "#1c1917",        // stone-900
-    background: "#fff",
-    tint: "#dc2626",        // red-600
-    icon: "#78716c",        // stone-500
-    tabIconDefault: "#78716c",
-    tabIconSelected: "#dc2626",
-    border: "#e7e5e4",      // stone-200
-    card: "#fafaf9",        // stone-50
-    errorBg: "#fff7ed",     // orange-50 (distinct from red tint)
-    errorBorder: "#fed7aa", // orange-200
-    warningBg: "#fefce8",   // yellow-50
-    warningBorder: "#fef08a", // yellow-200
-    topicBg: "#fff1f2",     // rose-50
-    topicBorder: "#fda4af", // rose-300
+    // -- shadcn semantic tokens ------------------------------------------
+    background: "#ffffff",
+    foreground: "#1c1917",           // stone-900
+    primary: "#dc2626",              // red-600  (brand)
+    "primary-foreground": "#ffffff",
+    secondary: "#f5f5f4",            // stone-100
+    "secondary-foreground": "#1c1917",
+    muted: "#f5f5f4",                // stone-100
+    "muted-foreground": "#78716c",   // stone-500  (was "icon")
+    accent: "#f5f5f4",               // stone-100
+    "accent-foreground": "#1c1917",
+    destructive: "#ef4444",          // red-500
+    "destructive-foreground": "#ffffff",
+    card: "#fafaf9",                 // stone-50
+    "card-foreground": "#1c1917",
+    popover: "#ffffff",
+    "popover-foreground": "#1c1917",
+    border: "#e7e5e4",               // stone-200
+    input: "#e7e5e4",                // stone-200
+    ring: "#dc2626",                 // red-600  (brand)
+
+    // -- app-specific custom tokens -------------------------------------
+    "error-bg": "#fff7ed",           // orange-50
+    "error-border": "#fed7aa",       // orange-200
+    "warning-bg": "#fefce8",         // yellow-50
+    "warning-border": "#fef08a",     // yellow-200
+    "topic-bg": "#fff1f2",           // rose-50
+    "topic-border": "#fda4af",       // rose-300
+
+    // -- prose (HTML-formatted LLM content) ------------------------------
+    "prose-text": "#4b5563",         // gray-600
+    "prose-strong": "#2563eb",       // blue-600
+    "prose-strong-bg": "rgba(37, 99, 235, 0.08)",
+    "prose-em": "#6366f1",           // indigo-500
+    "prose-marker": "#9ca3af",       // gray-400
+
+    // -- React Flow graph ------------------------------------------------
+    "rf-edge": "#3b82f6",            // blue-500
+    "rf-controls-bg": "#ffffff",
+    "rf-controls-border": "#d1d5db", // gray-300
+    "rf-controls-text": "#1f2937",   // gray-800
+    "rf-controls-hover": "#f3f4f6",  // gray-100
   },
+
   dark: {
-    text: "#ECEDEE",
-    background: "#000000",  // pure black
-    tint: "#dc2626",        // red-600
-    icon: "#a8a29e",        // stone-400
-    tabIconDefault: "#a8a29e",
-    tabIconSelected: "#dc2626",
-    border: "#44403c",      // stone-700
-    card: "#292524",        // stone-800
-    errorBg: "#431407",     // orange-950
-    errorBorder: "#9a3412", // orange-800
-    warningBg: "#422006",   // amber-950
-    warningBorder: "#854d0e", // amber-800
-    topicBg: "#4c0519",     // rose-950
-    topicBorder: "#e11d48", // rose-600
+    // -- shadcn semantic tokens ------------------------------------------
+    background: "#000000",
+    foreground: "#ECEDEE",
+    primary: "#dc2626",              // red-600  (brand)
+    "primary-foreground": "#ffffff",
+    secondary: "#44403c",            // stone-700
+    "secondary-foreground": "#ECEDEE",
+    muted: "#292524",                // stone-800
+    "muted-foreground": "#a8a29e",   // stone-400  (was "icon")
+    accent: "#44403c",               // stone-700
+    "accent-foreground": "#ECEDEE",
+    destructive: "#ef4444",          // red-500
+    "destructive-foreground": "#ffffff",
+    card: "#292524",                 // stone-800
+    "card-foreground": "#ECEDEE",
+    popover: "#1c1917",              // stone-900
+    "popover-foreground": "#ECEDEE",
+    border: "#44403c",               // stone-700
+    input: "#44403c",                // stone-700
+    ring: "#dc2626",                 // red-600  (brand)
+
+    // -- app-specific custom tokens -------------------------------------
+    "error-bg": "#431407",           // orange-950
+    "error-border": "#9a3412",       // orange-800
+    "warning-bg": "#422006",         // amber-950
+    "warning-border": "#854d0e",     // amber-800
+    "topic-bg": "#4c0519",           // rose-950
+    "topic-border": "#e11d48",       // rose-600
+
+    // -- prose (HTML-formatted LLM content) ------------------------------
+    "prose-text": "#e5e7eb",         // gray-200
+    "prose-strong": "#93c5fd",       // blue-300
+    "prose-strong-bg": "rgba(147, 197, 253, 0.15)",
+    "prose-em": "#c4b5fd",           // violet-300
+    "prose-marker": "#9ca3af",       // gray-400
+
+    // -- React Flow graph ------------------------------------------------
+    "rf-edge": "#3b82f6",            // blue-500
+    "rf-controls-bg": "#374151",     // gray-700
+    "rf-controls-border": "#4b5563", // gray-600
+    "rf-controls-text": "#e5e7eb",   // gray-200
+    "rf-controls-hover": "#4b5563",  // gray-600
   },
 };
+
+// ---------------------------------------------------------------------------
+// Build the theme.extend.colors map
+// Light values are the defaults; "-dark" suffixed keys for mobile dark: prefix
+// ---------------------------------------------------------------------------
+
+function buildThemeColors(light, dark) {
+  const out = {};
+  for (const key of Object.keys(light)) {
+    out[key] = light[key];
+    out[`${key}-dark`] = dark[key];
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Tailwind plugin — injects :root / .dark CSS custom-properties
+// (consumed by the web client via @theme inline { --color-X: var(--X) })
+// ---------------------------------------------------------------------------
+
+function injectCSSVariables({ addBase }) {
+  const toVars = (obj) =>
+    Object.fromEntries(
+      Object.entries(obj).map(([key, value]) => [`--${key}`, value]),
+    );
+  addBase({
+    ":root": toVars(colors.light),
+    ".dark": toVars(colors.dark),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Export
+// ---------------------------------------------------------------------------
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   colors, // Extra export for JS consumers needing raw hex values
   theme: {
     extend: {
-      colors: {
-        tint: colors.light.tint,
-        tintDark: colors.dark.tint,
-        background: colors.light.background,
-        backgroundDark: colors.dark.background,
-        text: colors.light.text,
-        textDark: colors.dark.text,
-        muted: colors.light.border,
-        mutedDark: colors.dark.border,
-        icon: colors.light.icon,
-        iconDark: colors.dark.icon,
-        card: colors.light.card,
-        cardDark: colors.dark.card,
-        errorBg: colors.light.errorBg,
-        errorBgDark: colors.dark.errorBg,
-        errorBorder: colors.light.errorBorder,
-        errorBorderDark: colors.dark.errorBorder,
-        warningBg: colors.light.warningBg,
-        warningBgDark: colors.dark.warningBg,
-        warningBorder: colors.light.warningBorder,
-        warningBorderDark: colors.dark.warningBorder,
-        topicBg: colors.light.topicBg,
-        topicBgDark: colors.dark.topicBg,
-        topicBorder: colors.light.topicBorder,
-        topicBorderDark: colors.dark.topicBorder,
-      },
+      colors: buildThemeColors(colors.light, colors.dark),
     },
   },
+  plugins: [injectCSSVariables],
 };

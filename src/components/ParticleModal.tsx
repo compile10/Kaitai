@@ -39,7 +39,7 @@ export default function ParticleModal({
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-lg w-full mx-4 overflow-hidden"
+        className="bg-card rounded-lg shadow-2xl max-w-lg w-full mx-4 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -59,7 +59,7 @@ export default function ParticleModal({
 
         {/* Content */}
         <div className="p-6">
-          <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
             Function in this sentence
           </h3>
           <div
@@ -69,7 +69,7 @@ export default function ParticleModal({
         </div>
 
         {/* Footer */}
-        <div className="bg-gray-50 dark:bg-gray-900 px-6 py-3 text-right">
+        <div className="bg-muted px-6 py-3 text-right">
           <button
             onClick={onClose}
             className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors font-medium"

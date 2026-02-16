@@ -51,12 +51,12 @@ export default function SignUpPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <Card className="w-full max-w-md bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-xl rounded-2xl">
+      <Card className="w-full max-w-md bg-card border-border shadow-xl rounded-2xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <CardTitle className="text-3xl font-bold text-foreground">
             Create an account
           </CardTitle>
-          <CardDescription className="text-gray-600 dark:text-gray-400">
+          <CardDescription className="text-muted-foreground">
             Get started with Kaitai (解体)
           </CardDescription>
         </CardHeader>
@@ -66,7 +66,7 @@ export default function SignUpPage() {
             <Field>
               <FieldLabel
                 htmlFor="name"
-                className="text-sm font-semibold text-gray-900 dark:text-gray-100"
+                className="text-sm font-semibold text-foreground"
               >
                 Name
               </FieldLabel>
@@ -78,14 +78,14 @@ export default function SignUpPage() {
                 required
                 autoComplete="name"
                 placeholder="Your name"
-                className="px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-tint focus:ring-0 focus:outline-none transition-colors"
+                className="px-4 py-3 border-2 border-input rounded-lg bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-0 focus:outline-none transition-colors"
               />
             </Field>
 
             <Field>
               <FieldLabel
                 htmlFor="email"
-                className="text-sm font-semibold text-gray-900 dark:text-gray-100"
+                className="text-sm font-semibold text-foreground"
               >
                 Email
               </FieldLabel>
@@ -97,14 +97,14 @@ export default function SignUpPage() {
                 required
                 autoComplete="email"
                 placeholder="you@example.com"
-                className="px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-tint focus:ring-0 focus:outline-none transition-colors"
+                className="px-4 py-3 border-2 border-input rounded-lg bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-0 focus:outline-none transition-colors"
               />
             </Field>
 
             <Field>
               <FieldLabel
                 htmlFor="password"
-                className="text-sm font-semibold text-gray-900 dark:text-gray-100"
+                className="text-sm font-semibold text-foreground"
               >
                 Password
               </FieldLabel>
@@ -117,7 +117,7 @@ export default function SignUpPage() {
                 minLength={8}
                 autoComplete="new-password"
                 placeholder="Minimum 8 characters"
-                className="px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-tint focus:ring-0 focus:outline-none transition-colors"
+                className="px-4 py-3 border-2 border-input rounded-lg bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-0 focus:outline-none transition-colors"
               />
               <FieldDescription>
                 Must be at least 8 characters long.
@@ -129,19 +129,19 @@ export default function SignUpPage() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2.5 bg-tint hover:bg-red-700 disabled:bg-red-400 text-white font-medium rounded-lg transition-colors"
+              className="w-full py-2.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-medium rounded-lg transition-colors"
             >
               {isLoading ? "Creating account..." : "Sign up"}
             </Button>
           </form>
         </CardContent>
 
-        <CardFooter className="justify-center border-t border-gray-200 dark:border-gray-700">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+        <CardFooter className="justify-center border-t border-border">
+          <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link
               href="/"
-              className="text-tint dark:text-tintDark hover:underline font-medium"
+              className="text-primary hover:underline font-medium"
             >
               Sign in
             </Link>

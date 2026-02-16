@@ -39,8 +39,8 @@ export default function HistoryScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const expertMode = useSettingsStore((s) => s.expertMode);
-  const tintColor = useRawCSSTheme("tint");
-  const iconColor = useRawCSSTheme("icon");
+  const tintColor = useRawCSSTheme("primary");
+  const iconColor = useRawCSSTheme("muted-foreground");
 
   const fetchHistory = useCallback(
     async (pageNum: number, replace: boolean) => {
@@ -115,7 +115,7 @@ export default function HistoryScreen() {
           <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
           <ThemedText className="text-center opacity-80">{error}</ThemedText>
           <Pressable
-            className="mt-4 px-6 py-3 rounded-xl bg-tint dark:bg-tintDark"
+            className="mt-4 px-6 py-3 rounded-xl bg-primary dark:bg-primary-dark"
             onPress={() => {
               setIsLoading(true);
               fetchHistory(1, true).finally(() => setIsLoading(false));
@@ -157,7 +157,7 @@ export default function HistoryScreen() {
         onEndReachedThreshold={0.3}
         renderItem={({ item }) => (
           <Pressable
-            className="py-4 border-b border-muted dark:border-mutedDark"
+            className="py-4 border-b border-border dark:border-border-dark"
             onPress={() => handlePress(item)}
             style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
           >

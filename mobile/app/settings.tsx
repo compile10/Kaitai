@@ -33,7 +33,7 @@ export default function SettingsScreen() {
     isHydrated,
   } = useSettingsStore();
 
-  const tintColor = useRawCSSTheme("tint");
+  const tintColor = useRawCSSTheme("primary");
   const borderColor = useRawCSSTheme("border");
 
   const models = PROVIDER_MAP[provider]?.models ?? [];
@@ -105,7 +105,7 @@ export default function SettingsScreen() {
               onChangeText={setModel}
               placeholder="e.g., claude-opus-4-5-20251101"
               placeholderTextColor="#9ca3af"
-              className="p-4 rounded-xl border-2 border-muted dark:border-mutedDark bg-card dark:bg-cardDark text-base text-text dark:text-textDark"
+              className="p-4 rounded-xl border-2 border-border dark:border-border-dark bg-card dark:bg-card-dark text-base text-foreground dark:text-foreground-dark"
             />
           </View>
         ) : (
@@ -123,15 +123,15 @@ export default function SettingsScreen() {
                   key={m.id}
                   className={`p-4 rounded-xl border-2 ${
                     model === m.id
-                      ? "bg-gray-100 dark:bg-gray-800 border-tint dark:border-tintDark"
-                      : "bg-transparent border-muted dark:border-mutedDark"
+                      ? "bg-gray-100 dark:bg-gray-800 border-primary dark:border-primary-dark"
+                      : "bg-transparent border-border dark:border-border-dark"
                   }`}
                   onPress={() => setModel(m.id)}
                 >
                   <View className="flex-row items-center mb-2">
                     <View className="w-5 h-5 rounded-full border-2 border-gray-400 items-center justify-center">
                       {model === m.id && (
-                        <View className="w-2.5 h-2.5 rounded-full bg-tint dark:bg-tintDark" />
+                        <View className="w-2.5 h-2.5 rounded-full bg-primary dark:bg-primary-dark" />
                       )}
                     </View>
                     <ThemedText type="defaultSemiBold" className="flex-1 ml-3">

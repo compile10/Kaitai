@@ -31,7 +31,7 @@ export default async function Home() {
       </div>
 
       {/* Top navigation bar */}
-      <header className="border-b border-gray-200 dark:border-gray-700 bg-background">
+      <header className="border-b border-border bg-background">
         <div className="container mx-auto px-4 h-14 flex items-center justify-end">
           {session ? (
             <UserMenu name={session.user.name} email={session.user.email} />
@@ -40,7 +40,7 @@ export default async function Home() {
               <SignInDialog />
               <Link
                 href="/sign-up"
-                className="text-sm px-4 py-1.5 bg-tint hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
+                className="text-sm px-4 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-colors"
               >
                 Sign up
               </Link>
@@ -61,7 +61,7 @@ export default async function Home() {
               className="mx-auto"
               priority
             />
-            <p className="text-lg text-gray-600 dark:text-gray-400">
+            <p className="text-lg text-muted-foreground">
               Breaking the language barrier.
             </p>
           </div>
@@ -72,7 +72,7 @@ export default async function Home() {
       </main>
 
       {/* Server-rendered footer */}
-      <footer className="text-center py-8 text-gray-600 dark:text-gray-400 text-sm">
+      <footer className="text-center py-8 text-muted-foreground text-sm">
         <p>Powered by AI and Next.js</p>
       </footer>
     </div>

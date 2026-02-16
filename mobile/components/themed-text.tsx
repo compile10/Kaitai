@@ -6,14 +6,14 @@ export type ThemedTextProps = TextProps & {
   className?: string;
 };
 
-const defaultTextClass = "text-text dark:text-textDark";
+const defaultTextClass = "text-foreground dark:text-foreground-dark";
 
 const typeStyles = {
   default: "text-base leading-6",
   defaultSemiBold: "text-base leading-6 font-semibold",
   title: "text-3xl font-bold leading-8",
   subtitle: "text-xl font-bold",
-  link: "leading-8 text-base text-tint dark:text-tintDark",
+  link: "leading-8 text-base text-primary dark:text-primary-dark",
 };
 
 export function ThemedText({

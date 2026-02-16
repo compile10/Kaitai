@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 import { SettingsStoreProvider } from "@/providers/settings-store-provider";
 import "./globals.css";
 
@@ -25,11 +26,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SettingsStoreProvider>{children}</SettingsStoreProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <SettingsStoreProvider>{children}</SettingsStoreProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
