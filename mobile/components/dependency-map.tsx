@@ -307,12 +307,12 @@ function WordMapCard({
   const isTopic = word.isTopic === true;
 
   // Determine border and background
-  let borderClass = "border-border dark:border-border-dark";
-  let bgClass = "bg-card dark:bg-card-dark";
+  let borderClass = "border-border";
+  let bgClass = "bg-card";
 
   if (isTopic) {
-    borderClass = "border-topic-border dark:border-topic-border-dark";
-    bgClass = "bg-topic-bg dark:bg-topic-bg-dark";
+    borderClass = "border-topic-border";
+    bgClass = "bg-topic-bg";
   }
 
   const dimmed = isAnySelected && !isConnected;

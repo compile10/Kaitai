@@ -13,7 +13,7 @@ export type ThemedViewProps = ViewProps & {
   edges?: Edges;
 };
 
-const defaultBackgroundClass = "bg-background dark:bg-background-dark";
+const defaultBackgroundClass = "bg-background";
 
 export function ThemedView({
   style,

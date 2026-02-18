@@ -33,7 +33,8 @@ IMPORTANT RULES:
    - Subjects (が) modify the verb or an adjective they are attached to
 
 Please provide:
-1. A direct, literal translation of the sentence into English. Translate as literally as possible, preserving the Japanese word order and structure. It's okay if it sounds unnatural in English -- the goal is to show what the sentence is literally saying word-by-word.
+1. A direct, literal translation of the sentence into English. Translate as literally as possible, preserving the Japanese word order and structure. It's okay if it sounds unnatural in English -- the goal is to show what the sentence is literally saying word-by-word. Write the particles as a word in parenthesis.
+Example: "彼女は新しい本を読んでいる。" → "She (topic) new book (object) reading is."
 2. Each word/phrase broken down with its reading and part of speech
 3. Particles attached to their words (not as separate entries)
 4. Mark the topic with "isTopic: true"
@@ -43,6 +44,7 @@ Please provide:
    - Provide a clear, concise title (e.g., "は (Topic Marker)", "て-form (Connective)", "Potential Form")
    - Write a 2-3 sentence explanation in plain text (no HTML) describing how this grammar point functions, an example from THIS specific sentence
    - Include all significant grammatical structures: particles, verb forms, conjugations, sentence patterns, etc.
+   - Do not include SOV (subject-object-verb) word order in the grammar points.
 
 EXPLANATION FORMATTING:
 - Use HTML tags for better readability: <p>, <strong>, <em>, <ul>, <li>

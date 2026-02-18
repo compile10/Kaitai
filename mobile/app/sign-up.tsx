@@ -75,7 +75,7 @@ export default function SignUpScreen() {
               autoCapitalize="words"
               autoCorrect={false}
               autoComplete="name"
-              className="p-4 rounded-xl border-2 border-border dark:border-border-dark text-base text-foreground dark:text-foreground-dark bg-transparent"
+              className="p-4 rounded-xl border-2 border-border text-base text-foreground bg-transparent"
             />
           </View>
 
@@ -93,7 +93,7 @@ export default function SignUpScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               autoComplete="email"
-              className="p-4 rounded-xl border-2 border-border dark:border-border-dark text-base text-foreground dark:text-foreground-dark bg-transparent"
+              className="p-4 rounded-xl border-2 border-border text-base text-foreground bg-transparent"
             />
           </View>
 
@@ -109,7 +109,7 @@ export default function SignUpScreen() {
               placeholderTextColor="#9ca3af"
               secureTextEntry
               autoComplete="new-password"
-              className="p-4 rounded-xl border-2 border-border dark:border-border-dark text-base text-foreground dark:text-foreground-dark bg-transparent"
+              className="p-4 rounded-xl border-2 border-border text-base text-foreground bg-transparent"
             />
           </View>
 
@@ -124,7 +124,7 @@ export default function SignUpScreen() {
 
           {/* Sign Up Button */}
           <TouchableOpacity
-            className={`w-full py-4 rounded-xl items-center mt-2 bg-primary dark:bg-primary-dark ${isLoading ? "opacity-60" : ""}`}
+            className={`w-full py-4 rounded-xl items-center mt-2 bg-primary ${isLoading ? "opacity-60" : ""}`}
             onPress={handleSignUp}
             disabled={isLoading}
             activeOpacity={0.7}
@@ -144,7 +144,7 @@ export default function SignUpScreen() {
               activeOpacity={0.6}
             >
               <ThemedText
-                className="text-sm font-semibold text-primary dark:text-primary-dark"
+                className="text-sm font-semibold text-primary"
               >
                 Sign In
               </ThemedText>

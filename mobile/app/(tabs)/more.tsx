@@ -36,7 +36,7 @@ export default function MoreScreen() {
         {/* User profile header */}
         <View className="items-center pt-10 pb-6 px-5">
           <View
-            className="w-20 h-20 rounded-full items-center justify-center mb-4 bg-primary dark:bg-primary-dark"
+            className="w-20 h-20 rounded-full items-center justify-center mb-4 bg-primary"
           >
             <ThemedText className="text-3xl font-bold text-white">
               {initial}
@@ -52,7 +52,7 @@ export default function MoreScreen() {
         <View className="px-5 mt-2">
           {/* Settings row */}
           <TouchableOpacity
-            className="flex-row items-center py-4 border-b border-border dark:border-border-dark"
+            className="flex-row items-center py-4 border-b border-border"
             onPress={() => router.push("/settings")}
             activeOpacity={0.6}
           >
@@ -63,7 +63,7 @@ export default function MoreScreen() {
 
           {/* History row */}
           <TouchableOpacity
-            className="flex-row items-center py-4 border-b border-border dark:border-border-dark"
+            className="flex-row items-center py-4 border-b border-border"
             onPress={() => router.push("/history")}
             activeOpacity={0.6}
           >
@@ -101,7 +101,7 @@ export default function MoreScreen() {
 
       <View className="w-full mt-8 gap-3">
         <TouchableOpacity
-          className="w-full py-4 rounded-xl items-center bg-primary dark:bg-primary-dark"
+          className="w-full py-4 rounded-xl items-center bg-primary"
           onPress={() => router.push("/sign-in")}
           activeOpacity={0.7}
         >
@@ -111,12 +111,12 @@ export default function MoreScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="w-full py-4 rounded-xl items-center border-2 border-primary dark:border-primary-dark"
+          className="w-full py-4 rounded-xl items-center border-2 border-primary"
           onPress={() => router.push("/sign-up")}
           activeOpacity={0.7}
         >
           <ThemedText
-            className="text-base font-semibold text-primary dark:text-primary-dark"
+            className="text-base font-semibold text-primary"
           >
             Create Account
           </ThemedText>

@@ -155,7 +155,7 @@ export default function ResultsScreen() {
   if (error) {
     return (
       <ThemedView className="flex-1 justify-center pb-32" edges={['left', 'right']}>
-        <View className="mx-5 p-5 rounded-xl border gap-3 bg-error-bg dark:bg-error-bg-dark border-error-border dark:border-error-border-dark">
+        <View className="mx-5 p-5 rounded-xl border gap-3 bg-error-bg border-error-border">
           <View className="flex-row items-center gap-2">
             <Ionicons name="alert-circle" size={22} color="#dc2626" />
             <ThemedText type="defaultSemiBold" className="text-red-600">
@@ -164,7 +164,7 @@ export default function ResultsScreen() {
           </View>
           <ThemedText className="opacity-80">{error}</ThemedText>
           <TouchableOpacity
-            className="p-3 rounded-lg items-center mt-2 bg-primary dark:bg-primary-dark"
+            className="p-3 rounded-lg items-center mt-2 bg-primary"
             onPress={fetchAnalysis}
           >
             <ThemedText className="text-white font-semibold">Retry</ThemedText>
@@ -191,7 +191,7 @@ export default function ResultsScreen() {
           </ThemedText>
         </View>
 
-        <View className="mb-6 p-4 rounded-xl border bg-card dark:bg-card-dark border-border dark:border-border-dark">
+        <View className="mb-6 p-4 rounded-xl border bg-card border-border">
           <ThemedText type="defaultSemiBold" className="mb-2">
             Direct Translation
           </ThemedText>
@@ -201,7 +201,7 @@ export default function ResultsScreen() {
         </View>
 
         {analysis.isFragment && (
-          <View className="p-4 rounded-xl border mb-6 gap-2 bg-warning-bg dark:bg-warning-bg-dark border-warning-border dark:border-warning-border-dark">
+          <View className="p-4 rounded-xl border mb-6 gap-2 bg-warning-bg border-warning-border">
             <ThemedText type="defaultSemiBold" className="text-yellow-600">
               Sentence Fragment
             </ThemedText>
@@ -219,7 +219,7 @@ export default function ResultsScreen() {
           <DependencyMap words={analysis.words} />
         </View>
 
-        <View className="mb-6 p-4 rounded-xl border bg-card dark:bg-card-dark border-border dark:border-border-dark">
+        <View className="mb-6 p-4 rounded-xl border bg-card border-border">
           <ThemedText type="subtitle" className="mb-3">
             Explanation
           </ThemedText>
@@ -267,7 +267,7 @@ function GrammarPointItem({ grammarPoint, tintColor }: GrammarPointItemProps) {
 
   return (
     <TouchableOpacity
-      className="p-4 rounded-xl border bg-card dark:bg-card-dark border-border dark:border-border-dark"
+      className="p-4 rounded-xl border bg-card border-border"
       onPress={() => setExpanded(!expanded)}
       activeOpacity={0.7}
     >
