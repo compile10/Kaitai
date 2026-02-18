@@ -92,7 +92,7 @@ export default function SentenceInput({
               type="button"
               onClick={() => setSentence(example)}
               disabled={isLoading}
-              className="px-3 py-1 text-sm bg-secondary text-secondary-foreground rounded hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1 text-sm bg-secondary text-secondary-foreground rounded border-b-2 border-b-transparent hover:border-b-primary hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {example}
             </button>
