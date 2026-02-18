@@ -40,8 +40,9 @@ export default function SentenceInput({
   ];
 
   return (
-    <div className="w-full max-w-2xl bg-card text-card-foreground p-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="w-full max-w-2xl bg-card text-card-foreground p-6 relative overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
+      <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
         <div>
           <label
             htmlFor="sentence"
@@ -81,7 +82,7 @@ export default function SentenceInput({
         </div>
       </form>
 
-      <div className="mt-6">
+      <div className="mt-6 relative z-10">
         <p className="text-sm text-card-foreground/70 mb-2">
           Try these examples:
         </p>

@@ -32,6 +32,8 @@ const colors = {
     "destructive-foreground": "#ffffff",
     card: "#000000",                 // black
     "card-foreground": "#ffffff",
+    "card-alt": "#4a0c0c",           // dark red
+    "card-alt-foreground": "#fecaca", // red-200
     popover: "#ffffff",
     "popover-foreground": "#1c1917",
     border: "#e7e5e4",               // stone-200
@@ -77,6 +79,8 @@ const colors = {
     "destructive-foreground": "#ffffff",
     card: "#ffffff",                 // white
     "card-foreground": "#000000",
+    "card-alt": "#4a0c0c",           // dark red
+    "card-alt-foreground": "#fecaca", // red-200
     popover: "#1c1917",              // stone-900
     "popover-foreground": "#ECEDEE",
     border: "#44403c",               // stone-700
