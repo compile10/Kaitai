@@ -1,17 +1,9 @@
 import logo from "@common/assets/branding/logo.svg";
-import { headers } from "next/headers";
 import Image from "next/image";
-import Link from "next/link";
+import Header from "@/components/Header";
 import HomeContent from "@/components/HomeContent";
-import SignInDialog from "@/components/SignInDialog";
-import UserMenu from "@/components/UserMenu";
-import { auth } from "@/lib/auth";
 
-export default async function Home() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
+export default function Home() {
   return (
     <div className="min-h-screen bg-background relative">
       {/* Decorative triangle image — top-right corner */}
@@ -31,24 +23,7 @@ export default async function Home() {
         />
       </div>
 
-      {/* Top navigation bar */}
-      <header className="border-b border-border bg-background relative z-10">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-end">
-          {session ? (
-            <UserMenu name={session.user.name} email={session.user.email} />
-          ) : (
-            <nav className="flex items-center gap-2">
-              <SignInDialog />
-              <Link
-                href="/sign-up"
-                className="text-sm px-4 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-colors"
-              >
-                Sign up
-              </Link>
-            </nav>
-          )}
-        </div>
-      </header>
+      <Header />
 
       <main className="container mx-auto px-4 py-12 relative z-10">
         <div className="flex flex-col items-start space-y-8">
