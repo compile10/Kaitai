@@ -89,10 +89,10 @@ export default function SignInDialog() {
         {/* Content */}
         <div className="p-6">
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-foreground mb-1">
+            <h3 className="text-lg font-semibold text-card-foreground mb-1">
               Welcome back
             </h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-card-foreground/70">
               Enter your credentials to access Kaitai (解体).
             </p>
           </div>
@@ -101,7 +101,7 @@ export default function SignInDialog() {
             <Field>
               <FieldLabel
                 htmlFor="signin-email"
-                className="text-sm font-semibold text-foreground"
+                className="text-sm font-semibold text-card-foreground"
               >
                 Email
               </FieldLabel>
@@ -113,14 +113,14 @@ export default function SignInDialog() {
                 required
                 autoComplete="email"
                 placeholder="you@example.com"
-                className="px-4 py-3 border-2 border-input rounded-lg bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-0 focus:outline-none transition-colors"
+                className="px-4 py-3 border-2 border-card-foreground/20 rounded-lg bg-card text-card-foreground placeholder-card-foreground/50 focus:border-primary focus:ring-0 focus:outline-none transition-colors"
               />
             </Field>
 
             <Field>
               <FieldLabel
                 htmlFor="signin-password"
-                className="text-sm font-semibold text-foreground"
+                className="text-sm font-semibold text-card-foreground"
               >
                 Password
               </FieldLabel>
@@ -132,15 +132,15 @@ export default function SignInDialog() {
                 required
                 autoComplete="current-password"
                 placeholder="Enter your password"
-                className="px-4 py-3 border-2 border-input rounded-lg bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-0 focus:outline-none transition-colors"
+                className="px-4 py-3 border-2 border-card-foreground/20 rounded-lg bg-card text-card-foreground placeholder-card-foreground/50 focus:border-primary focus:ring-0 focus:outline-none transition-colors"
               />
             </Field>
 
             {error && <FieldError>{error}</FieldError>}
 
             {/* Footer */}
-            <div className="bg-muted -mx-6 -mb-6 px-6 py-4 mt-6 flex items-center justify-between border-t border-border">
-              <p className="text-sm text-muted-foreground">
+            <div className="bg-card-foreground/5 -mx-6 -mb-6 px-6 py-4 mt-6 flex items-center justify-between border-t border-card-foreground/20">
+              <p className="text-sm text-card-foreground/70">
                 Don&apos;t have an account?{" "}
                 <Link
                   href="/sign-up"
@@ -153,7 +153,7 @@ export default function SignInDialog() {
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors font-medium"
+                  className="px-4 py-2 text-card-foreground hover:bg-card-foreground/10 rounded-lg transition-colors font-medium"
                 >
                   Cancel
                 </button>

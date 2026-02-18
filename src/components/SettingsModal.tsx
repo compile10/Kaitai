@@ -81,7 +81,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       onClick={onClose}
     >
       <div
-        className="bg-card rounded-lg shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-card text-card-foreground rounded-lg shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -105,7 +105,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             <div className="flex items-center justify-center py-12">
               <div className="flex flex-col items-center gap-4">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
-                <p className="text-muted-foreground">
+                <p className="text-card-foreground/70">
                   Loading settings...
                 </p>
               </div>
@@ -114,10 +114,10 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             <>
               {/* Provider Selection */}
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-foreground mb-2">
+                <h3 className="text-lg font-semibold text-card-foreground mb-2">
                   AI Provider
                 </h3>
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="text-sm text-card-foreground/70 mb-4">
                   Choose which AI provider to use for sentence analysis.
                 </p>
                 <select
@@ -125,7 +125,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   onChange={(e) =>
                     handleProviderChange(e.target.value as Provider)
                   }
-                  className="w-full px-4 py-3 border-2 border-input rounded-lg bg-background text-foreground focus:border-primary focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 border-2 border-card-foreground/20 rounded-lg bg-card text-card-foreground focus:border-primary focus:outline-none transition-colors"
                 >
                   {PROVIDERS.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -156,10 +156,10 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     className="w-5 h-5 text-primary focus:ring-ring rounded"
                   />
                   <div>
-                    <span className="text-base font-semibold text-foreground">
+                    <span className="text-base font-semibold text-card-foreground">
                       Use Custom Model
                     </span>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-card-foreground/70">
                       Enter a specific model name instead of choosing from
                       presets
                     </p>
@@ -170,7 +170,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               {/* Custom Model Input or Model Selection */}
               {useCustomModel ? (
                 <div className="mb-6">
-                  <label className="block text-sm font-semibold text-foreground mb-2">
+                  <label className="block text-sm font-semibold text-card-foreground mb-2">
                     Custom Model Name
                   </label>
                   <input
@@ -178,15 +178,15 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     value={draftModel}
                     onChange={(e) => setDraftModel(e.target.value)}
                     placeholder="e.g., claude-opus-4-5-20251101"
-                    className="w-full px-4 py-3 border-2 border-input rounded-lg bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 border-2 border-card-foreground/20 rounded-lg bg-card text-card-foreground placeholder-card-foreground/50 focus:border-primary focus:outline-none transition-colors"
                   />
                 </div>
               ) : (
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                  <h3 className="text-lg font-semibold text-card-foreground mb-2">
                     Select Model
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
+                  <p className="text-sm text-card-foreground/70 mb-4">
                     Choose which model to use. Your preference will be saved
                     locally.
                   </p>
@@ -198,7 +198,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         className={`flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all ${
                           draftModel === m.id
                             ? "border-primary bg-primary/10"
-                            : "border-input hover:border-border"
+                            : "border-card-foreground/20 hover:border-card-foreground/40"
                         }`}
                       >
                         <input
@@ -211,7 +211,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         />
                         <div className="ml-3 flex-1">
                           <div className="flex items-center justify-between">
-                            <span className="font-semibold text-foreground">
+                            <span className="font-semibold text-card-foreground">
                               {m.name}
                             </span>
                             {m.speed && (
@@ -220,11 +220,11 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-muted-foreground mt-1">
+                          <p className="text-sm text-card-foreground/70 mt-1">
                             {m.description}
                           </p>
                           {m.pricing && (
-                            <p className="text-xs text-muted-foreground mt-2">
+                            <p className="text-xs text-card-foreground/70 mt-2">
                               Pricing: {m.pricing}
                             </p>
                           )}
@@ -239,10 +239,10 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="bg-muted px-6 py-4 flex justify-end gap-3 border-t border-border">
+        <div className="bg-card-foreground/5 px-6 py-4 flex justify-end gap-3 border-t border-card-foreground/20">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-foreground hover:bg-accent rounded-lg transition-colors font-medium"
+            className="px-4 py-2 text-card-foreground hover:bg-card-foreground/10 rounded-lg transition-colors font-medium"
           >
             Cancel
           </button>
