@@ -30,8 +30,8 @@ const colors = {
     "accent-foreground": "#1c1917",
     destructive: "#ef4444",          // red-500
     "destructive-foreground": "#ffffff",
-    card: "#fafaf9",                 // stone-50
-    "card-foreground": "#1c1917",
+    card: "#000000",                 // black
+    "card-foreground": "#ffffff",
     popover: "#ffffff",
     "popover-foreground": "#1c1917",
     border: "#e7e5e4",               // stone-200
@@ -75,8 +75,8 @@ const colors = {
     "accent-foreground": "#ECEDEE",
     destructive: "#ef4444",          // red-500
     "destructive-foreground": "#ffffff",
-    card: "#292524",                 // stone-800
-    "card-foreground": "#ECEDEE",
+    card: "#ffffff",                 // white
+    "card-foreground": "#000000",
     popover: "#1c1917",              // stone-900
     "popover-foreground": "#ECEDEE",
     border: "#44403c",               // stone-700

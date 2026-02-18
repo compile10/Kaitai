@@ -3,7 +3,6 @@
 import { analyzeImage, analyzeSentence } from "@common/api";
 import { PROVIDERS } from "@common/providers";
 import type { SentenceAnalysis } from "@common/types";
-import { Settings } from "lucide-react";
 import { useState } from "react";
 import ImageUploadModal from "@/components/ImageUploadModal";
 import SentenceInput from "@/components/SentenceInput";
@@ -72,18 +71,6 @@ export default function HomeContent() {
 
   return (
     <>
-      {/* Settings Button */}
-      <div className="w-full max-w-2xl flex justify-end -mt-4">
-        <button
-          type="button"
-          onClick={() => setIsSettingsOpen(true)}
-          className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-          aria-label="Settings"
-        >
-          <Settings className="w-6 h-6" />
-        </button>
-      </div>
-
       {/* Input Form */}
       <SentenceInput
         onAnalyze={handleAnalyze}
@@ -103,7 +90,7 @@ export default function HomeContent() {
 
       {/* Loading State */}
       {(isLoading || isImageLoading) && (
-        <div className="flex items-center justify-center space-x-2">
+        <div className="flex items-center space-x-2">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
           <p className="text-muted-foreground">
             {isImageLoading
@@ -120,11 +107,11 @@ export default function HomeContent() {
 
       {/* Instructions */}
       {!analysis && !isLoading && !isImageLoading && !error && (
-        <div className="w-full max-w-2xl bg-card rounded-lg p-6 shadow-lg">
-          <h3 className="text-lg font-semibold mb-3 text-foreground">
+        <div className="w-full max-w-2xl bg-card p-6 shadow-lg">
+          <h3 className="text-lg font-semibold mb-3 text-card-foreground">
             How it works
           </h3>
-          <ul className="space-y-2 text-muted-foreground">
+          <ul className="space-y-2 text-card-foreground/70">
             <li className="flex items-start">
               <span className="mr-2">1.</span>
               <span>
