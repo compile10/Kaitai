@@ -40,12 +40,12 @@ export default function SentenceInput({
   ];
 
   return (
-    <div className="w-full max-w-2xl bg-card text-card-foreground p-6 border-t-4 border-t-primary">
+    <div className="w-full max-w-2xl bg-card-alt text-card-alt-foreground p-6 border-t-4 border-t-primary">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label
             htmlFor="sentence"
-            className="block text-sm font-medium text-card-foreground/70 mb-2"
+            className="block text-sm font-medium text-card-alt-foreground/70 mb-2"
           >
             Enter a Japanese sentence:
           </label>
@@ -82,7 +82,7 @@ export default function SentenceInput({
       </form>
 
       <div className="mt-6">
-        <p className="text-sm text-card-foreground/70 mb-2">
+        <p className="text-sm text-card-alt-foreground/70 mb-2">
           Try these examples:
         </p>
         <div className="flex flex-wrap gap-2">

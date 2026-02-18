@@ -107,11 +107,11 @@ export default function HomeContent() {
 
       {/* Instructions */}
       {!analysis && !isLoading && !isImageLoading && !error && (
-        <div className="w-full max-w-2xl bg-card-alt p-6 shadow-lg">
-          <h3 className="text-lg font-semibold mb-3 text-card-alt-foreground">
+        <div className="w-full max-w-2xl bg-card p-6 shadow-lg">
+          <h3 className="text-lg font-semibold mb-3 text-card-foreground">
             How it works
           </h3>
-          <ul className="space-y-2 text-card-alt-foreground/70">
+          <ul className="space-y-2 text-card-foreground/70">
             <li className="flex items-start">
               <span className="mr-2">1.</span>
               <span>
