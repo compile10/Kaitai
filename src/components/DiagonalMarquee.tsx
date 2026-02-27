@@ -1,3 +1,5 @@
+import { Marquee } from "@/components/ui/marquee";
+
 const SENTENCES = [
   "言葉は世界への扉",
   "日本語の美しさを解き明かす",
@@ -9,7 +11,13 @@ const SENTENCES = [
   "文を分析する力",
 ];
 
-const ANIMATION_DURATION = 85;
+function SentenceItem({ text }: { text: string }) {
+  return (
+    <span className="whitespace-nowrap font-[family-name:var(--font-rampart-one)] text-2xl text-white/40">
+      {text}
+    </span>
+  );
+}
 
 export default function DiagonalMarquee() {
   return (
@@ -20,19 +28,14 @@ export default function DiagonalMarquee() {
           left: "35vw",
           transformOrigin: "top left",
           transform: "rotate(atan2(80vh, 65vw))",
+          width: "calc(100vw + 50vw)",
         }}
       >
-        {SENTENCES.map((sentence, i) => (
-          <div
-            key={sentence}
-            className="absolute top-0 left-0 whitespace-nowrap font-[family-name:var(--font-rampart-one)] text-2xl text-white/40 opacity-0"
-            style={{
-              animation: `scroll-hypotenuse ${ANIMATION_DURATION}s linear ${i * (ANIMATION_DURATION / SENTENCES.length)}s infinite`,
-            }}
-          >
-            {sentence}
-          </div>
-        ))}
+        <Marquee className="[--duration:110s] [--gap:4rem]">
+          {SENTENCES.map((s) => (
+            <SentenceItem key={s} text={s} />
+          ))}
+        </Marquee>
       </div>
     </div>
   );
