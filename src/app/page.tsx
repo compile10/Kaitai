@@ -1,5 +1,6 @@
 import logo from "@common/assets/branding/logo.svg";
 import Image from "next/image";
+import DiagonalMarquee from "@/components/DiagonalMarquee";
 import Header from "@/components/Header";
 import HomeContent from "@/components/HomeContent";
 
@@ -22,6 +23,8 @@ export default function Home() {
           priority={false}
         />
       </div>
+
+      <DiagonalMarquee />
 
       <Header />
 

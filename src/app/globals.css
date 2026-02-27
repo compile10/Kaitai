@@ -154,3 +154,23 @@ body {
 .react-flow .react-flow__controls .react-flow__controls-button svg {
   fill: var(--rf-controls-text);
 }
+
+/* ---------------------------------------------------------------------------
+   Diagonal marquee animation (scrolls along the triangle hypotenuse)
+   ------------------------------------------------------------------------ */
+@keyframes scroll-hypotenuse {
+  0% {
+    transform: translateX(calc(-100% - 10vw));
+    opacity: 0;
+  }
+  3% {
+    opacity: 1;
+  }
+  97% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(100vw + 50vw));
+    opacity: 0;
+  }
+}
