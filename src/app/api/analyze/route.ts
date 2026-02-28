@@ -8,6 +8,7 @@ import {
 import { auth } from "@/lib/auth";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
 import { saveToHistory } from "@/lib/history";
+import { isValidModelId } from "@/lib/validation";
 
 // Handle CORS preflight requests
 export async function OPTIONS() {
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
       return jsonResponse({ error: "Invalid provider specified" }, 400);
     }
 
-    if (!model || typeof model !== "string") {
+    if (!isValidModelId(model)) {
       return jsonResponse({ error: "Invalid model specified" }, 400);
     }
 
