@@ -88,6 +88,7 @@ export async function analyzeSentence(
       allowedTags: ["p", "strong", "em", "ul", "li", "ol", "br", "span"],
       allowedAttributes: {},
     }),
+    grammarPoints: analysis.grammarPoints ?? [],
     words: analysis.words.map((word) => ({
       ...word,
       attachedParticle: word.attachedParticle
