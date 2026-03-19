@@ -220,3 +220,6 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
 };
 
 export const PROVIDERS: ProviderConfig[] = Object.values(PROVIDER_MAP);
+
+export const DEFAULT_PROVIDER: Provider = "anthropic";
+export const DEFAULT_MODEL: string = PROVIDER_MAP[DEFAULT_PROVIDER].defaultModel;

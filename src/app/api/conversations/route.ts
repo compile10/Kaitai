@@ -1,10 +1,9 @@
-import type { Provider } from "@common/types";
 import type { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { generateGreeting } from "@/lib/conversation";
 import { createConversation, listConversations } from "@/lib/conversations";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
-import { isValidModelId } from "@/lib/validation";
+import { resolveSettings } from "@/lib/settings";
 
 export async function OPTIONS() {
   return corsPreflightResponse();
@@ -32,19 +31,15 @@ export async function POST(request: NextRequest) {
       return jsonResponse({ error: "Authentication required" }, 401);
     }
 
-    const { topic, provider, model } = await request.json();
+    const { topic } = await request.json();
 
     if (!topic || typeof topic !== "string") {
       return jsonResponse({ error: "Invalid topic" }, 400);
     }
-    if (!provider || typeof provider !== "string") {
-      return jsonResponse({ error: "Invalid provider" }, 400);
-    }
-    if (!isValidModelId(model)) {
-      return jsonResponse({ error: "Invalid model" }, 400);
-    }
 
-    const greeting = await generateGreeting(topic, provider as Provider, model);
+    const { provider, model } = await resolveSettings(session);
+
+    const greeting = await generateGreeting(topic, provider, model);
 
     const conversation = await createConversation(
       session.user.id,
