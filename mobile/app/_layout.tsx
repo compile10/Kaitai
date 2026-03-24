@@ -5,6 +5,7 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { vars } from "nativewind";
@@ -13,7 +14,8 @@ import { View } from "react-native";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { authClient } from "@/lib/auth-client";
+import { useSettingsQuery } from "@/hooks/use-settings-sync";
+import { queryClient } from "@/lib/query-client";
 
 const { colors } = require("@common/tailwind.config");
 
@@ -42,9 +44,9 @@ function ThemeVars({ children }: { children: ReactNode }) {
   );
 }
 
-/** Triggers session fetch (SecureStore cache + background revalidation) on app start. */
+/** Triggers session fetch and syncs server settings to the local store on login/app start. */
 function SessionPreloader() {
-  authClient.useSession();
+  useSettingsQuery();
   return null;
 }
 
@@ -52,6 +54,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
+    <QueryClientProvider client={queryClient}>
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <ThemeVars>
         <SessionPreloader />
@@ -69,5 +72,6 @@ export default function RootLayout() {
         <StatusBar style="auto" />
       </ThemeVars>
     </ThemeProvider>
+    </QueryClientProvider>
   );
 }

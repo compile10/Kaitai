@@ -17,7 +17,6 @@ import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 import type { SentenceAnalysis } from "@common/types";
 import { buildApiUrl, buildHistoryEntryUrl } from "@/constants/api";
 import { authFetch } from "@/lib/auth-fetch";
-import { useSettingsStore, PROVIDER_MAP } from "@/stores/settings-store";
 
 export default function ResultsScreen() {
   const { sentence, imageUri, imageMimeType, imageFileName, historyId, historyTitle } =
@@ -30,8 +29,6 @@ export default function ResultsScreen() {
       historyTitle?: string;
     }>();
   const { width } = useWindowDimensions();
-
-  const { provider, model, isHydrated } = useSettingsStore();
 
   const [analysis, setAnalysis] = useState<SentenceAnalysis | null>(null);
   const [extractedSentence, setExtractedSentence] = useState<string | null>(
@@ -47,9 +44,6 @@ export default function ResultsScreen() {
   const tintColor = useRawCSSTheme("primary");
 
   const fetchAnalysis = useCallback(async () => {
-    if (!isHydrated) return;
-
-    // History mode: fetch pre-computed analysis by ID
     if (historyId) {
       setIsLoading(true);
       setError(null);
@@ -88,8 +82,6 @@ export default function ResultsScreen() {
           type: imageMimeType || "image/jpeg",
           name: imageFileName || "image.jpg",
         } as unknown as Blob);
-        formData.append("provider", provider);
-        formData.append("model", model);
 
         const response = await authFetch(buildApiUrl("analyzeImage"), {
           method: "POST",
@@ -110,7 +102,7 @@ export default function ResultsScreen() {
         const response = await authFetch(buildApiUrl("analyze"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sentence, provider, model }),
+          body: JSON.stringify({ sentence }),
         });
 
         const data = await response.json();
@@ -126,16 +118,13 @@ export default function ResultsScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [sentence, imageUri, imageMimeType, imageFileName, provider, model, isHydrated, historyId, historyTitle]);
+  }, [sentence, imageUri, imageMimeType, imageFileName, historyId, historyTitle]);
 
   useEffect(() => {
     fetchAnalysis();
   }, [fetchAnalysis]);
 
-  const currentProvider = PROVIDER_MAP[provider];
-  const currentModel = currentProvider?.models.find((m) => m.id === model);
-
-  if (isLoading || !isHydrated) {
+  if (isLoading) {
     return (
       <ThemedView className="flex-1" edges={['left', 'right']}>
         <View className="flex-1 justify-center items-center gap-4">

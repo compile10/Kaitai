@@ -1,3 +1,5 @@
+import debounce from "lodash/debounce";
+import { useEffect, useMemo } from "react";
 import {
   ScrollView,
   Switch,
@@ -9,6 +11,7 @@ import { BottomSheetPicker } from "@/components/bottom-sheet-picker";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
+import { useSettingsMutation } from "@/hooks/use-settings-sync";
 import {
   PROVIDER_MAP,
   type Provider,
@@ -19,6 +22,8 @@ const PROVIDER_OPTIONS = Object.values(PROVIDER_MAP).map((p) => ({
   id: p.id,
   label: p.name,
 }));
+
+const CUSTOM_MODEL_DEBOUNCE_MS = 400;
 
 export default function SettingsScreen() {
   const {
@@ -38,30 +43,61 @@ export default function SettingsScreen() {
 
   const models = PROVIDER_MAP[provider]?.models ?? [];
 
+  const { mutate: syncSettings } = useSettingsMutation();
+
+  const debouncedSync = useMemo(
+    () =>
+      debounce((prov: string, m: string) => {
+        syncSettings({ provider: prov as Provider, model: m });
+      }, CUSTOM_MODEL_DEBOUNCE_MS),
+    [syncSettings],
+  );
+
+  // immediately flushes the debounced sync when the component unmounts
+  // this ensures any pending sync is completed when the user navigates away
+  useEffect(() => () => debouncedSync.flush(), [debouncedSync]);
+
   const handleProviderChange = (id: string) => {
+    debouncedSync.cancel();
     setProvider(id as Provider);
+    const newDefault = PROVIDER_MAP[id as Provider]?.defaultModel ?? "";
+    syncSettings({ provider: id as Provider, model: newDefault });
+  };
+
+  const handlePresetModelChange = (newModel: string) => {
+    debouncedSync.cancel();
+    setModel(newModel);
+    syncSettings({ provider, model: newModel });
+  };
+
+  const handleCustomModelTextChange = (newModel: string) => {
+    setModel(newModel);
+    debouncedSync(provider, newModel);
   };
 
   const handleUseCustomModelChange = (value: boolean) => {
     setUseCustomModel(value);
     if (!value) {
+      debouncedSync.cancel();
       const isPreset = models.some((m) => m.id === model);
       if (!isPreset) {
-        setModel(PROVIDER_MAP[provider]?.defaultModel ?? "");
+        const defaultModel = PROVIDER_MAP[provider]?.defaultModel ?? "";
+        setModel(defaultModel);
+        syncSettings({ provider, model: defaultModel });
       }
     }
   };
 
   if (!isHydrated) {
     return (
-      <ThemedView className="flex-1" edges={['left', 'right']}>
+      <ThemedView className="flex-1" edges={["left", "right"]}>
         <ThemedText>Loading settings...</ThemedText>
       </ThemedView>
     );
   }
 
   return (
-    <ThemedView className="flex-1" edges={['left', 'right']}>
+    <ThemedView className="flex-1" edges={["left", "right"]}>
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
         <View className="mb-6 mt-5">
           <ThemedText type="subtitle" className="mb-2">
@@ -102,7 +138,7 @@ export default function SettingsScreen() {
             </ThemedText>
             <TextInput
               value={model}
-              onChangeText={setModel}
+              onChangeText={handleCustomModelTextChange}
               placeholder="e.g., claude-opus-4-5-20251101"
               placeholderTextColor="#9ca3af"
               className="p-4 rounded-xl border-2 border-border bg-card text-base text-foreground"
@@ -114,7 +150,7 @@ export default function SettingsScreen() {
               Select Model
             </ThemedText>
             <ThemedText className="text-sm opacity-70 mb-4">
-              Choose which model to use. Your preference will be saved locally.
+              Choose which model to use for sentence analysis.
             </ThemedText>
 
             <View className="gap-3">
@@ -126,7 +162,7 @@ export default function SettingsScreen() {
                       ? "bg-gray-100 dark:bg-gray-800 border-primary"
                       : "bg-transparent border-border"
                   }`}
-                  onPress={() => setModel(m.id)}
+                  onPress={() => handlePresetModelChange(m.id)}
                 >
                   <View className="flex-row items-center mb-2">
                     <View className="w-5 h-5 rounded-full border-2 border-gray-400 items-center justify-center">

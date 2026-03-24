@@ -1,5 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
+import { SETTINGS_KEY } from "@/hooks/use-settings-sync";
 import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -10,9 +12,11 @@ export default function MoreScreen() {
   const { data: session, isPending } = authClient.useSession();
   const tintColor = useRawCSSTheme("primary");
   const iconColor = useRawCSSTheme("muted-foreground");
+  const queryClient = useQueryClient();
 
   const handleSignOut = async () => {
     await authClient.signOut();
+    queryClient.removeQueries({ queryKey: SETTINGS_KEY });
   };
 
   if (isPending) {
@@ -123,17 +127,6 @@ export default function MoreScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Settings shortcut even when not logged in */}
-      <TouchableOpacity
-        className="flex-row items-center mt-10"
-        onPress={() => router.push("/settings")}
-        activeOpacity={0.6}
-      >
-        <Ionicons name="settings-outline" size={18} color={iconColor} />
-        <ThemedText className="ml-2 text-sm opacity-70">
-          AI Provider Settings
-        </ThemedText>
-      </TouchableOpacity>
     </ThemedView>
   );
 }
