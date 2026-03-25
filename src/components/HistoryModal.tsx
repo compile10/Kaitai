@@ -88,6 +88,7 @@ export default function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
 
   const handleSelect = (entry: HistoryEntry) => {
     onClose();
+    sessionStorage.setItem("kaitai-internal-nav", "1");
     router.push(`/analyze/${encodeURIComponent(entry.sentence)}`);
   };
 

@@ -11,6 +11,14 @@ export default function AnalysisContent({ sentence }: { sentence: string }) {
   const [analysis, setAnalysis] = useState<SentenceAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showBackButton, setShowBackButton] = useState(false);
+
+  useEffect(() => {
+    if (sessionStorage.getItem("kaitai-internal-nav")) {
+      setShowBackButton(true);
+      sessionStorage.removeItem("kaitai-internal-nav");
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,13 +47,15 @@ export default function AnalysisContent({ sentence }: { sentence: string }) {
   return (
     <>
       {/* Back link */}
-      <button
-        type="button"
-        onClick={() => router.back()}
-        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        &larr; Go back
-      </button>
+      {showBackButton && (
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          &larr; Go back
+        </button>
+      )}
 
       {/* Sentence heading */}
       <h1 className="text-2xl font-bold text-foreground" lang="ja">
