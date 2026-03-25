@@ -1,45 +1,29 @@
 "use client";
 
-import { analyzeImage, analyzeSentence } from "@common/api";
-import type { SentenceAnalysis } from "@common/types";
+import { analyzeImage } from "@common/api";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ImageUploadModal from "@/components/ImageUploadModal";
 import SentenceInput from "@/components/SentenceInput";
-import SentenceVisualization from "@/components/SentenceVisualization";
 
 export default function HomeContent() {
-  const [analysis, setAnalysis] = useState<SentenceAnalysis | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isImageLoading, setIsImageLoading] = useState(false);
-  const [extractedSentence, setExtractedSentence] = useState<string>();
 
-  const handleAnalyze = async (sentence: string) => {
-    setIsLoading(true);
-    setError(null);
-    setAnalysis(null);
-
-    try {
-      const data = await analyzeSentence("/api/analyze", sentence);
-      setAnalysis(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setIsLoading(false);
-    }
+  const handleAnalyze = (sentence: string) => {
+    router.push(`/analyze/${encodeURIComponent(sentence)}`);
   };
 
   const handleImageAnalyze = async (file: File) => {
     setIsImageLoading(true);
     setError(null);
-    setAnalysis(null);
 
     try {
       const data = await analyzeImage("/api/analyze-image", file);
-      setAnalysis(data.analysis);
-      setExtractedSentence(data.sentence);
       setIsImageModalOpen(false);
+      router.push(`/analyze/${encodeURIComponent(data.sentence)}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to analyze image");
     } finally {
@@ -53,8 +37,7 @@ export default function HomeContent() {
       <SentenceInput
         onAnalyze={handleAnalyze}
         onImageClick={() => setIsImageModalOpen(true)}
-        isLoading={isLoading || isImageLoading}
-        externalSentence={extractedSentence}
+        isLoading={isImageLoading}
       />
 
       {/* Error Message */}
@@ -67,24 +50,15 @@ export default function HomeContent() {
       )}
 
       {/* Loading State */}
-      {(isLoading || isImageLoading) && (
+      {isImageLoading && (
         <div className="flex items-center space-x-2">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-          <p className="text-muted-foreground">
-            {isImageLoading
-              ? "Extracting text from image and analyzing..."
-              : "Analyzing sentence..."}
-          </p>
+          <p className="text-muted-foreground">Extracting text from image...</p>
         </div>
       )}
 
-      {/* Analysis Results */}
-      {analysis && !isLoading && !isImageLoading && (
-        <SentenceVisualization analysis={analysis} />
-      )}
-
       {/* Instructions */}
-      {!analysis && !isLoading && !isImageLoading && !error && (
+      {!isImageLoading && !error && (
         <div className="w-full max-w-2xl bg-card p-6 shadow-lg">
           <h3 className="text-lg font-semibold mb-3 text-card-foreground">
             How it works
