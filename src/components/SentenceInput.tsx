@@ -64,7 +64,7 @@ export default function SentenceInput({
           <button
             type="submit"
             disabled={isLoading || !sentence.trim()}
-            className="flex-1 px-6 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 px-6 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {isLoading ? "Analyzing..." : "Analyze Sentence"}
           </button>
