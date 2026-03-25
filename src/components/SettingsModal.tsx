@@ -4,6 +4,7 @@ import { PROVIDERS } from "@common/providers";
 import type { Provider } from "@common/types";
 import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
+import { authClient } from "@/lib/auth-client";
 import {
   useIsHydrated,
   useSettingsStore,
@@ -31,9 +32,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     if (isOpen && isHydrated) {
       setDraftProvider(provider);
       setDraftModel(model);
+      setSaveError(null);
 
-      // Check if current model is custom (not in preset list)
-      const providerConfig = PROVIDERS.find((p) => p.id === provider);
+    const providerConfig = PROVIDERS.find((p) => p.id === provider);
       const isPreset = providerConfig?.models.some((m) => m.id === model);
       setUseCustomModel(!isPreset);
     }
@@ -64,7 +65,34 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     }
   };
 
-  const handleSave = () => {
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const { data: session } = authClient.useSession();
+
+  const handleSave = async () => {
+    setSaveError(null);
+
+    if (session) {
+      setIsSaving(true);
+      try {
+        const res = await fetch("/api/settings", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ provider: draftProvider, model: draftModel }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          setSaveError(data.error || "Failed to save settings");
+          return;
+        }
+      } catch {
+        setSaveError("Failed to save settings");
+        return;
+      } finally {
+        setIsSaving(false);
+      }
+    }
+
     setProvider(draftProvider);
     setModel(draftModel);
     onClose();
@@ -88,7 +116,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         <div className="bg-primary px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Settings className="w-6 h-6 text-primary-foreground" />
-            <div className="text-xl font-semibold text-primary-foreground">Settings</div>
+            <div className="text-xl font-semibold text-primary-foreground">
+              Settings
+            </div>
           </div>
           <button
             onClick={onClose}
@@ -105,9 +135,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             <div className="flex items-center justify-center py-12">
               <div className="flex flex-col items-center gap-4">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
-                <p className="text-card-foreground/70">
-                  Loading settings...
-                </p>
+                <p className="text-card-foreground/70">Loading settings...</p>
               </div>
             </div>
           ) : (
@@ -187,8 +215,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     Select Model
                   </h3>
                   <p className="text-sm text-card-foreground/70 mb-4">
-                    Choose which model to use. Your preference will be saved
-                    locally.
+                    Choose which model to use for sentence analysis.
                   </p>
 
                   <div className="space-y-3">
@@ -239,19 +266,30 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="bg-card-foreground/5 px-6 py-4 flex justify-end gap-3 border-t border-card-foreground/20">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-card-foreground hover:bg-card-foreground/10 rounded-lg transition-colors font-medium"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors font-medium"
-          >
-            Save
-          </button>
+        <div className="bg-card-foreground/5 px-6 py-4 flex items-center gap-3 border-t border-card-foreground/20">
+          {saveError && (
+            <p className="text-sm text-red-600 dark:text-red-400 flex-1">
+              {saveError}
+            </p>
+          )}
+          <div className="flex gap-3 ml-auto">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSaving}
+              className="px-4 py-2 text-card-foreground hover:bg-card-foreground/10 rounded-lg transition-colors font-medium disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving}
+              className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors font-medium disabled:opacity-50"
+            >
+              {isSaving ? "Saving..." : "Save"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

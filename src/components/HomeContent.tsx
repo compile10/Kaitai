@@ -1,27 +1,19 @@
 "use client";
 
 import { analyzeImage, analyzeSentence } from "@common/api";
-import { PROVIDERS } from "@common/providers";
 import type { SentenceAnalysis } from "@common/types";
 import { useState } from "react";
 import ImageUploadModal from "@/components/ImageUploadModal";
 import SentenceInput from "@/components/SentenceInput";
 import SentenceVisualization from "@/components/SentenceVisualization";
-import SettingsModal from "@/components/SettingsModal";
-import { useSettingsStore } from "@/providers/settings-store-provider";
 
 export default function HomeContent() {
   const [analysis, setAnalysis] = useState<SentenceAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [extractedSentence, setExtractedSentence] = useState<string>();
-  const provider = useSettingsStore((s) => s.provider);
-  const model = useSettingsStore((s) => s.model);
-
-  const currentProvider = PROVIDERS.find((p) => p.id === provider);
 
   const handleAnalyze = async (sentence: string) => {
     setIsLoading(true);
@@ -29,13 +21,7 @@ export default function HomeContent() {
     setAnalysis(null);
 
     try {
-      const data = await analyzeSentence(
-        "/api/analyze",
-        sentence,
-        provider,
-        model,
-      );
-      console.log("Analysis received:", JSON.stringify(data, null, 2));
+      const data = await analyzeSentence("/api/analyze", sentence);
       setAnalysis(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -50,20 +36,12 @@ export default function HomeContent() {
     setAnalysis(null);
 
     try {
-      const data = await analyzeImage(
-        "/api/analyze-image",
-        file,
-        provider,
-        model,
-      );
-      console.log("Image analysis received:", JSON.stringify(data, null, 2));
+      const data = await analyzeImage("/api/analyze-image", file);
       setAnalysis(data.analysis);
       setExtractedSentence(data.sentence);
       setIsImageModalOpen(false);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to analyze image",
-      );
+      setError(err instanceof Error ? err.message : "Failed to analyze image");
     } finally {
       setIsImageLoading(false);
     }
@@ -95,7 +73,7 @@ export default function HomeContent() {
           <p className="text-muted-foreground">
             {isImageLoading
               ? "Extracting text from image and analyzing..."
-              : `Analyzing with ${currentProvider?.models.find((m) => m.id === model)?.name || model}...`}
+              : "Analyzing sentence..."}
           </p>
         </div>
       )}
@@ -114,9 +92,7 @@ export default function HomeContent() {
           <ul className="space-y-2 text-card-foreground/70">
             <li className="flex items-start">
               <span className="mr-2">1.</span>
-              <span>
-                Enter a Japanese sentence in the input field above
-              </span>
+              <span>Enter a Japanese sentence in the input field above</span>
             </li>
             <li className="flex items-start">
               <span className="mr-2">2.</span>
@@ -140,12 +116,6 @@ export default function HomeContent() {
           </ul>
         </div>
       )}
-
-      {/* Settings Modal */}
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-      />
 
       {/* Image Upload Modal */}
       <ImageUploadModal
