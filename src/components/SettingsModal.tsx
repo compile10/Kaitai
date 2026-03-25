@@ -4,6 +4,7 @@ import { PROVIDERS } from "@common/providers";
 import type { Provider } from "@common/types";
 import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSettingsMutation } from "@/hooks/use-settings-query";
 import { authClient } from "@/lib/auth-client";
 import {
   useIsHydrated,
@@ -21,6 +22,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const setProvider = useSettingsStore((s) => s.setProvider);
   const setModel = useSettingsStore((s) => s.setModel);
   const isHydrated = useIsHydrated();
+  const settingsMutation = useSettingsMutation();
 
   // Local draft state - initialized when modal opens
   const [draftProvider, setDraftProvider] = useState<Provider>(provider);
@@ -28,17 +30,18 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [useCustomModel, setUseCustomModel] = useState(false);
 
   // Initialize draft state when modal opens
+  const resetMutation = settingsMutation.reset;
   useEffect(() => {
     if (isOpen && isHydrated) {
       setDraftProvider(provider);
       setDraftModel(model);
-      setSaveError(null);
+      resetMutation();
 
-    const providerConfig = PROVIDERS.find((p) => p.id === provider);
+      const providerConfig = PROVIDERS.find((p) => p.id === provider);
       const isPreset = providerConfig?.models.some((m) => m.id === model);
       setUseCustomModel(!isPreset);
     }
-  }, [isOpen, isHydrated, provider, model]);
+  }, [isOpen, isHydrated, provider, model, resetMutation]);
 
   // Handle keyboard and scroll lock
   useEffect(() => {
@@ -65,38 +68,24 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     }
   };
 
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const { data: session } = authClient.useSession();
-
   const handleSave = async () => {
-    setSaveError(null);
-
-    if (session) {
-      setIsSaving(true);
-      try {
-        const res = await fetch("/api/settings", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ provider: draftProvider, model: draftModel }),
-        });
-        if (!res.ok) {
-          const data = await res.json();
-          setSaveError(data.error || "Failed to save settings");
-          return;
-        }
-      } catch {
-        setSaveError("Failed to save settings");
-        return;
-      } finally {
-        setIsSaving(false);
-      }
+    resetMutation(); // allow the user to re-attempt the mutation
+    try {
+      await settingsMutation.mutateAsync({
+        provider: draftProvider,
+        model: draftModel,
+      });
+    } catch {
+      return;
     }
 
     setProvider(draftProvider);
     setModel(draftModel);
     onClose();
   };
+
+  const isSaving = settingsMutation.isPending;
+  const saveError = settingsMutation.error?.message ?? null;
 
   if (!isOpen) return null;
 

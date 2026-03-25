@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Rampart_One } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { QueryClientProvider } from "@/providers/query-client-provider";
 import { SettingsStoreProvider } from "@/providers/settings-store-provider";
 import "./globals.css";
 
@@ -37,7 +38,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${rampartOne.variable} antialiased`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <SettingsStoreProvider>{children}</SettingsStoreProvider>
+          <QueryClientProvider>
+            <SettingsStoreProvider>{children}</SettingsStoreProvider>
+          </QueryClientProvider>
         </ThemeProvider>
       </body>
     </html>
