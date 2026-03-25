@@ -39,13 +39,7 @@ export async function POST(request: NextRequest) {
 
     if (session) {
       try {
-        await saveToHistory(
-          session.user.id,
-          sentence,
-          provider,
-          model,
-          analysis,
-        );
+        await saveToHistory(session.user.id, sentence, provider, model);
       } catch (e) {
         console.error("Failed to save history:", e);
       }

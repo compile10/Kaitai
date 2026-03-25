@@ -1,4 +1,3 @@
-import type { SentenceAnalysis } from "@common/types";
 import type { Document } from "mongodb";
 import { ObjectId } from "mongodb";
 import mongoClient from "@/lib/db";
@@ -10,7 +9,6 @@ export interface HistoryDocument {
   sentence: string;
   provider: string;
   model: string;
-  analysis: SentenceAnalysis;
   createdAt: Date;
 }
 
@@ -29,7 +27,7 @@ historyCollection.createIndex(
 );
 
 /**
- * Save a completed sentence analysis to the user's history.
+ * Save a sentence to the user's history.
  *
  * Uses upsert on { userId, sentence } so re-analyzing the same sentence
  * updates the existing entry (with fresh timestamp) instead of creating
@@ -42,12 +40,11 @@ export async function saveToHistory(
   sentence: string,
   provider: string,
   model: string,
-  analysis: SentenceAnalysis,
 ): Promise<void> {
   await historyCollection.updateOne(
     { userId, sentence },
     {
-      $set: { provider, model, analysis, createdAt: new Date() },
+      $set: { provider, model, createdAt: new Date() },
       $setOnInsert: { _id: new ObjectId(), userId, sentence },
     },
     { upsert: true },
