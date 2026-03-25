@@ -2,13 +2,15 @@
 
 import {
   CircleUser,
+  History as HistoryIcon,
   LogOut as LogOutIcon,
   Settings as SettingsIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { DropdownMenu } from "radix-ui";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { DropdownMenu } from "radix-ui";
+import HistoryModal from "@/components/HistoryModal";
 import SettingsModal from "@/components/SettingsModal";
 import { authClient } from "@/lib/auth-client";
 
@@ -20,6 +22,7 @@ interface UserMenuProps {
 export default function UserMenu({ name, email }: UserMenuProps) {
   const router = useRouter();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -51,6 +54,14 @@ export default function UserMenu({ name, email }: UserMenuProps) {
             className="z-50 min-w-40 rounded-lg border border-border bg-card p-1 shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 duration-150"
           >
             <DropdownMenu.Item
+              onSelect={() => setIsHistoryOpen(true)}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-card-foreground rounded-md cursor-pointer outline-none hover:bg-muted transition-colors"
+            >
+              <HistoryIcon className="w-4 h-4" />
+              History
+            </DropdownMenu.Item>
+
+            <DropdownMenu.Item
               onSelect={() => setIsSettingsOpen(true)}
               className="flex items-center gap-2 px-3 py-2 text-sm text-card-foreground rounded-md cursor-pointer outline-none hover:bg-muted transition-colors"
             >
@@ -73,10 +84,16 @@ export default function UserMenu({ name, email }: UserMenuProps) {
 
       {mounted &&
         createPortal(
-          <SettingsModal
-            isOpen={isSettingsOpen}
-            onClose={() => setIsSettingsOpen(false)}
-          />,
+          <>
+            <HistoryModal
+              isOpen={isHistoryOpen}
+              onClose={() => setIsHistoryOpen(false)}
+            />
+            <SettingsModal
+              isOpen={isSettingsOpen}
+              onClose={() => setIsSettingsOpen(false)}
+            />
+          </>,
           document.body,
         )}
     </>

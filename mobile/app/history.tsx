@@ -13,7 +13,7 @@ import { ThemedView } from "@/components/themed-view";
 import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 import { buildApiUrl } from "@/constants/api";
 import { authFetch } from "@/lib/auth-fetch";
-import { formatRelativeTime } from "@/lib/format";
+import { formatRelativeTime } from "@common/format";
 import { useSettingsStore, PROVIDER_MAP } from "@/stores/settings-store";
 import type { HistoryEntry, PaginatedHistory } from "@common/types";
 
