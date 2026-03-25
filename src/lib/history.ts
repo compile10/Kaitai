@@ -18,17 +18,24 @@ export const historyCollection = mongoClient
   .db()
   .collection<HistoryDocument & Document>("history");
 
-// Ensure compound index exists (idempotent — no-op if already created)
+// Ensure compound indexes exist (idempotent — no-op if already created)
 historyCollection.createIndex(
   { userId: 1, createdAt: -1 },
   { background: true },
+);
+historyCollection.createIndex(
+  { userId: 1, sentence: 1 },
+  { background: true, unique: true },
 );
 
 /**
  * Save a completed sentence analysis to the user's history.
  *
- * This is the single shared function called by both `/api/analyze` and
- * `/api/analyze-image` after a successful analysis.
+ * Uses upsert on { userId, sentence } so re-analyzing the same sentence
+ * updates the existing entry (with fresh timestamp) instead of creating
+ * a duplicate. This brings it to the top of the history list.
+ *
+ * Called by both `/api/analyze` and `/api/analyze-image`.
  */
 export async function saveToHistory(
   userId: string,
@@ -37,13 +44,12 @@ export async function saveToHistory(
   model: string,
   analysis: SentenceAnalysis,
 ): Promise<void> {
-  await historyCollection.insertOne({
-    _id: new ObjectId(),
-    userId,
-    sentence,
-    provider,
-    model,
-    analysis,
-    createdAt: new Date(),
-  });
+  await historyCollection.updateOne(
+    { userId, sentence },
+    {
+      $set: { provider, model, analysis, createdAt: new Date() },
+      $setOnInsert: { _id: new ObjectId(), userId, sentence },
+    },
+    { upsert: true },
+  );
 }

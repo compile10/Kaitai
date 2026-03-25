@@ -92,8 +92,7 @@ export default function HistoryScreen() {
     router.push({
       pathname: "/results",
       params: {
-        historyId: entry.id,
-        historyTitle: entry.sentence,
+        sentence: entry.sentence,
       },
     });
   };

@@ -15,18 +15,16 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 import type { SentenceAnalysis } from "@common/types";
-import { buildApiUrl, buildHistoryEntryUrl } from "@/constants/api";
+import { buildApiUrl } from "@/constants/api";
 import { authFetch } from "@/lib/auth-fetch";
 
 export default function ResultsScreen() {
-  const { sentence, imageUri, imageMimeType, imageFileName, historyId, historyTitle } =
+  const { sentence, imageUri, imageMimeType, imageFileName } =
     useLocalSearchParams<{
       sentence?: string;
       imageUri?: string;
       imageMimeType?: string;
       imageFileName?: string;
-      historyId?: string;
-      historyTitle?: string;
     }>();
   const { width } = useWindowDimensions();
 
@@ -38,35 +36,11 @@ export default function ResultsScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const isImageMode = Boolean(imageUri);
-  const isHistoryMode = Boolean(historyId);
 
   const textColor = useRawCSSTheme("foreground");
   const tintColor = useRawCSSTheme("primary");
 
   const fetchAnalysis = useCallback(async () => {
-    if (historyId) {
-      setIsLoading(true);
-      setError(null);
-      setAnalysis(null);
-      setExtractedSentence(historyTitle || null);
-
-      try {
-        const res = await authFetch(buildHistoryEntryUrl(historyId));
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || "Failed to load history entry");
-        }
-
-        setAnalysis(data.analysis);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        setIsLoading(false);
-      }
-      return;
-    }
-
     if (!imageUri && !sentence) return;
 
     setIsLoading(true);
@@ -118,7 +92,7 @@ export default function ResultsScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [sentence, imageUri, imageMimeType, imageFileName, historyId, historyTitle]);
+  }, [sentence, imageUri, imageMimeType, imageFileName]);
 
   useEffect(() => {
     fetchAnalysis();
@@ -130,11 +104,9 @@ export default function ResultsScreen() {
         <View className="flex-1 justify-center items-center gap-4">
           <ActivityIndicator size="large" color={tintColor} />
           <ThemedText className="opacity-70">
-            {isHistoryMode
-              ? "Loading analysis..."
-              : isImageMode
-                ? "Reading your sentence from your photo..."
-                : "Breaking down your sentence..."}
+            {isImageMode
+              ? "Reading your sentence from your photo..."
+              : "Breaking down your sentence..."}
           </ThemedText>
         </View>
       </ThemedView>
