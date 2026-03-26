@@ -1,4 +1,3 @@
-# Kaitai (解体) — Japanese Sentence Analyzer
 <img width="1622" height="959" alt="localhost_3000_" src="https://github.com/user-attachments/assets/c158d1ce-ee94-41f4-a4e3-ecb54d22c538" />
 
 AI-powered Japanese sentence breakdown and visualization. Available as a **Next.js web app** and a **React Native (Expo) mobile app**.
