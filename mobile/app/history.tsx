@@ -49,14 +49,13 @@ export default function HistoryScreen() {
       try {
         const url = `${buildApiUrl("history")}?page=${pageNum}&limit=${PAGE_SIZE}`;
         const res = await authFetch(url);
-        const data: PaginatedHistory = await res.json();
 
         if (!res.ok) {
-          throw new Error(
-            (data as unknown as { error: string }).error ||
-              "Failed to fetch history",
-          );
+          const data: { error: string } = await res.json();
+          throw new Error(data.error);
         }
+
+        const data: PaginatedHistory = await res.json();
 
         setItems((prev) => (replace ? data.items : [...prev, ...data.items]));
         setPage(data.page);
