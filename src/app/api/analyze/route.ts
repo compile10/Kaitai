@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
 import { saveToHistory } from "@/lib/history";
 import { resolveSettings } from "@/lib/settings";
+import { sanitizeForLLM } from "@/lib/validation";
 
 export async function OPTIONS() {
   return corsPreflightResponse();
@@ -25,13 +26,16 @@ export async function POST(request: NextRequest) {
       return jsonResponse({ error: "Invalid sentence provided" }, 400);
     }
 
+    const sanitizedSentence = sanitizeForLLM(sentence);
+
     const { provider, model } = await resolveSettings(session);
 
-    const cacheKey = `${provider}:${model}:${sentence}`;
+    const cacheKey = `${provider}:${model}:${sanitizedSentence}`;
     const cachedResponse = getCachedResponse(cacheKey);
 
     const analysis =
-      cachedResponse ?? (await analyzeSentence(sentence, provider, model));
+      cachedResponse ??
+      (await analyzeSentence(sanitizedSentence, provider, model));
 
     if (!cachedResponse) {
       setCachedResponse(cacheKey, analysis);
@@ -39,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     if (session) {
       try {
-        await saveToHistory(session.user.id, sentence, provider, model);
+        await saveToHistory(session.user.id, sanitizedSentence, provider, model);
       } catch (e) {
         console.error("Failed to save history:", e);
       }

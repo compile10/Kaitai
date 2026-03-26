@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
 import { saveToHistory } from "@/lib/history";
 import { resolveSettings } from "@/lib/settings";
+import { sanitizeForLLM } from "@/lib/validation";
 
 export async function OPTIONS() {
   return corsPreflightResponse();
@@ -96,7 +97,9 @@ export async function POST(request: Request) {
 
     let sentence: string;
     try {
-      sentence = await extractSentenceFromImage(base64Data, imageFile.type);
+      sentence = sanitizeForLLM(
+        await extractSentenceFromImage(base64Data, imageFile.type),
+      );
     } catch (error) {
       console.error("Error extracting text from image:", error);
       return jsonResponse(

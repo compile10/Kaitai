@@ -4,6 +4,7 @@ import { generateGreeting } from "@/lib/conversation";
 import { createConversation, listConversations } from "@/lib/conversations";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
 import { resolveSettings } from "@/lib/settings";
+import { sanitizeForLLM } from "@/lib/validation";
 
 export async function OPTIONS() {
   return corsPreflightResponse();
@@ -37,13 +38,15 @@ export async function POST(request: NextRequest) {
       return jsonResponse({ error: "Invalid topic" }, 400);
     }
 
+    const sanitizedTopic = sanitizeForLLM(topic);
+
     const { provider, model } = await resolveSettings(session);
 
-    const greeting = await generateGreeting(topic, provider, model);
+    const greeting = await generateGreeting(sanitizedTopic, provider, model);
 
     const conversation = await createConversation(
       session.user.id,
-      topic,
+      sanitizedTopic,
       provider,
       model,
       {

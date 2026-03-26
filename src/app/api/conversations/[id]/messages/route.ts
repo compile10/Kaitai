@@ -8,6 +8,7 @@ import {
   getConversation,
 } from "@/lib/conversations";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
+import { sanitizeForLLM } from "@/lib/validation";
 
 export async function OPTIONS() {
   return corsPreflightResponse();
@@ -39,16 +40,18 @@ export async function POST(
       return jsonResponse({ error: "Invalid message" }, 400);
     }
 
+    const sanitizedMessage = sanitizeForLLM(message);
+
     const userMessage: ConversationMessage = {
       role: "user",
-      content: message,
+      content: sanitizedMessage,
       timestamp: new Date().toISOString(),
     };
 
     const reply = await conversationReply(
       conversation.topic,
       conversation.messages,
-      message,
+      sanitizedMessage,
       conversation.provider as Provider,
       conversation.model,
     );
