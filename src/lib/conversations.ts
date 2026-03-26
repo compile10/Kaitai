@@ -24,10 +24,11 @@ export const conversationsCollection = mongoClient
   .db()
   .collection<ConversationDocument & Document>("conversations");
 
-// Ensure index exists once per process (globalThis guard prevents re-runs on HMR)
-if (!((globalThis as Record<symbol, boolean>)[Symbol.for("kaitai.conversations.indexes")])) {
-  (globalThis as Record<symbol, boolean>)[Symbol.for("kaitai.conversations.indexes")] = true;
-  void conversationsCollection.createIndex({ userId: 1, updatedAt: -1 }, { background: true });
+// Ensure index exists once per process (HMR-safe)
+// biome-ignore lint/suspicious/noExplicitAny: globalThis augmentation without declaration merging
+if (!(globalThis as any)["kaitai.conversations.indexes"]) {
+  (globalThis as any)["kaitai.conversations.indexes"] = true;
+  void conversationsCollection.createIndex({ userId: 1, updatedAt: -1 });
 }
 
 function toConversationResponse(doc: ConversationDocument) {

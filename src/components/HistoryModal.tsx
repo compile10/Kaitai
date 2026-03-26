@@ -6,6 +6,7 @@ import { Clock as ClockIcon, History } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Virtuoso } from "react-virtuoso";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 interface HistoryModalProps {
   isOpen: boolean;
@@ -60,23 +61,6 @@ export default function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
     fetchHistory(1, true).finally(() => setIsLoading(false));
   }, [isOpen, fetchHistory]);
 
-  // Keyboard and scroll lock
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen, onClose]);
-
   const handleLoadMore = useCallback(async () => {
     if (loadingMoreRef.current || page >= totalPages) return;
     loadingMoreRef.current = true;
@@ -92,17 +76,19 @@ export default function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
     router.push(`/analyze/${encodeURIComponent(entry.sentence)}`);
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-      onClick={onClose}
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      <div
-        className="bg-card text-card-foreground rounded-lg shadow-2xl max-w-lg w-full mx-4 h-[80vh] overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
+      <DialogContent
+        showCloseButton={false}
+        className="overflow-hidden p-0 sm:max-w-lg bg-card text-card-foreground border-border h-[80vh] flex flex-col"
       >
+        <DialogTitle className="sr-only">History</DialogTitle>
+
         {/* Header */}
         <div className="bg-primary px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -192,7 +178,7 @@ export default function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
             />
           )}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

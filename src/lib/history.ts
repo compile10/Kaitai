@@ -16,14 +16,12 @@ export const historyCollection = mongoClient
   .db()
   .collection<HistoryDocument & Document>("history");
 
-// Ensure compound indexes exist once per process (globalThis guard prevents re-runs on HMR)
-if (!((globalThis as Record<symbol, boolean>)[Symbol.for("kaitai.history.indexes")])) {
-  (globalThis as Record<symbol, boolean>)[Symbol.for("kaitai.history.indexes")] = true;
-  void historyCollection.createIndex({ userId: 1, createdAt: -1 }, { background: true });
-  void historyCollection.createIndex(
-    { userId: 1, sentence: 1 },
-    { background: true, unique: true },
-  );
+// Ensure compound indexes exist once per process (HMR-safe)
+// biome-ignore lint/suspicious/noExplicitAny: globalThis augmentation without declaration merging
+if (!(globalThis as any)["kaitai.history.indexes"]) {
+  (globalThis as any)["kaitai.history.indexes"] = true;
+  void historyCollection.createIndex({ userId: 1, createdAt: -1 });
+  void historyCollection.createIndex({ userId: 1, sentence: 1 }, { unique: true });
 }
 
 /**

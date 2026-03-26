@@ -62,7 +62,6 @@ export async function POST(
       timestamp: new Date().toISOString(),
     };
 
-
     await appendMessages(id, session.user.id, [userMessage, assistantMessage]);
 
     if (reply.isConversationComplete) {
