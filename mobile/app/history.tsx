@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -37,6 +37,8 @@ export default function HistoryScreen() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const loadingMoreRef = useRef(false);
 
   const expertMode = useSettingsStore((s) => s.expertMode);
   const tintColor = useRawCSSTheme("primary");
@@ -82,11 +84,13 @@ export default function HistoryScreen() {
 
   // Load more (infinite scroll)
   const handleLoadMore = useCallback(async () => {
-    if (isLoadingMore || page >= totalPages) return;
+    if (loadingMoreRef.current || page >= totalPages) return;
+    loadingMoreRef.current = true;
     setIsLoadingMore(true);
     await fetchHistory(page + 1, false);
     setIsLoadingMore(false);
-  }, [isLoadingMore, page, totalPages, fetchHistory]);
+    loadingMoreRef.current = false;
+  }, [page, totalPages, fetchHistory]);
 
   const handlePress = (entry: HistoryEntry) => {
     router.push({
