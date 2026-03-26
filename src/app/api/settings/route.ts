@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });
     if (!session) {
-      return jsonResponse({ defaults: serverDefaults });
+      return jsonResponse({ ...serverDefaults, defaults: serverDefaults });
     }
 
     const settings = await getUserSettings(session.user.id);
