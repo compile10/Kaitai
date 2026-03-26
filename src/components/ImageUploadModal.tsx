@@ -143,12 +143,12 @@ export default function ImageUploadModal({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border-0 shadow-2xl bg-white dark:bg-gray-800"
+        className="max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border-0 shadow-2xl bg-card"
       >
-        <DialogHeader className="bg-tint dark:bg-tintDark px-6 py-4 flex flex-row items-center justify-between space-y-0 rounded-t-lg">
+        <DialogHeader className="bg-primary px-6 py-4 flex flex-row items-center justify-between space-y-0 rounded-t-lg">
           <div className="flex items-center gap-3">
-            <ImagePlus className="w-6 h-6 text-white" />
-            <DialogTitle className="text-xl font-semibold text-white">
+            <ImagePlus className="w-6 h-6 text-primary-foreground" />
+            <DialogTitle className="text-xl font-semibold text-primary-foreground">
               Analyze Image
             </DialogTitle>
           </div>
@@ -156,7 +156,7 @@ export default function ImageUploadModal({
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="w-8 h-8 flex items-center justify-center rounded-full text-white hover:bg-white/20 transition-colors text-2xl font-bold leading-none disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-8 h-8 flex items-center justify-center rounded-full text-primary-foreground hover:bg-white/20 transition-colors text-2xl font-bold leading-none disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Close"
           >
             ×
@@ -164,7 +164,7 @@ export default function ImageUploadModal({
         </DialogHeader>
 
         <div className="p-6 overflow-y-auto flex-1">
-          <DialogDescription className="text-gray-600 dark:text-gray-400 mb-4">
+          <DialogDescription className="text-muted-foreground mb-4">
             Upload an image containing Japanese text. The text will be extracted
             and analyzed automatically.
           </DialogDescription>
@@ -177,7 +177,7 @@ export default function ImageUploadModal({
 
           {file ? (
             <div className="space-y-4">
-              <div className="relative rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 p-3">
+              <div className="relative rounded-lg overflow-hidden border border-border bg-muted p-3">
                 {preview && (
                   // biome-ignore lint/performance/noImgElement: blob URL preview cannot use next/image optimization
                   <img
@@ -190,10 +190,10 @@ export default function ImageUploadModal({
 
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                  <p className="text-sm font-medium text-foreground truncate">
                     {file.name}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-muted-foreground">
                     {formatFileSize(file.size)}
                   </p>
                 </div>
@@ -203,7 +203,7 @@ export default function ImageUploadModal({
                   size="sm"
                   onClick={handleRemove}
                   disabled={isLoading}
-                  className="ml-4 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  className="ml-4 text-destructive hover:bg-destructive/10"
                 >
                   <Trash2 className="w-4 h-4 mr-1.5" />
                   Remove
@@ -219,23 +219,23 @@ export default function ImageUploadModal({
               onClick={() => fileInputRef.current?.click()}
               className={`relative flex flex-col items-center justify-center gap-4 p-10 border-2 border-dashed rounded-lg cursor-pointer transition-all w-full ${
                 isDragOver
-                  ? "border-blue-500 bg-red-50 dark:bg-red-900/20"
-                  : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                  ? "border-blue-500 bg-primary/10"
+                  : "border-border hover:border-muted-foreground hover:bg-muted"
               }`}
             >
               <Upload
-                className={`w-10 h-10 ${isDragOver ? "text-blue-500" : "text-gray-400 dark:text-gray-500"}`}
+                className={`w-10 h-10 ${isDragOver ? "text-blue-500" : "text-muted-foreground"}`}
               />
               <div className="text-center">
-                <p className="text-base font-medium text-gray-700 dark:text-gray-300">
+                <p className="text-base font-medium text-foreground">
                   {isDragOver
                     ? "Drop your image here"
                     : "Drop an image here, or click to browse"}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   You can also paste an image from your clipboard
                 </p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                <p className="text-xs text-muted-foreground mt-2">
                   PNG, JPEG, GIF, WebP — up to 20 MB
                 </p>
               </div>
@@ -252,13 +252,12 @@ export default function ImageUploadModal({
           )}
         </div>
 
-        <DialogFooter className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-6 py-4 rounded-b-lg">
+        <DialogFooter className="bg-muted border-t border-border px-6 py-4 rounded-b-lg">
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
             disabled={isLoading}
-            className="text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 border-gray-200 dark:border-gray-600"
           >
             Cancel
           </Button>
@@ -269,7 +268,7 @@ export default function ImageUploadModal({
           >
             {isLoading ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground border-t-transparent mr-2" />
                 Analyzing...
               </>
             ) : (

@@ -1,26 +1,22 @@
 import { ALLOWED_MIME_TYPES, MAX_IMAGE_SIZE } from "@common/image";
-import type { Provider } from "@common/types";
 import { HumanMessage } from "@langchain/core/messages";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { analyzeSentence } from "@/lib/analysis";
+import { auth } from "@/lib/auth";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
+import { saveToHistory } from "@/lib/history";
+import { resolveSettings } from "@/lib/settings";
+import { sanitizeForLLM } from "@/lib/validation";
 
-// Handle CORS preflight requests
 export async function OPTIONS() {
   return corsPreflightResponse();
 }
 
-/**
- * Convert a File/Blob to a raw base64 string.
- */
 async function fileToBase64(file: File): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer());
   return buffer.toString("base64");
 }
 
-/**
- * Use Gemini 3 Flash via LangChain to extract Japanese text from an image.
- */
 async function extractSentenceFromImage(
   base64Data: string,
   mimeType: string,
@@ -58,16 +54,15 @@ async function extractSentenceFromImage(
 
 export async function POST(request: Request) {
   try {
-    // Parse multipart form data
-    // Type assertion: @types/node v20 re-declares FormData without DOM .get() method
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
     const formData = (await request.formData()) as unknown as {
       get(name: string): File | string | null;
     };
     const imageFile = formData.get("image");
-    const provider = formData.get("provider");
-    const model = formData.get("model");
 
-    // Validate image
     if (!imageFile || !(imageFile instanceof File)) {
       return jsonResponse({ error: "No image file provided" }, 400);
     }
@@ -82,22 +77,9 @@ export async function POST(request: Request) {
     }
 
     if (imageFile.size > MAX_IMAGE_SIZE) {
-      return jsonResponse(
-        { error: "Image exceeds maximum size of 20MB" },
-        400,
-      );
+      return jsonResponse({ error: "Image exceeds maximum size of 20MB" }, 400);
     }
 
-    // Validate provider and model
-    if (!provider || typeof provider !== "string") {
-      return jsonResponse({ error: "Invalid provider specified" }, 400);
-    }
-
-    if (!model || typeof model !== "string") {
-      return jsonResponse({ error: "Invalid model specified" }, 400);
-    }
-
-    // Check Google API key (required for Gemini vision extraction)
     const googleApiKey = process.env.GOOGLE_API_KEY;
     if (!googleApiKey) {
       return jsonResponse(
@@ -109,13 +91,15 @@ export async function POST(request: Request) {
       );
     }
 
-    //  Convert image to base64
+    const { provider, model } = await resolveSettings(session);
+
     const base64Data = await fileToBase64(imageFile);
 
-    //  Extract Japanese text from image using Gemini 3 Flash
     let sentence: string;
     try {
-      sentence = await extractSentenceFromImage(base64Data, imageFile.type);
+      sentence = sanitizeForLLM(
+        await extractSentenceFromImage(base64Data, imageFile.type),
+      );
     } catch (error) {
       console.error("Error extracting text from image:", error);
       return jsonResponse(
@@ -129,14 +113,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // Analyze the extracted sentence using the user's chosen provider/model
-    const analysis = await analyzeSentence(
-      sentence,
-      provider as Provider,
-      model,
-    );
+    const analysis = await analyzeSentence(sentence, provider, model);
 
-    // Return both the extracted sentence and its analysis
+    if (session) {
+      try {
+        await saveToHistory(session.user.id, sentence, provider, model);
+      } catch (e) {
+        console.error("Failed to save history:", e);
+      }
+    }
+
     return jsonResponse({ sentence, analysis });
   } catch (error) {
     console.error("Error in analyze-image:", error);

@@ -1,5 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
+import { SETTINGS_KEY } from "@/hooks/use-settings-sync";
 import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -8,11 +10,13 @@ import { authClient } from "@/lib/auth-client";
 
 export default function MoreScreen() {
   const { data: session, isPending } = authClient.useSession();
-  const tintColor = useRawCSSTheme("tint");
-  const iconColor = useRawCSSTheme("icon");
+  const tintColor = useRawCSSTheme("primary");
+  const iconColor = useRawCSSTheme("muted-foreground");
+  const queryClient = useQueryClient();
 
   const handleSignOut = async () => {
     await authClient.signOut();
+    queryClient.removeQueries({ queryKey: SETTINGS_KEY });
   };
 
   if (isPending) {
@@ -36,7 +40,7 @@ export default function MoreScreen() {
         {/* User profile header */}
         <View className="items-center pt-10 pb-6 px-5">
           <View
-            className="w-20 h-20 rounded-full items-center justify-center mb-4 bg-tint dark:bg-tintDark"
+            className="w-20 h-20 rounded-full items-center justify-center mb-4 bg-primary"
           >
             <ThemedText className="text-3xl font-bold text-white">
               {initial}
@@ -52,12 +56,23 @@ export default function MoreScreen() {
         <View className="px-5 mt-2">
           {/* Settings row */}
           <TouchableOpacity
-            className="flex-row items-center py-4 border-b border-muted dark:border-mutedDark"
+            className="flex-row items-center py-4 border-b border-border"
             onPress={() => router.push("/settings")}
             activeOpacity={0.6}
           >
             <Ionicons name="settings-outline" size={22} color={iconColor} />
             <ThemedText className="flex-1 ml-3 text-base">Settings</ThemedText>
+            <Ionicons name="chevron-forward" size={20} color={iconColor} />
+          </TouchableOpacity>
+
+          {/* History row */}
+          <TouchableOpacity
+            className="flex-row items-center py-4 border-b border-border"
+            onPress={() => router.push("/history")}
+            activeOpacity={0.6}
+          >
+            <Ionicons name="time-outline" size={22} color={iconColor} />
+            <ThemedText className="flex-1 ml-3 text-base">History</ThemedText>
             <Ionicons name="chevron-forward" size={20} color={iconColor} />
           </TouchableOpacity>
 
@@ -90,7 +105,7 @@ export default function MoreScreen() {
 
       <View className="w-full mt-8 gap-3">
         <TouchableOpacity
-          className="w-full py-4 rounded-xl items-center bg-tint dark:bg-tintDark"
+          className="w-full py-4 rounded-xl items-center bg-primary"
           onPress={() => router.push("/sign-in")}
           activeOpacity={0.7}
         >
@@ -100,29 +115,18 @@ export default function MoreScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="w-full py-4 rounded-xl items-center border-2 border-tint dark:border-tintDark"
+          className="w-full py-4 rounded-xl items-center border-2 border-primary"
           onPress={() => router.push("/sign-up")}
           activeOpacity={0.7}
         >
           <ThemedText
-            className="text-base font-semibold text-tint dark:text-tintDark"
+            className="text-base font-semibold text-primary"
           >
             Create Account
           </ThemedText>
         </TouchableOpacity>
       </View>
 
-      {/* Settings shortcut even when not logged in */}
-      <TouchableOpacity
-        className="flex-row items-center mt-10"
-        onPress={() => router.push("/settings")}
-        activeOpacity={0.6}
-      >
-        <Ionicons name="settings-outline" size={18} color={iconColor} />
-        <ThemedText className="ml-2 text-sm opacity-70">
-          AI Provider Settings
-        </ThemedText>
-      </TouchableOpacity>
     </ThemedView>
   );
 }

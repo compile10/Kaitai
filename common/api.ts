@@ -1,12 +1,5 @@
-import type {
-  ImageAnalysisResponse,
-  Provider,
-  SentenceAnalysis,
-} from "./types";
+import type { ImageAnalysisResponse, SentenceAnalysis } from "./types";
 
-/**
- * API Error class for handling API-specific errors
- */
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -18,27 +11,19 @@ export class ApiError extends Error {
 }
 
 /**
- * Analyze a Japanese sentence using the configured LLM provider
- *
- * @param url - The API endpoint URL (platform-specific)
- * @param sentence - The Japanese sentence to analyze
- * @param provider - The LLM provider to use
- * @param model - The model name for the provider
- * @returns The sentence analysis result
- * @throws ApiError if the request fails
+ * Analyze a Japanese sentence. The server resolves which provider/model to use
+ * based on the authenticated user's settings (or defaults for anonymous).
  */
 export async function analyzeSentence(
   url: string,
   sentence: string,
-  provider: Provider,
-  model: string,
 ): Promise<SentenceAnalysis> {
   const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ sentence, provider, model }),
+    body: JSON.stringify({ sentence }),
   });
 
   const data = await response.json();
@@ -54,25 +39,15 @@ export async function analyzeSentence(
 }
 
 /**
- * Analyze a Japanese sentence from an image using vision extraction + LLM analysis
- *
- * @param url - The API endpoint URL (platform-specific)
- * @param image - The image file to extract text from
- * @param provider - The LLM provider to use for analysis
- * @param model - The model name for the provider
- * @returns The extracted sentence and its analysis
- * @throws ApiError if the request fails
+ * Analyze a Japanese sentence from an image. The server resolves which
+ * provider/model to use based on the authenticated user's settings.
  */
 export async function analyzeImage(
   url: string,
   image: File | Blob,
-  provider: Provider,
-  model: string,
 ): Promise<ImageAnalysisResponse> {
   const formData = new FormData();
   formData.append("image", image);
-  formData.append("provider", provider);
-  formData.append("model", model);
 
   const response = await fetch(url, {
     method: "POST",

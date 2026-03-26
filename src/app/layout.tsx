@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Rampart_One } from "next/font/google";
+import { ThemeProvider } from "next-themes";
+import { QueryClientProvider } from "@/providers/query-client-provider";
 import { SettingsStoreProvider } from "@/providers/settings-store-provider";
 import "./globals.css";
 
@@ -11,6 +13,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const rampartOne = Rampart_One({
+  variable: "--font-rampart-one",
+  weight: "400",
+  subsets: [],
 });
 
 export const metadata: Metadata = {
@@ -25,11 +33,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${rampartOne.variable} antialiased`}
       >
-        <SettingsStoreProvider>{children}</SettingsStoreProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <QueryClientProvider>
+            <SettingsStoreProvider>{children}</SettingsStoreProvider>
+          </QueryClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

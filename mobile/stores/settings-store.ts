@@ -1,31 +1,31 @@
 import { create } from "zustand";
-import { persist, createJSONStorage, StateStorage } from "zustand/middleware";
-import * as SecureStore from "expo-secure-store";
+import { persist, createJSONStorage } from "zustand/middleware";
+import type { StateStorage } from "zustand/middleware";
+import { createMMKV } from "react-native-mmkv";
 import type { Provider, ProviderConfig, ModelInfo } from "@common/types";
-import { PROVIDER_MAP } from "@common/providers";
+import { DEFAULT_MODEL, DEFAULT_PROVIDER, PROVIDER_MAP } from "@common/providers";
+
+const mmkv = createMMKV({ id: "kaitai-settings" });
+
+const mmkvStorage: StateStorage = {
+  getItem: (name) => mmkv.getString(name) ?? null,
+  setItem: (name, value) => mmkv.set(name, value),
+  removeItem: (name) => { mmkv.remove(name); },
+};
 
 export type { Provider, ProviderConfig, ModelInfo };
 export { PROVIDER_MAP };
-
-const DEFAULT_PROVIDER: Provider = "anthropic";
-const DEFAULT_MODEL = PROVIDER_MAP[DEFAULT_PROVIDER].defaultModel;
-
-// Custom storage adapter for expo-secure-store to implement Zustand's storage interface
-const secureStorage: StateStorage = {
-  getItem: (name: string) => SecureStore.getItemAsync(name),
-  setItem: (name: string, value: string) =>
-    SecureStore.setItemAsync(name, value),
-  removeItem: (name: string) => SecureStore.deleteItemAsync(name),
-};
 
 interface SettingsState {
   provider: Provider;
   model: string;
   useCustomModel: boolean;
+  expertMode: boolean;
   isHydrated: boolean;
   setProvider: (provider: Provider) => void;
   setModel: (model: string) => void;
   setUseCustomModel: (value: boolean) => void;
+  setExpertMode: (value: boolean) => void;
   setHydrated: (state: boolean) => void;
 }
 
@@ -35,6 +35,7 @@ export const useSettingsStore = create<SettingsState>()(
       provider: DEFAULT_PROVIDER,
       model: DEFAULT_MODEL,
       useCustomModel: false,
+      expertMode: false,
       isHydrated: false,
       setProvider: (provider: Provider) => {
         set({
@@ -45,14 +46,18 @@ export const useSettingsStore = create<SettingsState>()(
       },
       setModel: (model: string) => set({ model }),
       setUseCustomModel: (useCustomModel: boolean) => set({ useCustomModel }),
+      setExpertMode: (expertMode: boolean) => set({ expertMode }),
       setHydrated: (state: boolean) => set({ isHydrated: state }),
     }),
     {
       name: "kaitai-settings",
-      storage: createJSONStorage(() => secureStorage),
+      storage: createJSONStorage(() => mmkvStorage),
       onRehydrateStorage: () => (state) => {
         if (state && state.useCustomModel === undefined) {
           state.setUseCustomModel(false);
+        }
+        if (state && state.expertMode === undefined) {
+          state.setExpertMode(false);
         }
         state?.setHydrated(true);
       },
@@ -60,6 +65,7 @@ export const useSettingsStore = create<SettingsState>()(
         provider: state.provider,
         model: state.model,
         useCustomModel: state.useCustomModel,
+        expertMode: state.expertMode,
       }),
     },
   ),

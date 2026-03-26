@@ -63,20 +63,20 @@ function WordNodeComponent({ data }: { data: WordNodeData }) {
       <div
         className={`border-2 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow ${
           word.isTopic
-            ? "bg-purple-50 dark:bg-purple-900/20 border-purple-300 dark:border-purple-700"
-            : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+            ? "bg-topic-bg border-topic-border"
+            : "bg-card border-border"
         }`}
         style={{ minWidth: "120px", maxWidth: "150px" }}
       >
-        <div className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1 text-center">
+        <div className="text-xl font-bold text-foreground mb-1 text-center">
           {word.text}
         </div>
         {word.reading && (
-          <div className="text-sm text-gray-600 dark:text-gray-400 mb-2 text-center">
+          <div className="text-sm text-muted-foreground mb-2 text-center">
             {word.reading}
           </div>
         )}
-        <div className="text-xs text-tint dark:text-tintDark font-medium text-center">
+        <div className="text-xs text-primary font-medium text-center">
           {word.partOfSpeech}
         </div>
       </div>
@@ -183,14 +183,14 @@ function GrammarPointItem({
     <button
       type="button"
       onClick={() => setIsExpanded(!isExpanded)}
-      className="w-full text-left p-3 bg-gray-50 dark:bg-gray-900 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+      className="w-full text-left p-3 bg-muted rounded hover:bg-accent transition-colors"
     >
       <div className="flex items-center justify-between gap-3">
-        <span className="font-semibold text-gray-900 dark:text-gray-100">
+        <span className="font-semibold text-foreground">
           {grammarPoint.title}
         </span>
         <svg
-          className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform ${
+          className={`w-5 h-5 text-muted-foreground transition-transform ${
             isExpanded ? "rotate-180" : ""
           }`}
           fill="none"
@@ -206,7 +206,7 @@ function GrammarPointItem({
         </svg>
       </div>
       {isExpanded && (
-        <p className="mt-2 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+        <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
           {grammarPoint.explanation}
         </p>
       )}
@@ -312,20 +312,20 @@ export default function SentenceVisualization({
       <div
         className={`border-2 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow ${
           word.isTopic
-            ? "bg-purple-50 dark:bg-purple-900/20 border-purple-300 dark:border-purple-700"
-            : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+            ? "bg-topic-bg border-topic-border"
+            : "bg-card border-border"
         }`}
         style={{ maxWidth: "150px" }}
       >
-        <div className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1 text-center">
+        <div className="text-xl font-bold text-foreground mb-1 text-center">
           {word.text}
         </div>
         {word.reading && (
-          <div className="text-sm text-gray-600 dark:text-gray-400 mb-2 text-center">
+          <div className="text-sm text-muted-foreground mb-2 text-center">
             {word.reading}
           </div>
         )}
-        <div className="text-xs text-tint dark:text-tintDark font-medium text-center">
+        <div className="text-xs text-primary font-medium text-center">
           {word.partOfSpeech}
         </div>
       </div>
@@ -363,128 +363,137 @@ export default function SentenceVisualization({
   );
 
   return (
-    <div className="w-full max-w-4xl space-y-6">
-      {/* Direct Translation */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
-        <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">
+    <div className="w-full space-y-6">
+      {/* Direct Translation — full width */}
+      <div className="bg-card rounded-lg p-6 shadow-lg">
+        <h3 className="text-lg font-semibold mb-2 text-foreground">
           Direct Translation
         </h3>
-        <p className="text-gray-700 dark:text-gray-300 text-lg italic">
+        <p className="text-muted-foreground text-lg italic">
           {analysis.directTranslation}
         </p>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
-        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
-          Sentence Structure
-        </h3>
+      {/* Two-column layout on wide screens */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* Left column — visualization (3/5 on lg+) */}
+        <div className="lg:col-span-3 space-y-6">
+          <div className="bg-card rounded-lg p-6 shadow-lg">
+            <h3 className="text-lg font-semibold mb-4 text-foreground">
+              Sentence Structure
+            </h3>
 
-        {/* Fragment Warning */}
-        {analysis.isFragment && (
-          <div className="mb-4 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 p-4">
-            <div className="flex items-center">
-              <svg
-                className="w-5 h-5 text-yellow-600 dark:text-yellow-500 mr-2"
-                fill="currentColor"
-                viewBox="0 0 20 20"
+            {/* Fragment Warning */}
+            {analysis.isFragment && (
+              <div className="mb-4 bg-warning-bg border-l-4 border-warning-border p-4">
+                <div className="flex items-center">
+                  <svg
+                    className="w-5 h-5 text-yellow-600 dark:text-yellow-500 mr-2"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span className="font-semibold text-yellow-800 dark:text-yellow-300">
+                    Sentence Fragment
+                  </span>
+                </div>
+                <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1 ml-7">
+                  This appears to be an incomplete sentence or fragment. It may
+                  be missing key components like a verb or not express a
+                  complete thought.
+                </p>
+              </div>
+            )}
+
+            {/* Topic Section */}
+            {topicWords.length > 0 && (
+              <div className="mb-6 pb-4 border-b-2 border-dashed border-topic-border">
+                <div className="text-sm font-medium text-purple-600 dark:text-purple-400 mb-2">
+                  Topic (Context)
+                </div>
+                <div className="flex flex-wrap gap-4 justify-center">
+                  {topicWords
+                    .sort((a, b) => a.position - b.position)
+                    .map(renderTopicWord)}
+                </div>
+              </div>
+            )}
+
+            {/* React Flow Visualization */}
+            <div className="relative h-[400px] lg:h-[500px] bg-muted rounded-lg overflow-hidden">
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                nodeTypes={nodeTypes}
+                edgeTypes={edgeTypes}
+                fitView
+                minZoom={0.5}
+                maxZoom={1.5}
+                defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+                nodesDraggable={true}
+                nodesConnectable={false}
+                elementsSelectable={true}
               >
-                <path
-                  fillRule="evenodd"
-                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="font-semibold text-yellow-800 dark:text-yellow-300">
-                Sentence Fragment
-              </span>
+                <Background color="#9ca3af" gap={16} />
+                <Controls showInteractive={false} />
+              </ReactFlow>
             </div>
-            <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1 ml-7">
-              This appears to be an incomplete sentence or fragment. It may be
-              missing key components like a verb or not express a complete
-              thought.
-            </p>
-          </div>
-        )}
 
-        {/* Topic Section */}
-        {topicWords.length > 0 && (
-          <div className="mb-6 pb-4 border-b-2 border-dashed border-purple-300 dark:border-purple-700">
-            <div className="text-sm font-medium text-purple-600 dark:text-purple-400 mb-2">
-              Topic (Context)
-            </div>
-            <div className="flex flex-wrap gap-4 justify-center">
-              {topicWords
-                .sort((a, b) => a.position - b.position)
-                .map(renderTopicWord)}
+            <div className="mt-4 text-sm text-muted-foreground">
+              <p>
+                <strong>Purple boxes:</strong> Topic - provides context but
+                doesn&apos;t modify the sentence
+              </p>
+              <p className="mt-1">
+                <strong>Arrows:</strong> Show which words modify or relate to
+                other words
+              </p>
+              <p className="mt-1">
+                <strong>Orange boxes:</strong> Particles (は, を, に, etc.) -{" "}
+                <span className="text-orange-600 dark:text-orange-400 font-semibold">
+                  Click to learn what they do!
+                </span>
+              </p>
+              <p className="mt-1">
+                <strong>Tip:</strong> You can drag nodes to rearrange them, zoom
+                with the mouse wheel, and pan by dragging the background.
+              </p>
             </div>
           </div>
-        )}
-
-        {/* React Flow Visualization */}
-        <div className="relative h-[400px] bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden">
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            nodeTypes={nodeTypes}
-            edgeTypes={edgeTypes}
-            fitView
-            minZoom={0.5}
-            maxZoom={1.5}
-            defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-            nodesDraggable={true}
-            nodesConnectable={false}
-            elementsSelectable={true}
-          >
-            <Background color="#9ca3af" gap={16} />
-            <Controls showInteractive={false} />
-          </ReactFlow>
         </div>
 
-        <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-          <p>
-            <strong>Purple boxes:</strong> Topic - provides context but doesn't
-            modify the sentence
-          </p>
-          <p className="mt-1">
-            <strong>Arrows:</strong> Show which words modify or relate to other
-            words
-          </p>
-          <p className="mt-1">
-            <strong>Orange boxes:</strong> Particles (は, を, に, etc.) -{" "}
-            <span className="text-orange-600 dark:text-orange-400 font-semibold">
-              Click to learn what they do!
-            </span>
-          </p>
-          <p className="mt-1">
-            <strong>Tip:</strong> You can drag nodes to rearrange them, zoom
-            with the mouse wheel, and pan by dragging the background.
-          </p>
-        </div>
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
-        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
-          Explanation
-        </h3>
-        <div
-          className="prose max-w-none"
-          dangerouslySetInnerHTML={{ __html: analysis.explanation }}
-        />
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
-        <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
-          Grammar Points
-        </h3>
-        <div className="space-y-2">
-          {analysis.grammarPoints.map((point, index) => (
-            <GrammarPointItem
-              key={`${point.title}-${index}`}
-              grammarPoint={point}
+        {/* Right column — explanation & grammar (2/5 on lg+) */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-card rounded-lg p-6 shadow-lg">
+            <h3 className="text-lg font-semibold mb-4 text-foreground">
+              Explanation
+            </h3>
+            <div
+              className="prose max-w-none"
+              dangerouslySetInnerHTML={{ __html: analysis.explanation }}
             />
-          ))}
+          </div>
+
+          <div className="bg-card rounded-lg p-6 shadow-lg">
+            <h3 className="text-lg font-semibold mb-3 text-foreground">
+              Grammar Points
+            </h3>
+            <div className="space-y-2">
+              {analysis.grammarPoints.map((point, index) => (
+                <GrammarPointItem
+                  key={`${point.title}-${index}`}
+                  grammarPoint={point}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 

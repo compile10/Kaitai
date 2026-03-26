@@ -14,10 +14,9 @@ import { DependencyMap } from "@/components/dependency-map";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
-import { analyzeSentence } from "@common/api";
 import type { SentenceAnalysis } from "@common/types";
 import { buildApiUrl } from "@/constants/api";
-import { useSettingsStore, PROVIDER_MAP } from "@/stores/settings-store";
+import { authFetch } from "@/lib/auth-fetch";
 
 export default function ResultsScreen() {
   const { sentence, imageUri, imageMimeType, imageFileName } =
@@ -29,8 +28,6 @@ export default function ResultsScreen() {
     }>();
   const { width } = useWindowDimensions();
 
-  const { provider, model, isHydrated } = useSettingsStore();
-
   const [analysis, setAnalysis] = useState<SentenceAnalysis | null>(null);
   const [extractedSentence, setExtractedSentence] = useState<string | null>(
     null,
@@ -40,11 +37,10 @@ export default function ResultsScreen() {
 
   const isImageMode = Boolean(imageUri);
 
-  const textColor = useRawCSSTheme("text");
-  const tintColor = useRawCSSTheme("tint");
+  const textColor = useRawCSSTheme("foreground");
+  const tintColor = useRawCSSTheme("primary");
 
   const fetchAnalysis = useCallback(async () => {
-    if (!isHydrated) return;
     if (!imageUri && !sentence) return;
 
     setIsLoading(true);
@@ -60,10 +56,8 @@ export default function ResultsScreen() {
           type: imageMimeType || "image/jpeg",
           name: imageFileName || "image.jpg",
         } as unknown as Blob);
-        formData.append("provider", provider);
-        formData.append("model", model);
 
-        const response = await fetch(buildApiUrl("analyzeImage"), {
+        const response = await authFetch(buildApiUrl("analyzeImage"), {
           method: "POST",
           body: formData,
         });
@@ -78,29 +72,33 @@ export default function ResultsScreen() {
         setAnalysis(data.analysis);
       } else {
         setExtractedSentence(sentence || null);
-        const result = await analyzeSentence(
-          buildApiUrl("analyze"),
-          sentence!,
-          provider,
-          model,
-        );
-        setAnalysis(result);
+
+        const response = await authFetch(buildApiUrl("analyze"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sentence }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to analyze sentence");
+        }
+
+        setAnalysis(data as SentenceAnalysis);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
-  }, [sentence, imageUri, imageMimeType, imageFileName, provider, model, isHydrated]);
+  }, [sentence, imageUri, imageMimeType, imageFileName]);
 
   useEffect(() => {
     fetchAnalysis();
   }, [fetchAnalysis]);
 
-  const currentProvider = PROVIDER_MAP[provider];
-  const currentModel = currentProvider?.models.find((m) => m.id === model);
-
-  if (isLoading || !isHydrated) {
+  if (isLoading) {
     return (
       <ThemedView className="flex-1" edges={['left', 'right']}>
         <View className="flex-1 justify-center items-center gap-4">
@@ -108,7 +106,7 @@ export default function ResultsScreen() {
           <ThemedText className="opacity-70">
             {isImageMode
               ? "Reading your sentence from your photo..."
-              : `Breaking down your sentence...`}
+              : "Breaking down your sentence..."}
           </ThemedText>
         </View>
       </ThemedView>
@@ -118,7 +116,7 @@ export default function ResultsScreen() {
   if (error) {
     return (
       <ThemedView className="flex-1 justify-center pb-32" edges={['left', 'right']}>
-        <View className="mx-5 p-5 rounded-xl border gap-3 bg-errorBg dark:bg-errorBgDark border-errorBorder dark:border-errorBorderDark">
+        <View className="mx-5 p-5 rounded-xl border gap-3 bg-error-bg border-error-border">
           <View className="flex-row items-center gap-2">
             <Ionicons name="alert-circle" size={22} color="#dc2626" />
             <ThemedText type="defaultSemiBold" className="text-red-600">
@@ -127,7 +125,7 @@ export default function ResultsScreen() {
           </View>
           <ThemedText className="opacity-80">{error}</ThemedText>
           <TouchableOpacity
-            className="p-3 rounded-lg items-center mt-2 bg-tint dark:bg-tintDark"
+            className="p-3 rounded-lg items-center mt-2 bg-primary"
             onPress={fetchAnalysis}
           >
             <ThemedText className="text-white font-semibold">Retry</ThemedText>
@@ -154,7 +152,7 @@ export default function ResultsScreen() {
           </ThemedText>
         </View>
 
-        <View className="mb-6 p-4 rounded-xl border bg-card dark:bg-cardDark border-muted dark:border-mutedDark">
+        <View className="mb-6 p-4 rounded-xl border bg-card border-border">
           <ThemedText type="defaultSemiBold" className="mb-2">
             Direct Translation
           </ThemedText>
@@ -164,7 +162,7 @@ export default function ResultsScreen() {
         </View>
 
         {analysis.isFragment && (
-          <View className="p-4 rounded-xl border mb-6 gap-2 bg-warningBg dark:bg-warningBgDark border-warningBorder dark:border-warningBorderDark">
+          <View className="p-4 rounded-xl border mb-6 gap-2 bg-warning-bg border-warning-border">
             <ThemedText type="defaultSemiBold" className="text-yellow-600">
               Sentence Fragment
             </ThemedText>
@@ -182,7 +180,7 @@ export default function ResultsScreen() {
           <DependencyMap words={analysis.words} />
         </View>
 
-        <View className="mb-6 p-4 rounded-xl border bg-card dark:bg-cardDark border-muted dark:border-mutedDark">
+        <View className="mb-6 p-4 rounded-xl border bg-card border-border">
           <ThemedText type="subtitle" className="mb-3">
             Explanation
           </ThemedText>
@@ -230,7 +228,7 @@ function GrammarPointItem({ grammarPoint, tintColor }: GrammarPointItemProps) {
 
   return (
     <TouchableOpacity
-      className="p-4 rounded-xl border bg-card dark:bg-cardDark border-muted dark:border-mutedDark"
+      className="p-4 rounded-xl border bg-card border-border"
       onPress={() => setExpanded(!expanded)}
       activeOpacity={0.7}
     >

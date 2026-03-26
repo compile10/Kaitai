@@ -1,50 +1,53 @@
-import type { Provider } from "@common/types";
 import type { NextRequest } from "next/server";
 import {
   analyzeSentence,
   getCachedResponse,
   setCachedResponse,
 } from "@/lib/analysis";
+import { auth } from "@/lib/auth";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
+import { saveToHistory } from "@/lib/history";
+import { resolveSettings } from "@/lib/settings";
+import { sanitizeForLLM } from "@/lib/validation";
 
-// Handle CORS preflight requests
 export async function OPTIONS() {
   return corsPreflightResponse();
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { sentence, provider, model } = await request.json();
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
 
-    // Validate input
+    const { sentence } = await request.json();
+
     if (!sentence || typeof sentence !== "string") {
       return jsonResponse({ error: "Invalid sentence provided" }, 400);
     }
 
-    if (!provider || typeof provider !== "string") {
-      return jsonResponse({ error: "Invalid provider specified" }, 400);
-    }
+    const sanitizedSentence = sanitizeForLLM(sentence);
 
-    if (!model || typeof model !== "string") {
-      return jsonResponse({ error: "Invalid model specified" }, 400);
-    }
+    const { provider, model } = await resolveSettings(session);
 
-    // Check cache first (include provider and model in cache key)
-    const cacheKey = `${provider}:${model}:${sentence}`;
+    const cacheKey = `${provider}:${model}:${sanitizedSentence}`;
     const cachedResponse = getCachedResponse(cacheKey);
-    if (cachedResponse) {
-      return jsonResponse(cachedResponse);
+
+    const analysis =
+      cachedResponse ??
+      (await analyzeSentence(sanitizedSentence, provider, model));
+
+    if (!cachedResponse) {
+      setCachedResponse(cacheKey, analysis);
     }
 
-    // Perform the analysis
-    const analysis = await analyzeSentence(
-      sentence,
-      provider as Provider,
-      model,
-    );
-
-    // Cache the successful response
-    setCachedResponse(cacheKey, analysis);
+    if (session) {
+      try {
+        await saveToHistory(session.user.id, sanitizedSentence, provider, model);
+      } catch (e) {
+        console.error("Failed to save history:", e);
+      }
+    }
 
     return jsonResponse(analysis);
   } catch (error) {

@@ -1,3 +1,5 @@
+import debounce from "lodash/debounce";
+import { useEffect, useMemo } from "react";
 import {
   ScrollView,
   Switch,
@@ -9,6 +11,7 @@ import { BottomSheetPicker } from "@/components/bottom-sheet-picker";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
+import { useSettingsMutation } from "@/hooks/use-settings-sync";
 import {
   PROVIDER_MAP,
   type Provider,
@@ -20,46 +23,81 @@ const PROVIDER_OPTIONS = Object.values(PROVIDER_MAP).map((p) => ({
   label: p.name,
 }));
 
+const CUSTOM_MODEL_DEBOUNCE_MS = 400;
+
 export default function SettingsScreen() {
   const {
     provider,
     model,
     useCustomModel,
+    expertMode,
     setProvider,
     setModel,
     setUseCustomModel,
+    setExpertMode,
     isHydrated,
   } = useSettingsStore();
 
-  const tintColor = useRawCSSTheme("tint");
+  const tintColor = useRawCSSTheme("primary");
   const borderColor = useRawCSSTheme("border");
 
   const models = PROVIDER_MAP[provider]?.models ?? [];
 
+  const { mutate: syncSettings } = useSettingsMutation();
+
+  const debouncedSync = useMemo(
+    () =>
+      debounce((prov: string, m: string) => {
+        syncSettings({ provider: prov as Provider, model: m });
+      }, CUSTOM_MODEL_DEBOUNCE_MS),
+    [syncSettings],
+  );
+
+  // immediately flushes the debounced sync when the component unmounts
+  // this ensures any pending sync is completed when the user navigates away
+  useEffect(() => () => debouncedSync.flush(), [debouncedSync]);
+
   const handleProviderChange = (id: string) => {
+    debouncedSync.cancel();
     setProvider(id as Provider);
+    const newDefault = PROVIDER_MAP[id as Provider]?.defaultModel ?? "";
+    syncSettings({ provider: id as Provider, model: newDefault });
+  };
+
+  const handlePresetModelChange = (newModel: string) => {
+    debouncedSync.cancel();
+    setModel(newModel);
+    syncSettings({ provider, model: newModel });
+  };
+
+  const handleCustomModelTextChange = (newModel: string) => {
+    setModel(newModel);
+    debouncedSync(provider, newModel);
   };
 
   const handleUseCustomModelChange = (value: boolean) => {
     setUseCustomModel(value);
     if (!value) {
+      debouncedSync.cancel();
       const isPreset = models.some((m) => m.id === model);
       if (!isPreset) {
-        setModel(PROVIDER_MAP[provider]?.defaultModel ?? "");
+        const defaultModel = PROVIDER_MAP[provider]?.defaultModel ?? "";
+        setModel(defaultModel);
+        syncSettings({ provider, model: defaultModel });
       }
     }
   };
 
   if (!isHydrated) {
     return (
-      <ThemedView className="flex-1" edges={['left', 'right']}>
+      <ThemedView className="flex-1" edges={["left", "right"]}>
         <ThemedText>Loading settings...</ThemedText>
       </ThemedView>
     );
   }
 
   return (
-    <ThemedView className="flex-1" edges={['left', 'right']}>
+    <ThemedView className="flex-1" edges={["left", "right"]}>
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
         <View className="mb-6 mt-5">
           <ThemedText type="subtitle" className="mb-2">
@@ -100,10 +138,10 @@ export default function SettingsScreen() {
             </ThemedText>
             <TextInput
               value={model}
-              onChangeText={setModel}
+              onChangeText={handleCustomModelTextChange}
               placeholder="e.g., claude-opus-4-5-20251101"
               placeholderTextColor="#9ca3af"
-              className="p-4 rounded-xl border-2 border-muted dark:border-mutedDark bg-card dark:bg-cardDark text-base text-text dark:text-textDark"
+              className="p-4 rounded-xl border-2 border-border bg-card text-base text-foreground"
             />
           </View>
         ) : (
@@ -112,7 +150,7 @@ export default function SettingsScreen() {
               Select Model
             </ThemedText>
             <ThemedText className="text-sm opacity-70 mb-4">
-              Choose which model to use. Your preference will be saved locally.
+              Choose which model to use for sentence analysis.
             </ThemedText>
 
             <View className="gap-3">
@@ -121,15 +159,15 @@ export default function SettingsScreen() {
                   key={m.id}
                   className={`p-4 rounded-xl border-2 ${
                     model === m.id
-                      ? "bg-gray-100 dark:bg-gray-800 border-tint dark:border-tintDark"
-                      : "bg-transparent border-muted dark:border-mutedDark"
+                      ? "bg-gray-100 dark:bg-gray-800 border-primary"
+                      : "bg-transparent border-border"
                   }`}
-                  onPress={() => setModel(m.id)}
+                  onPress={() => handlePresetModelChange(m.id)}
                 >
                   <View className="flex-row items-center mb-2">
                     <View className="w-5 h-5 rounded-full border-2 border-gray-400 items-center justify-center">
                       {model === m.id && (
-                        <View className="w-2.5 h-2.5 rounded-full bg-tint dark:bg-tintDark" />
+                        <View className="w-2.5 h-2.5 rounded-full bg-primary" />
                       )}
                     </View>
                     <ThemedText type="defaultSemiBold" className="flex-1 ml-3">
@@ -154,6 +192,26 @@ export default function SettingsScreen() {
             </View>
           </View>
         )}
+
+        {/* Display section */}
+        <View className="mb-6 mt-2">
+          <ThemedText type="subtitle" className="mb-4">
+            Display
+          </ThemedText>
+          <View className="flex-row items-center">
+            <View className="flex-1">
+              <ThemedText type="defaultSemiBold">Expert Mode</ThemedText>
+              <ThemedText className="text-[13px] opacity-70 mt-1">
+                Show provider and model details in history
+              </ThemedText>
+            </View>
+            <Switch
+              value={expertMode}
+              onValueChange={setExpertMode}
+              trackColor={{ false: borderColor, true: tintColor }}
+            />
+          </View>
+        </View>
       </ScrollView>
     </ThemedView>
   );

@@ -4,29 +4,29 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
   anthropic: {
     id: "anthropic",
     name: "Anthropic",
-    defaultModel: "claude-sonnet-4-5-20250929",
+    defaultModel: "claude-sonnet-4-6",
     models: [
       {
-        id: "claude-sonnet-4-5-20250929",
-        name: "Claude Sonnet 4.5",
+        id: "claude-sonnet-4-6",
+        name: "Claude Sonnet 4.6",
         description:
-          "Best balance of intelligence, speed, and cost for most use cases",
-        pricing: "$3 / $15 per MTok",
+          "Latest balanced model for strong quality with fast responses",
+        pricing: "$3.00 / $15.00 per MTok",
         speed: "Fast",
       },
       {
-        id: "claude-opus-4-5-20251101",
-        name: "Claude Opus 4.5",
+        id: "claude-opus-4-6",
+        name: "Claude Opus 4.6",
         description:
-          "Premium model combining maximum intelligence with practical performance",
-        pricing: "$5 / $25 per MTok",
+          "Latest flagship model focused on maximum intelligence",
+        pricing: "$5.00 / $25.00 per MTok",
         speed: "Moderate",
       },
       {
         id: "claude-haiku-4-5-20251001",
         name: "Claude Haiku 4.5",
-        description: "Fastest model with near-frontier intelligence",
-        pricing: "$1 / $5 per MTok",
+        description: "Fastest low-latency model for lightweight tasks",
+        pricing: "$1.00 / $5.00 per MTok",
         speed: "Fastest",
       },
     ],
@@ -34,30 +34,30 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
   openai: {
     id: "openai",
     name: "OpenAI",
-    defaultModel: "gpt-5.2",
+    defaultModel: "gpt-5.4",
     models: [
       {
-        id: "gpt-5.2",
-        name: "GPT-5.2",
+        id: "gpt-5.4",
+        name: "GPT-5.4",
         description:
-          "Best model for coding and agentic tasks across industries",
-        pricing: "$1.75 / $14.00 per MTok",
+          "Latest flagship model with best overall capability",
+        pricing: "$2.50 / $15.00 per MTok",
         speed: "Fast",
       },
       {
-        id: "gpt-5.2-pro",
-        name: "GPT-5.2 Pro",
+        id: "gpt-5.4-pro",
+        name: "GPT-5.4 Pro",
         description:
-          "Version of GPT-5.2 that produces smarter and more precise responses",
-        pricing: "$21.00 / $168.00 per MTok",
+          "Highest quality GPT-5.4 variant for toughest tasks",
+        pricing: "See OpenAI pricing (model-specific)",
         speed: "Moderate",
       },
       {
-        id: "gpt-5-mini",
-        name: "GPT-5 Mini",
+        id: "gpt-5.3-chat-latest",
+        name: "GPT-5.3 Chat (Latest)",
         description:
-          "Faster, cost-efficient version of GPT-5 for well-defined tasks",
-        pricing: "$0.25 / $2.00 per MTok",
+          "Rolling latest chat-optimized GPT-5.3 model alias",
+        pricing: "See OpenAI pricing (rolling alias)",
         speed: "Fast",
       },
     ],
@@ -65,36 +65,29 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
   google: {
     id: "google",
     name: "Google Gemini",
-    defaultModel: "gemini-3-flash-preview",
+    defaultModel: "gemini-3.1-pro-preview",
     models: [
       {
-        id: "gemini-3-flash-preview",
-        name: "Gemini 3 Flash",
+        id: "gemini-3.1-pro-preview",
+        name: "Gemini 3.1 Pro Preview",
         description:
-          "Latest generation balanced model for speed and intelligence",
-        pricing: "$0.50 / $3.00 per MTok",
-        speed: "Fastest",
+          "Latest high-capability Gemini preview model",
+        pricing: "$2.00 / $12.00 per MTok (<=200k prompt)",
+        speed: "Moderate",
       },
       {
-        id: "gemini-3-pro-preview",
-        name: "Gemini 3 Pro",
-        description: "Most intelligent model with state-of-the-art reasoning",
-        pricing: "$2.00 / $12.00 per MTok",
-        speed: "Moderate",
+        id: "gemini-3.1-flash-lite-preview",
+        name: "Gemini 3.1 Flash Lite Preview",
+        description:
+          "Latest low-latency preview model for fast responses",
+        pricing: "$0.25 / $1.50 per MTok",
+        speed: "Fastest",
       },
       {
         id: "gemini-2.5-pro",
         name: "Gemini 2.5 Pro",
-        description:
-          "Advanced thinking model with complex reasoning capabilities",
-        pricing: "$1.25 / $10.00 per MTok",
-        speed: "Moderate",
-      },
-      {
-        id: "gemini-2.5-flash",
-        name: "Gemini 2.5 Flash",
-        description: "Fast model with improved efficiency and agentic tool use",
-        pricing: "$0.30 / $2.50 per MTok",
+        description: "Stable high-quality model for complex reasoning tasks",
+        pricing: "$1.25 / $10.00 per MTok (<=200k prompt)",
         speed: "Fast",
       },
     ],
@@ -102,29 +95,29 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
   xai: {
     id: "xai",
     name: "xAI",
-    defaultModel: "grok-4-1-fast-reasoning",
+    defaultModel: "grok-4.20-beta-0309-reasoning",
     models: [
+      {
+        id: "grok-4.20-beta-0309-reasoning",
+        name: "Grok 4.20 Beta (Reasoning)",
+        description: "Latest reasoning-focused Grok model",
+        pricing: "$2.00 / $6.00 per MTok",
+        speed: "Fast",
+      },
+      {
+        id: "grok-4.20-beta-0309-non-reasoning",
+        name: "Grok 4.20 Beta (Non-Reasoning)",
+        description:
+          "Latest non-reasoning variant for lower latency",
+        pricing: "$2.00 / $6.00 per MTok",
+        speed: "Fast",
+      },
       {
         id: "grok-4-1-fast-reasoning",
         name: "Grok 4.1 Fast Reasoning",
-        description: "Enhanced reasoning model optimized for speed",
-        pricing: "$2.00 / $10.00 per MTok",
+        description: "Fast reasoning model with strong quality/speed balance",
+        pricing: "$0.20 / $0.50 per MTok",
         speed: "Fast",
-      },
-      {
-        id: "grok-4",
-        name: "Grok 4",
-        description:
-          "Latest flagship model with real-time search and multimodal capabilities",
-        pricing: "$3.00 / $15.00 per MTok",
-        speed: "Fast",
-      },
-      {
-        id: "grok-3-mini",
-        name: "Grok Mini 3",
-        description: "Compact model optimized for speed and cost efficiency",
-        pricing: "$0.50 / $2.50 per MTok",
-        speed: "Fastest",
       },
     ],
   },
@@ -138,23 +131,23 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
         name: "Auto Router",
         description:
           "Intelligent auto-routing to select the best model for each prompt",
-        pricing: "Varies by model",
+        pricing: "Varies by route/model",
         speed: "Varies",
       },
       {
-        id: "z-ai/glm-4.7",
-        name: "Z.AI GLM 4.7",
+        id: "openai/gpt-5.4",
+        name: "OpenAI GPT-5.4",
         description:
-          "Enhanced programming and reasoning with 202K context window",
-        pricing: "$0.40 / $1.50 per MTok",
+          "Latest GPT model available via OpenRouter",
+        pricing: "$2.50 / $15.00 per MTok",
         speed: "Fast",
       },
       {
-        id: "mistralai/ministral-14b-2512",
-        name: "Mistral Ministral 3 14B",
+        id: "anthropic/claude-sonnet-4.6",
+        name: "Anthropic Claude Sonnet 4.6",
         description:
-          "Frontier model with vision capabilities and 262K context window",
-        pricing: "$0.20 / $0.20 per MTok",
+          "Latest Claude Sonnet model through OpenRouter",
+        pricing: "$3.00 / $15.00 per MTok",
         speed: "Fast",
       },
     ],
@@ -167,8 +160,22 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
       {
         id: "gpt-oss-120b",
         name: "GPT OSS 120B",
-        description: "Largest Cerebras model with excellent quality and speed",
+        description: "Strong open model with excellent reasoning and coding quality",
         pricing: "$0.25 / $0.69 per MTok",
+        speed: "~3000 tok/s",
+      },
+      {
+        id: "qwen-3-235b-a22b-instruct-2507",
+        name: "Qwen 3 235B A22B Instruct",
+        description: "Largest and most capable latest model on Cerebras",
+        pricing: "$0.60 / $1.20 per MTok",
+        speed: "~3000 tok/s",
+      },
+      {
+        id: "zai-glm-4.7",
+        name: "Z.AI GLM 4.7",
+        description: "Strong latest general-purpose reasoning model",
+        pricing: "$2.25 / $2.75 per MTok",
         speed: "~3000 tok/s",
       },
       {
@@ -183,33 +190,36 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
   fireworks: {
     id: "fireworks",
     name: "Fireworks AI",
-    defaultModel: "accounts/fireworks/models/deepseek-v3p2",
+    defaultModel: "accounts/fireworks/models/kimi-k2-instruct-0905",
     models: [
       {
+        id: "accounts/fireworks/models/kimi-k2-instruct-0905",
+        name: "Kimi K2 Instruct 0905",
+        description:
+          "Latest high-capability model available on Fireworks",
+        pricing: "$0.60 / $2.50 per MTok",
+        speed: "Fast",
+      },
+      {
         id: "accounts/fireworks/models/deepseek-v3p2",
-        name: "Deepseek V3.2",
-        description:
-          "Large model with top-tier quality for complex reasoning and analysis",
-        pricing: "$0.50 / $1.40 per MTok",
+        name: "DeepSeek V3.2",
+        description: "Recent top-tier reasoning model with broad capability",
+        pricing: "$0.56 / $1.68 per MTok",
         speed: "Fast",
       },
       {
-        id: "accounts/fireworks/models/gpt-oss-120b",
-        name: "GPT-OSS 120B",
-        description: "Medium model with excellent balance of quality and speed",
-        pricing: "$0.15 / $0.60 per MTok",
-        speed: "Fast",
-      },
-      {
-        id: "accounts/fireworks/models/llama-v3p3-70b-instruct",
-        name: "Llama 3.3 70B",
+        id: "accounts/fireworks/models/glm-5",
+        name: "GLM-5",
         description:
-          "Medium model optimized for fast inference and good quality",
-        pricing: "$0.10 / $0.10 per MTok",
-        speed: "Fastest",
+          "Latest GLM generation model hosted by Fireworks",
+        pricing: "$1.00 / $3.20 per MTok",
+        speed: "Fast",
       },
     ],
   },
 };
 
 export const PROVIDERS: ProviderConfig[] = Object.values(PROVIDER_MAP);
+
+export const DEFAULT_PROVIDER: Provider = "anthropic";
+export const DEFAULT_MODEL: string = PROVIDER_MAP[DEFAULT_PROVIDER].defaultModel;

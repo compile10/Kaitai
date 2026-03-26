@@ -35,7 +35,7 @@ export default function HomeScreen() {
   const [searchValue, setSearchValue] = useState("");
   const [sheetVisible, setSheetVisible] = useState(false);
   const colorScheme = useColorScheme();
-  const iconColor = useRawCSSTheme("icon");
+  const iconColor = useRawCSSTheme("muted-foreground");
   const shadowTint = colorScheme === "dark" ? "#FFFFFF" : "#000000";
 
   const handleSearch = () => {

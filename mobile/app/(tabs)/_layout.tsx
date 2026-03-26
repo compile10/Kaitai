@@ -10,8 +10,8 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tabIconSelected,
-        tabBarInactiveTintColor: Colors[colorScheme].tabIconDefault,
+        tabBarActiveTintColor: Colors[colorScheme].primary,
+        tabBarInactiveTintColor: Colors[colorScheme]["muted-foreground"],
         tabBarStyle: {
           backgroundColor: Colors[colorScheme].background,
           borderTopColor: Colors[colorScheme].border,
@@ -21,7 +21,7 @@ export default function TabLayout() {
         headerStyle: {
           backgroundColor: Colors[colorScheme].background,
         },
-        headerTintColor: Colors[colorScheme].text,
+        headerTintColor: Colors[colorScheme].foreground,
         tabBarShowLabel: true,
         headerShown: false,
       }}

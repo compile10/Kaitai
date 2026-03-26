@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { useStore } from "zustand";
+import { useSettingsQuery } from "@/hooks/use-settings-query";
 import {
   createSettingsStore,
   type SettingsStore,
@@ -40,9 +41,15 @@ export function SettingsStoreProvider({ children }: { children: ReactNode }) {
 
   return (
     <SettingsStoreContext value={{ store: storeRef.current, isHydrated }}>
+      <SettingsSync />
       {children}
     </SettingsStoreContext>
   );
+}
+
+function SettingsSync() {
+  useSettingsQuery();
+  return null;
 }
 
 export function useSettingsStore<T>(selector: (state: SettingsStore) => T): T {
