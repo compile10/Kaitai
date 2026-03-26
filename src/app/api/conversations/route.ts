@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     const { topic } = await request.json();
 
-    if (!topic || typeof topic !== "string") {
+    if (!topic || typeof topic !== "string" || topic.length > 200) {
       return jsonResponse({ error: "Invalid topic" }, 400);
     }
 

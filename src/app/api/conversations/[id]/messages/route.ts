@@ -35,7 +35,7 @@ export async function POST(
     }
 
     const { message } = await request.json();
-    if (!message || typeof message !== "string") {
+    if (!message || typeof message !== "string" || message.length > 2000) {
       return jsonResponse({ error: "Invalid message" }, 400);
     }
 
