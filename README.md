@@ -8,7 +8,7 @@ AI-powered Japanese sentence breakdown and visualization. Available as a **Next.
 - Interactive dependency visualization (React Flow on web, SVG on mobile)
 - Image upload — extract Japanese text from photos
 - Analysis history for authenticated users
-- Japanese conversation practice with AI scoring
+- Japanese conversation practice with AI scoring (WIP)
 - Server-synced provider/model settings per user
 - Email/password auth via Better Auth
 
