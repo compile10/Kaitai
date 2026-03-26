@@ -24,10 +24,11 @@ export const conversationsCollection = mongoClient
   .db()
   .collection<ConversationDocument & Document>("conversations");
 
-conversationsCollection.createIndex(
-  { userId: 1, updatedAt: -1 },
-  { background: true },
-);
+// Ensure index exists once per process (globalThis guard prevents re-runs on HMR)
+if (!((globalThis as Record<symbol, boolean>)[Symbol.for("kaitai.conversations.indexes")])) {
+  (globalThis as Record<symbol, boolean>)[Symbol.for("kaitai.conversations.indexes")] = true;
+  void conversationsCollection.createIndex({ userId: 1, updatedAt: -1 }, { background: true });
+}
 
 function toConversationResponse(doc: ConversationDocument) {
   return {

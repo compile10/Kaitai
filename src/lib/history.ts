@@ -16,15 +16,15 @@ export const historyCollection = mongoClient
   .db()
   .collection<HistoryDocument & Document>("history");
 
-// Ensure compound indexes exist (idempotent — no-op if already created)
-historyCollection.createIndex(
-  { userId: 1, createdAt: -1 },
-  { background: true },
-);
-historyCollection.createIndex(
-  { userId: 1, sentence: 1 },
-  { background: true, unique: true },
-);
+// Ensure compound indexes exist once per process (globalThis guard prevents re-runs on HMR)
+if (!((globalThis as Record<symbol, boolean>)[Symbol.for("kaitai.history.indexes")])) {
+  (globalThis as Record<symbol, boolean>)[Symbol.for("kaitai.history.indexes")] = true;
+  void historyCollection.createIndex({ userId: 1, createdAt: -1 }, { background: true });
+  void historyCollection.createIndex(
+    { userId: 1, sentence: 1 },
+    { background: true, unique: true },
+  );
+}
 
 /**
  * Save a sentence to the user's history.

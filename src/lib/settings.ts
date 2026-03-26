@@ -21,10 +21,11 @@ const settingsCollection = mongoClient
   .db()
   .collection<SettingsDocument & Document>("user_settings");
 
-settingsCollection.createIndex(
-  { userId: 1 },
-  { unique: true, background: true },
-);
+// Ensure index exists once per process (globalThis guard prevents re-runs on HMR)
+if (!((globalThis as Record<symbol, boolean>)[Symbol.for("kaitai.settings.indexes")])) {
+  (globalThis as Record<symbol, boolean>)[Symbol.for("kaitai.settings.indexes")] = true;
+  void settingsCollection.createIndex({ userId: 1 }, { unique: true, background: true });
+}
 
 export async function getUserSettings(
   userId: string,
