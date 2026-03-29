@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import SignInDialog from "@/components/SignInDialog";
 import UserMenu from "@/components/UserMenu";
+import NavLinks from "@/components/NavLinks";
 import { auth } from "@/lib/auth";
 
 export default async function Header() {
@@ -10,11 +11,12 @@ export default async function Header() {
   });
   return (
     <header className="border-b border-border bg-background relative z-10">
-      <div className="container mx-auto px-4 h-14 flex items-center justify-end gap-2">
+      <div className="px-8 h-14 flex items-center justify-between gap-2">
+        <NavLinks />
         {session ? (
           <UserMenu name={session.user.name} email={session.user.email} />
         ) : (
-          <nav className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <SignInDialog />
             <Link
               href="/sign-up"
@@ -22,7 +24,7 @@ export default async function Header() {
             >
               Sign up
             </Link>
-          </nav>
+          </div>
         )}
       </div>
     </header>
