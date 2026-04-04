@@ -1,17 +1,8 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { StateStorage } from "zustand/middleware";
-import { createMMKV } from "react-native-mmkv";
+import * as SecureStore from "expo-secure-store";
 import type { Provider, ProviderConfig, ModelInfo } from "@common/types";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER, PROVIDER_MAP } from "@common/providers";
-
-const mmkv = createMMKV({ id: "kaitai-settings" });
-
-const mmkvStorage: StateStorage = {
-  getItem: (name) => mmkv.getString(name) ?? null,
-  setItem: (name, value) => mmkv.set(name, value),
-  removeItem: (name) => { mmkv.remove(name); },
-};
 
 export type { Provider, ProviderConfig, ModelInfo };
 export { PROVIDER_MAP };
@@ -51,7 +42,11 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "kaitai-settings",
-      storage: createJSONStorage(() => mmkvStorage),
+      storage: createJSONStorage(() => ({
+        getItem: (name: string) => SecureStore.getItemAsync(name),
+        setItem: (name: string, value: string) => { SecureStore.setItemAsync(name, value); },
+        removeItem: (name: string) => { SecureStore.deleteItemAsync(name); },
+      })),
       onRehydrateStorage: () => (state) => {
         if (state && state.useCustomModel === undefined) {
           state.setUseCustomModel(false);
