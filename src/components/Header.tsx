@@ -18,7 +18,7 @@ export default async function Header() {
             <SignInDialog />
             <Link
               href="/sign-up"
-              className="text-sm px-4 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-colors"
+              className="text-sm px-4 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-md transition-colors"
             >
               Sign up
             </Link>
