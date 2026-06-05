@@ -8,7 +8,6 @@ AI-powered Japanese sentence breakdown and visualization. Available as a **Next.
 - Interactive dependency visualization (React Flow on web, SVG on mobile)
 - Image upload — extract Japanese text from photos
 - Analysis history for authenticated users
-- Japanese conversation practice with AI scoring (WIP)
 - Server-synced provider/model settings per user
 - Email/password auth via Better Auth
 
@@ -63,9 +62,6 @@ Copy `.env.local.example` — set `MONGODB_URI` and at least one AI key:
 | `POST` | `/api/analyze-image` | Extract + analyze text from an image |
 | `GET/PUT` | `/api/settings` | User provider/model settings |
 | `GET` | `/api/history` | Paginated analysis history (auth required) |
-| `GET/POST` | `/api/conversations` | List or create conversations |
-| `GET/DELETE` | `/api/conversations/[id]` | Get or delete a conversation |
-| `POST` | `/api/conversations/[id]/messages` | Send a conversation message |
 | `*` | `/api/auth/*` | Better Auth (sign-in, sign-up, session, etc.) |
 
 `POST /api/analyze` — request body: `{ "sentence": "私は花を見ました。" }`. Provider and model are read from the user's server-side settings.
