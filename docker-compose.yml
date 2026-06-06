@@ -31,7 +31,16 @@ services:
   # ── MongoDB (single-node replica set for transaction support) ──
   mongo:
     image: mongo:7
-    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    command:
+      [
+        "mongod",
+        "--replSet",
+        "rs0",
+        "--bind_ip_all",
+        "--quiet",
+        "--setParameter",
+        "logComponentVerbosity={network:{verbosity:-1}}",
+      ]
     ports:
       - "27017:27017"
     volumes:
@@ -42,7 +51,7 @@ services:
           try { rs.status().ok }
           catch(e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] }); }
         "
-      interval: 5s
+      interval: 30s
       timeout: 10s
       retries: 5
       start_period: 10s
