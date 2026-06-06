@@ -1,23 +1,24 @@
 import "../global.css";
 
+import { QueryClientProvider } from "@tanstack/react-query";
+import { Stack } from "expo-router";
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from "expo-router/react-navigation";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { vars } from "nativewind";
 import type { ReactNode } from "react";
 import { View } from "react-native";
 import "react-native-reanimated";
 
+import { colors } from "@common/tailwind.config";
+
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useSettingsQuery } from "@/hooks/use-settings-sync";
 import { queryClient } from "@/lib/query-client";
 
-const { colors } = require("@common/tailwind.config");
 
 // Pre-build NativeWind vars() style objects for each color scheme.
 // These provide the actual hex values that var(--xxx) references resolve to.
