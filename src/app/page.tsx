@@ -20,6 +20,7 @@ export default function Home() {
               alt="Kaitai 解体"
               width={360}
               height={92}
+              className="h-auto w-56 sm:w-72 md:w-90"
               priority
             />
             <p className="text-lg text-muted-foreground">
