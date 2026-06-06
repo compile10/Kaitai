@@ -82,7 +82,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     >
       <DialogContent
         showCloseButton={false}
-        className="overflow-hidden p-0 sm:max-w-3xl bg-card text-card-foreground border-border max-h-[90vh] flex flex-col"
+        className="overflow-hidden p-0 rounded-none sm:max-w-3xl bg-card text-card-foreground border-border max-h-[90vh] flex flex-col"
       >
         <DialogTitle className="sr-only">Settings</DialogTitle>
 

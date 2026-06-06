@@ -85,7 +85,7 @@ export default function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
     >
       <DialogContent
         showCloseButton={false}
-        className="overflow-hidden p-0 sm:max-w-lg bg-card text-card-foreground border-border h-[80vh] flex flex-col"
+        className="overflow-hidden p-0 rounded-none sm:max-w-lg bg-card text-card-foreground border-border h-[80vh] flex flex-col"
       >
         <DialogTitle className="sr-only">History</DialogTitle>
 
