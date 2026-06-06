@@ -1,5 +1,5 @@
-import { formatRelativeTime } from "@common/format";
 import type { HistoryEntry, PaginatedHistory } from "@common/types";
+import { formatDistanceToNow } from "date-fns";
 import { Ionicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
 import { router } from "expo-router";
@@ -178,7 +178,9 @@ export default function HistoryScreen() {
                 {item.sentence}
               </ThemedText>
               <ThemedText className="text-xs opacity-50 mt-0.5">
-                {formatRelativeTime(item.createdAt)}
+                {formatDistanceToNow(new Date(item.createdAt), {
+                  addSuffix: true,
+                })}
               </ThemedText>
             </View>
 

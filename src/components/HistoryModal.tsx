@@ -1,7 +1,7 @@
 "use client";
 
-import { formatRelativeTime } from "@common/format";
 import type { HistoryEntry, PaginatedHistory } from "@common/types";
+import { formatDistanceToNow } from "date-fns";
 import { Clock as ClockIcon, History } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -162,7 +162,9 @@ export default function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
                       {item.sentence}
                     </p>
                     <span className="text-xs text-muted-foreground whitespace-nowrap mt-0.5">
-                      {formatRelativeTime(item.createdAt)}
+                      {formatDistanceToNow(new Date(item.createdAt), {
+                        addSuffix: true,
+                      })}
                     </span>
                   </div>
                 </button>
