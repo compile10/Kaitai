@@ -2,6 +2,7 @@ import { expo } from "@better-auth/expo";
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { nextCookies } from "better-auth/next-js";
+import { admin } from "better-auth/plugins";
 import mongoClient from "@/lib/db";
 
 // Server side Better Auth instance
@@ -22,6 +23,7 @@ export const auth = betterAuth({
   ],
   plugins: [
     expo(),
+    admin(),
     nextCookies(), // must be last
   ],
   experimental: {
