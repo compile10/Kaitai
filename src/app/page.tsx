@@ -1,30 +1,13 @@
 import logo from "@common/assets/branding/logo.svg";
 import Image from "next/image";
-import DiagonalMarquee from "@/components/DiagonalMarquee";
 import Header from "@/components/Header";
 import HomeContent from "@/components/HomeContent";
+import HomeHeroBackground from "@/components/HomeHeroBackground";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Decorative triangle image — top-right corner */}
-      <div
-        className="absolute top-0 right-0 w-[65vw] h-[80vh] z-0 pointer-events-none"
-        style={{ clipPath: "polygon(0% 0%, 100% 0%, 100% 100%)" }}
-      >
-        <Image
-          src="/harold-wainwright-4JHvZQSMkD4-unsplash.jpg"
-          alt=""
-          fill
-          sizes="50vw"
-          quality={80}
-          className="object-cover"
-          style={{ objectPosition: "8mak0px center" }}
-          priority={false}
-        />
-      </div>
-
-      <DiagonalMarquee />
+      <HomeHeroBackground />
 
       <Header />
 
