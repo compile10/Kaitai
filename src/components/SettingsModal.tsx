@@ -4,8 +4,8 @@ import { PROVIDERS } from "@common/providers";
 import type { Provider } from "@common/types";
 import { Settings } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useSettingsMutation } from "@/hooks/use-settings-query";
-import { authClient } from "@/lib/auth-client";
 import {
   useIsHydrated,
   useSettingsStore,
@@ -43,23 +43,6 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     }
   }, [isOpen, isHydrated, provider, model, resetMutation]);
 
-  // Handle keyboard and scroll lock
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen, onClose]);
-
   const handleProviderChange = (newProvider: Provider) => {
     setDraftProvider(newProvider);
     if (!useCustomModel) {
@@ -87,20 +70,22 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const isSaving = settingsMutation.isPending;
   const saveError = settingsMutation.error?.message ?? null;
 
-  if (!isOpen) return null;
-
   const providerConfig = PROVIDERS.find((p) => p.id === draftProvider);
   const models = providerConfig?.models || [];
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-      onClick={onClose}
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      <div
-        className="bg-card text-card-foreground rounded-lg shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
+      <DialogContent
+        showCloseButton={false}
+        className="overflow-hidden p-0 sm:max-w-3xl bg-card text-card-foreground border-border max-h-[90vh] flex flex-col"
       >
+        <DialogTitle className="sr-only">Settings</DialogTitle>
+
         {/* Header */}
         <div className="bg-primary px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -188,10 +173,14 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               {/* Custom Model Input or Model Selection */}
               {useCustomModel ? (
                 <div className="mb-6">
-                  <label className="block text-sm font-semibold text-card-foreground mb-2">
+                  <label
+                    htmlFor="custom-model-name"
+                    className="block text-sm font-semibold text-card-foreground mb-2"
+                  >
                     Custom Model Name
                   </label>
                   <input
+                    id="custom-model-name"
                     type="text"
                     value={draftModel}
                     onChange={(e) => setDraftModel(e.target.value)}
@@ -281,7 +270,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
