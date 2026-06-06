@@ -27,7 +27,7 @@ export default function SignInScreen() {
     setError(null);
     setIsLoading(true);
 
-    const { error: signInError } = await authClient.signIn.email({
+    const { data, error: signInError } = await authClient.signIn.email({
       email: email.trim(),
       password,
     });
@@ -36,6 +36,9 @@ export default function SignInScreen() {
       setError(signInError.message ?? "Failed to sign in");
       setIsLoading(false);
     } else {
+      if (__DEV__) {
+        console.info("[auth:sign-in]", data?.user);
+      }
       router.back();
     }
   };

@@ -34,7 +34,7 @@ export default function SignUpPage() {
     setError(null);
     setIsLoading(true);
 
-    const { error } = await authClient.signUp.email({
+    const { data, error } = await authClient.signUp.email({
       name,
       email,
       password,
@@ -45,6 +45,9 @@ export default function SignUpPage() {
       setError(error.message ?? "Failed to create account");
       setIsLoading(false);
     } else {
+      if (process.env.NODE_ENV === "development") {
+        console.info("[auth:account-created]", data?.user);
+      }
       router.push("/");
     }
   };

@@ -28,7 +28,7 @@ export default function SignUpScreen() {
     setError(null);
     setIsLoading(true);
 
-    const { error: signUpError } = await authClient.signUp.email({
+    const { data, error: signUpError } = await authClient.signUp.email({
       name: name.trim(),
       email: email.trim(),
       password,
@@ -38,6 +38,9 @@ export default function SignUpScreen() {
       setError(signUpError.message ?? "Failed to create account");
       setIsLoading(false);
     } else {
+      if (__DEV__) {
+        console.info("[auth:account-created]", data?.user);
+      }
       router.back();
     }
   };

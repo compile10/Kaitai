@@ -39,7 +39,7 @@ export default function SignInDialog() {
     setError(null);
     setIsLoading(true);
 
-    const { error } = await authClient.signIn.email({
+    const { data, error } = await authClient.signIn.email({
       email,
       password,
     });
@@ -48,6 +48,9 @@ export default function SignInDialog() {
       setError(error.message ?? "Failed to sign in");
       setIsLoading(false);
     } else {
+      if (process.env.NODE_ENV === "development") {
+        console.info("[auth:sign-in]", data?.user);
+      }
       setOpen(false);
       router.refresh();
     }
