@@ -1,16 +1,19 @@
 "use client";
 
-import { Bot, type LucideIcon, Settings } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { Bot, type LucideIcon, Settings, Shield } from "lucide-react";
+import { type ReactNode, useEffect, useState } from "react";
+import AdminSettingsPage from "@/components/settings/AdminSettingsPage";
 import ModelsSettingsPage from "@/components/settings/ModelsSettingsPage";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { isAdminUser, type SessionUser } from "@/lib/user-utils";
 
 interface SettingsModalProps {
   isOpen: boolean;
+  user: SessionUser;
   onClose: () => void;
 }
 
-type SettingsSection = "models";
+type SettingsSection = "models" | "admin";
 
 const SETTINGS_SECTIONS: Array<{
   id: SettingsSection;
@@ -22,12 +25,33 @@ const SETTINGS_SECTIONS: Array<{
     label: "Models",
     icon: Bot,
   },
+  {
+    id: "admin",
+    label: "Admin",
+    icon: Shield,
+  },
 ];
 
-export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
+export default function SettingsModal({
+  isOpen,
+  user,
+  onClose,
+}: SettingsModalProps) {
   const [activeSection, setActiveSection] = useState<SettingsSection>("models");
+  const isAdmin = isAdminUser(user);
+
+  useEffect(() => {
+    if (!isAdmin && activeSection === "admin") {
+      setActiveSection("models");
+    }
+  }, [activeSection, isAdmin]);
+
+  const visibleSections = SETTINGS_SECTIONS.filter(
+    (section) => section.id !== "admin" || isAdmin,
+  );
   const sectionContent: Record<SettingsSection, ReactNode> = {
     models: <ModelsSettingsPage isOpen={isOpen} onClose={onClose} />,
+    admin: <AdminSettingsPage />,
   };
 
   return (
@@ -69,7 +93,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               className="flex gap-2 overflow-x-auto p-3 sm:flex-col sm:overflow-visible"
               aria-label="Settings sections"
             >
-              {SETTINGS_SECTIONS.map((section) => {
+              {visibleSections.map((section) => {
                 const isActive = activeSection === section.id;
                 const SectionIcon = section.icon;
 

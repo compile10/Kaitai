@@ -12,7 +12,7 @@ export default async function Header() {
     <header className="border-b border-border bg-background relative z-10">
       <div className="container mx-auto px-4 h-14 flex items-center justify-end gap-2">
         {session ? (
-          <UserMenu name={session.user.name} email={session.user.email} />
+          <UserMenu user={session.user} />
         ) : (
           <nav className="flex items-center gap-2">
             <SignInDialog />

@@ -13,13 +13,13 @@ import { createPortal } from "react-dom";
 import HistoryModal from "@/components/HistoryModal";
 import SettingsModal from "@/components/SettingsModal";
 import { authClient } from "@/lib/auth-client";
+import type { SessionUser } from "@/lib/user-utils";
 
 interface UserMenuProps {
-  name: string;
-  email: string;
+  user: SessionUser;
 }
 
-export default function UserMenu({ name, email }: UserMenuProps) {
+export default function UserMenu({ user }: UserMenuProps) {
   const router = useRouter();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -43,7 +43,7 @@ export default function UserMenu({ name, email }: UserMenuProps) {
             className="flex items-center gap-2 px-3 py-1.5 rounded-none text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors outline-none"
           >
             <CircleUser className="w-5 h-5" />
-            <span>{name || email}</span>
+            <span>{user.name || user.email}</span>
           </button>
         </DropdownMenu.Trigger>
 
@@ -91,6 +91,7 @@ export default function UserMenu({ name, email }: UserMenuProps) {
             />
             <SettingsModal
               isOpen={isSettingsOpen}
+              user={user}
               onClose={() => setIsSettingsOpen(false)}
             />
           </>,
