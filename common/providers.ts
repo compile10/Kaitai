@@ -17,8 +17,7 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
       {
         id: "claude-opus-4-6",
         name: "Claude Opus 4.6",
-        description:
-          "Latest flagship model focused on maximum intelligence",
+        description: "Latest flagship model focused on maximum intelligence",
         pricing: "$5.00 / $25.00 per MTok",
         speed: "Moderate",
       },
@@ -39,24 +38,21 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
       {
         id: "gpt-5.4",
         name: "GPT-5.4",
-        description:
-          "Latest flagship model with best overall capability",
+        description: "Latest flagship model with best overall capability",
         pricing: "$2.50 / $15.00 per MTok",
         speed: "Fast",
       },
       {
         id: "gpt-5.4-pro",
         name: "GPT-5.4 Pro",
-        description:
-          "Highest quality GPT-5.4 variant for toughest tasks",
+        description: "Highest quality GPT-5.4 variant for toughest tasks",
         pricing: "See OpenAI pricing (model-specific)",
         speed: "Moderate",
       },
       {
         id: "gpt-5.3-chat-latest",
         name: "GPT-5.3 Chat (Latest)",
-        description:
-          "Rolling latest chat-optimized GPT-5.3 model alias",
+        description: "Rolling latest chat-optimized GPT-5.3 model alias",
         pricing: "See OpenAI pricing (rolling alias)",
         speed: "Fast",
       },
@@ -70,16 +66,14 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
       {
         id: "gemini-3.1-pro-preview",
         name: "Gemini 3.1 Pro Preview",
-        description:
-          "Latest high-capability Gemini preview model",
+        description: "Latest high-capability Gemini preview model",
         pricing: "$2.00 / $12.00 per MTok (<=200k prompt)",
         speed: "Moderate",
       },
       {
         id: "gemini-3.1-flash-lite-preview",
         name: "Gemini 3.1 Flash Lite Preview",
-        description:
-          "Latest low-latency preview model for fast responses",
+        description: "Latest low-latency preview model for fast responses",
         pricing: "$0.25 / $1.50 per MTok",
         speed: "Fastest",
       },
@@ -107,8 +101,7 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
       {
         id: "grok-4.20-beta-0309-non-reasoning",
         name: "Grok 4.20 Beta (Non-Reasoning)",
-        description:
-          "Latest non-reasoning variant for lower latency",
+        description: "Latest non-reasoning variant for lower latency",
         pricing: "$2.00 / $6.00 per MTok",
         speed: "Fast",
       },
@@ -137,16 +130,14 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
       {
         id: "openai/gpt-5.4",
         name: "OpenAI GPT-5.4",
-        description:
-          "Latest GPT model available via OpenRouter",
+        description: "Latest GPT model available via OpenRouter",
         pricing: "$2.50 / $15.00 per MTok",
         speed: "Fast",
       },
       {
         id: "anthropic/claude-sonnet-4.6",
         name: "Anthropic Claude Sonnet 4.6",
-        description:
-          "Latest Claude Sonnet model through OpenRouter",
+        description: "Latest Claude Sonnet model through OpenRouter",
         pricing: "$3.00 / $15.00 per MTok",
         speed: "Fast",
       },
@@ -160,7 +151,8 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
       {
         id: "gpt-oss-120b",
         name: "GPT OSS 120B",
-        description: "Strong open model with excellent reasoning and coding quality",
+        description:
+          "Strong open model with excellent reasoning and coding quality",
         pricing: "$0.25 / $0.69 per MTok",
         speed: "~3000 tok/s",
       },
@@ -195,8 +187,7 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
       {
         id: "accounts/fireworks/models/kimi-k2-instruct-0905",
         name: "Kimi K2 Instruct 0905",
-        description:
-          "Latest high-capability model available on Fireworks",
+        description: "Latest high-capability model available on Fireworks",
         pricing: "$0.60 / $2.50 per MTok",
         speed: "Fast",
       },
@@ -210,8 +201,7 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
       {
         id: "accounts/fireworks/models/glm-5",
         name: "GLM-5",
-        description:
-          "Latest GLM generation model hosted by Fireworks",
+        description: "Latest GLM generation model hosted by Fireworks",
         pricing: "$1.00 / $3.20 per MTok",
         speed: "Fast",
       },
@@ -222,4 +212,5 @@ export const PROVIDER_MAP: Record<Provider, ProviderConfig> = {
 export const PROVIDERS: ProviderConfig[] = Object.values(PROVIDER_MAP);
 
 export const DEFAULT_PROVIDER: Provider = "anthropic";
-export const DEFAULT_MODEL: string = PROVIDER_MAP[DEFAULT_PROVIDER].defaultModel;
+export const DEFAULT_MODEL: string =
+  PROVIDER_MAP[DEFAULT_PROVIDER].defaultModel;

@@ -1,11 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { SETTINGS_KEY } from "@/hooks/use-settings-sync";
 import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
+import { SETTINGS_KEY } from "@/hooks/use-settings-sync";
 import { authClient } from "@/lib/auth-client";
 
 export default function MoreScreen() {
@@ -21,7 +21,10 @@ export default function MoreScreen() {
 
   if (isPending) {
     return (
-      <ThemedView className="flex-1 items-center justify-center" edges={['top', 'left', 'right']}>
+      <ThemedView
+        className="flex-1 items-center justify-center"
+        edges={["top", "left", "right"]}
+      >
         <ActivityIndicator size="large" color={tintColor} />
       </ThemedView>
     );
@@ -36,12 +39,10 @@ export default function MoreScreen() {
     ).toUpperCase();
 
     return (
-      <ThemedView className="flex-1" edges={['top', 'left', 'right']}>
+      <ThemedView className="flex-1" edges={["top", "left", "right"]}>
         {/* User profile header */}
         <View className="items-center pt-10 pb-6 px-5">
-          <View
-            className="w-20 h-20 rounded-full items-center justify-center mb-4 bg-primary"
-          >
+          <View className="w-20 h-20 rounded-full items-center justify-center mb-4 bg-primary">
             <ThemedText className="text-3xl font-bold text-white">
               {initial}
             </ThemedText>
@@ -94,7 +95,10 @@ export default function MoreScreen() {
 
   // Unauthenticated view
   return (
-    <ThemedView className="flex-1 items-center justify-center px-12" edges={['top', 'left', 'right']}>
+    <ThemedView
+      className="flex-1 items-center justify-center px-12"
+      edges={["top", "left", "right"]}
+    >
       <Ionicons name="person-circle-outline" size={80} color={iconColor} />
       <ThemedText type="subtitle" className="mt-4 text-center">
         Welcome to Kaitai
@@ -119,14 +123,11 @@ export default function MoreScreen() {
           onPress={() => router.push("/sign-up")}
           activeOpacity={0.7}
         >
-          <ThemedText
-            className="text-base font-semibold text-primary"
-          >
+          <ThemedText className="text-base font-semibold text-primary">
             Create Account
           </ThemedText>
         </TouchableOpacity>
       </View>
-
     </ThemedView>
   );
 }

@@ -1,13 +1,13 @@
-import { useEffect, type ReactNode } from "react";
-import { View, Modal, Pressable, Dimensions } from "react-native";
+import { type ReactNode, useEffect } from "react";
+import { Dimensions, Modal, Pressable, View } from "react-native";
 import {
   Gesture,
   GestureDetector,
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
+  useSharedValue,
   withTiming,
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
@@ -42,6 +42,7 @@ export function BottomSheet({
   }, [visible, translateY]);
 
   const closeWithAnimation = () => {
+    // eslint-disable-next-line react-hooks/immutability -- Reanimated shared values are intentionally mutable
     translateY.value = withTiming(SCREEN_HEIGHT, { duration: 200 }, () => {
       scheduleOnRN(onClose);
     });
@@ -53,10 +54,12 @@ export function BottomSheet({
 
   const panGesture = Gesture.Pan()
     .onUpdate((e) => {
+      // eslint-disable-next-line react-hooks/immutability -- Reanimated shared values are intentionally mutable
       translateY.value = Math.max(0, e.translationY);
     })
     .onEnd((e) => {
       if (e.translationY > DISMISS_THRESHOLD) {
+        // eslint-disable-next-line react-hooks/immutability -- Reanimated shared values are intentionally mutable
         translateY.value = withTiming(SCREEN_HEIGHT, { duration: 200 }, () => {
           scheduleOnRN(onClose);
         });

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,6 +19,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -139,10 +139,7 @@ export default function SignUpPage() {
         <CardFooter className="justify-center border-t border-border">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link
-              href="/"
-              className="text-primary hover:underline font-medium"
-            >
+            <Link href="/" className="text-primary hover:underline font-medium">
               Sign in
             </Link>
           </p>

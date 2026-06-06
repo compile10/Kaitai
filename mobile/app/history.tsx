@@ -1,21 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  View,
-} from "react-native";
+import { formatRelativeTime } from "@common/format";
+import type { HistoryEntry, PaginatedHistory } from "@common/types";
+import { Ionicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Pressable, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 import { buildApiUrl } from "@/constants/api";
+import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 import { authFetch } from "@/lib/auth-fetch";
-import { formatRelativeTime } from "@common/format";
-import { useSettingsStore, PROVIDER_MAP } from "@/stores/settings-store";
-import type { HistoryEntry, PaginatedHistory } from "@common/types";
+import { PROVIDER_MAP, useSettingsStore } from "@/stores/settings-store";
 
 const PAGE_SIZE = 20;
 
@@ -25,7 +20,8 @@ const PAGE_SIZE = 20;
 function getProviderModelLabel(providerId: string, modelId: string): string {
   const config = PROVIDER_MAP[providerId as keyof typeof PROVIDER_MAP];
   const providerName = config?.name ?? providerId;
-  const modelName = config?.models.find((m) => m.id === modelId)?.name ?? modelId;
+  const modelName =
+    config?.models.find((m) => m.id === modelId)?.name ?? modelId;
   return `${providerName} / ${modelName}`;
 }
 
@@ -70,6 +66,7 @@ export default function HistoryScreen() {
 
   // Initial load
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial fetch loading state is intentional
     setIsLoading(true);
     fetchHistory(1, true).finally(() => setIsLoading(false));
   }, [fetchHistory]);
@@ -103,7 +100,10 @@ export default function HistoryScreen() {
   // --- Loading state ---
   if (isLoading) {
     return (
-      <ThemedView className="flex-1 items-center justify-center" edges={["left", "right"]}>
+      <ThemedView
+        className="flex-1 items-center justify-center"
+        edges={["left", "right"]}
+      >
         <ActivityIndicator size="large" color={tintColor} />
       </ThemedView>
     );
@@ -112,7 +112,10 @@ export default function HistoryScreen() {
   // --- Error state ---
   if (error && items.length === 0) {
     return (
-      <ThemedView className="flex-1 justify-center px-8" edges={["left", "right"]}>
+      <ThemedView
+        className="flex-1 justify-center px-8"
+        edges={["left", "right"]}
+      >
         <View className="items-center gap-3">
           <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
           <ThemedText className="text-center opacity-80">{error}</ThemedText>
@@ -134,7 +137,10 @@ export default function HistoryScreen() {
   // --- Empty state ---
   if (items.length === 0) {
     return (
-      <ThemedView className="flex-1 justify-center items-center px-12" edges={["left", "right"]}>
+      <ThemedView
+        className="flex-1 justify-center items-center px-12"
+        edges={["left", "right"]}
+      >
         <Ionicons name="time-outline" size={64} color={iconColor} />
         <ThemedText type="subtitle" className="mt-4 text-center">
           No History Yet
@@ -152,7 +158,11 @@ export default function HistoryScreen() {
       <FlashList
         data={items}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 32 }}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 12,
+          paddingBottom: 32,
+        }}
         refreshing={isRefreshing}
         onRefresh={handleRefresh}
         onEndReached={handleLoadMore}
@@ -164,10 +174,7 @@ export default function HistoryScreen() {
             style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
           >
             <View className="flex-row items-start justify-between gap-3">
-              <ThemedText
-                className="flex-1 text-base"
-                numberOfLines={2}
-              >
+              <ThemedText className="flex-1 text-base" numberOfLines={2}>
                 {item.sentence}
               </ThemedText>
               <ThemedText className="text-xs opacity-50 mt-0.5">

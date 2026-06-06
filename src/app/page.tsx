@@ -48,7 +48,6 @@ export default function Home() {
           <HomeContent />
         </div>
       </main>
-
     </div>
   );
 }

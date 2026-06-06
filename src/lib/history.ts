@@ -21,7 +21,10 @@ export const historyCollection = mongoClient
 if (!(globalThis as any)["kaitai.history.indexes"]) {
   (globalThis as any)["kaitai.history.indexes"] = true;
   void historyCollection.createIndex({ userId: 1, createdAt: -1 });
-  void historyCollection.createIndex({ userId: 1, sentence: 1 }, { unique: true });
+  void historyCollection.createIndex(
+    { userId: 1, sentence: 1 },
+    { unique: true },
+  );
 }
 
 /**

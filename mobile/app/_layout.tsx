@@ -24,9 +24,7 @@ const { colors } = require("@common/tailwind.config");
 // These provide the actual hex values that var(--xxx) references resolve to.
 function buildVars(scheme: Record<string, string>) {
   return vars(
-    Object.fromEntries(
-      Object.entries(scheme).map(([k, v]) => [`--${k}`, v]),
-    ),
+    Object.fromEntries(Object.entries(scheme).map(([k, v]) => [`--${k}`, v])),
   );
 }
 const lightVars = buildVars(colors.light);
@@ -56,23 +54,23 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <ThemeVars>
-        <SessionPreloader />
-        <Stack>
-          <Stack.Screen
-            name="(tabs)"
-            options={{ headerShown: false, title: "Home" }}
-          />
-          <Stack.Screen name="results" options={{ title: "Analysis" }} />
-          <Stack.Screen name="history" options={{ title: "History" }} />
-          <Stack.Screen name="settings" options={{ title: "Settings" }} />
-          <Stack.Screen name="sign-in" options={{ title: "Sign In" }} />
-          <Stack.Screen name="sign-up" options={{ title: "Sign Up" }} />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeVars>
-    </ThemeProvider>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <ThemeVars>
+          <SessionPreloader />
+          <Stack>
+            <Stack.Screen
+              name="(tabs)"
+              options={{ headerShown: false, title: "Home" }}
+            />
+            <Stack.Screen name="results" options={{ title: "Analysis" }} />
+            <Stack.Screen name="history" options={{ title: "History" }} />
+            <Stack.Screen name="settings" options={{ title: "Settings" }} />
+            <Stack.Screen name="sign-in" options={{ title: "Sign In" }} />
+            <Stack.Screen name="sign-up" options={{ title: "Sign Up" }} />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeVars>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

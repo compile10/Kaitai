@@ -1,21 +1,20 @@
-import { useEffect, useState, useCallback } from "react";
-import {
-  View,
-  ScrollView,
-  ActivityIndicator,
-  TouchableOpacity,
-  useWindowDimensions,
-} from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import type { SentenceAnalysis } from "@common/types";
 import { Ionicons } from "@expo/vector-icons";
 import RenderHTML from "@native-html/render";
-
+import { useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { DependencyMap } from "@/components/dependency-map";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
-import type { SentenceAnalysis } from "@common/types";
 import { buildApiUrl } from "@/constants/api";
+import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 import { authFetch } from "@/lib/auth-fetch";
 
 export default function ResultsScreen() {
@@ -95,12 +94,13 @@ export default function ResultsScreen() {
   }, [sentence, imageUri, imageMimeType, imageFileName]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- route param changes intentionally trigger a fetch
     fetchAnalysis();
   }, [fetchAnalysis]);
 
   if (isLoading) {
     return (
-      <ThemedView className="flex-1" edges={['left', 'right']}>
+      <ThemedView className="flex-1" edges={["left", "right"]}>
         <View className="flex-1 justify-center items-center gap-4">
           <ActivityIndicator size="large" color={tintColor} />
           <ThemedText className="opacity-70">
@@ -115,7 +115,10 @@ export default function ResultsScreen() {
 
   if (error) {
     return (
-      <ThemedView className="flex-1 justify-center pb-32" edges={['left', 'right']}>
+      <ThemedView
+        className="flex-1 justify-center pb-32"
+        edges={["left", "right"]}
+      >
         <View className="mx-5 p-5 rounded-xl border gap-3 bg-error-bg border-error-border">
           <View className="flex-row items-center gap-2">
             <Ionicons name="alert-circle" size={22} color="#dc2626" />
@@ -137,14 +140,14 @@ export default function ResultsScreen() {
 
   if (!analysis) {
     return (
-      <ThemedView className="flex-1" edges={['left', 'right']}>
+      <ThemedView className="flex-1" edges={["left", "right"]}>
         <ThemedText>No analysis available</ThemedText>
       </ThemedView>
     );
   }
 
   return (
-    <ThemedView className="flex-1" edges={['left', 'right']}>
+    <ThemedView className="flex-1" edges={["left", "right"]}>
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
         <View className="mt-2 mb-6">
           <ThemedText type="title" className="mt-1">

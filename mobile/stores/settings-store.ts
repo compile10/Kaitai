@@ -1,8 +1,12 @@
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import {
+  DEFAULT_MODEL,
+  DEFAULT_PROVIDER,
+  PROVIDER_MAP,
+} from "@common/providers";
+import type { ModelInfo, Provider, ProviderConfig } from "@common/types";
 import * as SecureStore from "expo-secure-store";
-import type { Provider, ProviderConfig, ModelInfo } from "@common/types";
-import { DEFAULT_MODEL, DEFAULT_PROVIDER, PROVIDER_MAP } from "@common/providers";
+import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 export type { Provider, ProviderConfig, ModelInfo };
 export { PROVIDER_MAP };
@@ -44,8 +48,12 @@ export const useSettingsStore = create<SettingsState>()(
       name: "kaitai-settings",
       storage: createJSONStorage(() => ({
         getItem: (name: string) => SecureStore.getItemAsync(name),
-        setItem: (name: string, value: string) => { SecureStore.setItemAsync(name, value); },
-        removeItem: (name: string) => { SecureStore.deleteItemAsync(name); },
+        setItem: (name: string, value: string) => {
+          SecureStore.setItemAsync(name, value);
+        },
+        removeItem: (name: string) => {
+          SecureStore.deleteItemAsync(name);
+        },
       })),
       onRehydrateStorage: () => (state) => {
         if (state && state.useCustomModel === undefined) {

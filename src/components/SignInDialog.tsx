@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { LogIn as LogInIcon } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 export default function SignInDialog() {
   const router = useRouter();
@@ -74,7 +74,9 @@ export default function SignInDialog() {
         <div className="bg-primary px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <LogInIcon className="w-6 h-6 text-primary-foreground" />
-            <div className="text-xl font-semibold text-primary-foreground">Sign In</div>
+            <div className="text-xl font-semibold text-primary-foreground">
+              Sign In
+            </div>
           </div>
           <button
             type="button"

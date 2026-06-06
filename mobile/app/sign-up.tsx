@@ -19,7 +19,6 @@ export default function SignUpScreen() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-
   const handleSignUp = async () => {
     if (!name.trim() || !email.trim() || !password.trim()) {
       setError("Please fill in all fields.");
@@ -44,7 +43,7 @@ export default function SignUpScreen() {
   };
 
   return (
-    <ThemedView className="flex-1" edges={['bottom', 'left', 'right']}>
+    <ThemedView className="flex-1" edges={["bottom", "left", "right"]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
@@ -143,9 +142,7 @@ export default function SignUpScreen() {
               onPress={() => router.replace("/sign-in")}
               activeOpacity={0.6}
             >
-              <ThemedText
-                className="text-sm font-semibold text-primary"
-              >
+              <ThemedText className="text-sm font-semibold text-primary">
                 Sign In
               </ThemedText>
             </TouchableOpacity>

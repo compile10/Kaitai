@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, TouchableOpacity } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 
 import { BottomSheet } from "@/components/bottom-sheet";
 import { ThemedText } from "@/components/themed-text";
@@ -59,21 +59,15 @@ export function BottomSheetPicker({
           >
             <View
               className={`w-5 h-5 rounded-full border-2 items-center justify-center mr-3 ${
-                selectedId === option.id
-                  ? "border-primary"
-                  : "border-gray-400"
+                selectedId === option.id ? "border-primary" : "border-gray-400"
               }`}
             >
               {selectedId === option.id && (
-                <View
-                  className="w-2.5 h-2.5 rounded-full bg-primary"
-                />
+                <View className="w-2.5 h-2.5 rounded-full bg-primary" />
               )}
             </View>
             <ThemedText
-              type={
-                selectedId === option.id ? "defaultSemiBold" : "default"
-              }
+              type={selectedId === option.id ? "defaultSemiBold" : "default"}
             >
               {option.label}
             </ThemedText>

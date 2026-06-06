@@ -1,10 +1,9 @@
-import React, { useState, useCallback, useMemo, useRef } from "react";
-import { View, TouchableOpacity, LayoutChangeEvent } from "react-native";
-import Svg, { Path, Circle } from "react-native-svg";
-
+import type { WordNode } from "@common/types";
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import { type LayoutChangeEvent, TouchableOpacity, View } from "react-native";
+import Svg, { Circle, Path } from "react-native-svg";
 import { ThemedText } from "@/components/themed-text";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import type { WordNode } from "@common/types";
 
 // Arc colors — visually distinct, accessible palette
 const ARC_COLORS = [

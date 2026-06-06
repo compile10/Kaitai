@@ -1,5 +1,5 @@
-import { type ViewProps } from "react-native";
-import { SafeAreaView, type Edges } from "react-native-safe-area-context";
+import type { ViewProps } from "react-native";
+import { type Edges, SafeAreaView } from "react-native-safe-area-context";
 
 /**
  * A View that uses the app's theme for its default background (light/dark).

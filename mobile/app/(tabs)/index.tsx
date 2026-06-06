@@ -1,14 +1,12 @@
-import { TextInput, View, TouchableOpacity, Alert, Image } from "react-native";
-import { useState } from "react";
-import { router } from "expo-router";
+import Logo from "@common/assets/branding/logo.svg";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-
-import Logo from "@common/assets/branding/logo.svg";
+import { router } from "expo-router";
+import { useState } from "react";
+import { Alert, Image, TextInput, TouchableOpacity, View } from "react-native";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 
 const EXAMPLE_SENTENCES = [
@@ -34,9 +32,7 @@ function navigateToImageResults(asset: ImagePicker.ImagePickerAsset) {
 export default function HomeScreen() {
   const [searchValue, setSearchValue] = useState("");
   const [sheetVisible, setSheetVisible] = useState(false);
-  const colorScheme = useColorScheme();
   const iconColor = useRawCSSTheme("muted-foreground");
-  const shadowTint = colorScheme === "dark" ? "#FFFFFF" : "#000000";
 
   const handleSearch = () => {
     if (searchValue.trim()) {
@@ -50,8 +46,7 @@ export default function HomeScreen() {
   const handleCamera = async () => {
     setSheetVisible(false);
 
-    const permissionResult =
-      await ImagePicker.requestCameraPermissionsAsync();
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
     if (!permissionResult.granted) {
       Alert.alert(
@@ -102,7 +97,10 @@ export default function HomeScreen() {
   };
 
   return (
-    <ThemedView className="flex-1 items-center px-5" edges={['top', 'left', 'right']}>
+    <ThemedView
+      className="flex-1 items-center px-5"
+      edges={["top", "left", "right"]}
+    >
       <View className="flex-[1]" />
       <Logo width={300} height={76} />
       <ThemedText type="subtitle" className="text-center mt-2">
@@ -133,9 +131,9 @@ export default function HomeScreen() {
           Try these examples:
         </ThemedText>
         <View className="flex-row flex-wrap justify-center gap-2 px-2.5">
-          {EXAMPLE_SENTENCES.map((sentence, index) => (
+          {EXAMPLE_SENTENCES.map((sentence) => (
             <TouchableOpacity
-              key={index}
+              key={sentence}
               className="px-3 py-2 rounded-2xl bg-gray-500 dark:bg-white"
               onPress={() =>
                 router.push({ pathname: "/results", params: { sentence } })
@@ -152,10 +150,7 @@ export default function HomeScreen() {
       <View className="flex-[3]" />
 
       {/* Decorative sakura background */}
-      <View
-        className="absolute -right-6 bottom-[40px]"
-        pointerEvents="none"
-      >
+      <View className="absolute -right-6 bottom-[40px]" pointerEvents="none">
         <Image
           source={require("@/assets/images/sakura_edited_hd.webp")}
           className="w-[280px] h-[280px]"

@@ -41,7 +41,7 @@ export default function SignInScreen() {
   };
 
   return (
-    <ThemedView className="flex-1" edges={['bottom', 'left', 'right']}>
+    <ThemedView className="flex-1" edges={["bottom", "left", "right"]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
@@ -123,9 +123,7 @@ export default function SignInScreen() {
               onPress={() => router.replace("/sign-up")}
               activeOpacity={0.6}
             >
-              <ThemedText
-                className="text-sm font-semibold text-primary"
-              >
+              <ThemedText className="text-sm font-semibold text-primary">
                 Sign Up
               </ThemedText>
             </TouchableOpacity>
