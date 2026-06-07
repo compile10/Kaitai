@@ -54,33 +54,6 @@ Copy `.env.local.example` — set `MONGODB_URI` and at least one AI key:
 | `CEREBRAS_API_KEY` | [cloud.cerebras.ai](https://cloud.cerebras.ai/) |
 | `FIREWORKS_API_KEY` | [fireworks.ai](https://fireworks.ai/) |
 
-## API
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| `POST` | `/api/analyze` | Analyze a Japanese sentence |
-| `POST` | `/api/analyze-image` | Extract + analyze text from an image |
-| `GET/PUT` | `/api/settings` | User provider/model settings |
-| `GET` | `/api/history` | Paginated analysis history (auth required) |
-| `*` | `/api/auth/*` | Better Auth (sign-in, sign-up, session, etc.) |
-
-`POST /api/analyze` — request body: `{ "sentence": "私は花を見ました。" }`. Provider and model are read from the user's server-side settings.
-
-## Tech Stack
-
-| | Web | Mobile |
-|-|-----|--------|
-| Framework | Next.js 16, React 19 | Expo SDK 54, RN 0.81 |
-| Styling | Tailwind CSS v4 | NativeWind 4 (Tailwind v3) |
-| State / Data | Zustand + TanStack Query | Zustand + MMKV + TanStack Query |
-| Visualization | React Flow | react-native-svg |
-| Auth | Better Auth (email/password) | Better Auth (Expo plugin) |
-| Database | MongoDB 7 | — |
-| AI | LangChain (7 providers) | — |
-| Linter | Biome 2.2 | ESLint 9 |
-
-Shared theme: `common/tailwind.config.js`. Shared types/providers: `common/`.
-
 ## Development
 
 ```bash
