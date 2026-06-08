@@ -3,6 +3,7 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins";
+import { ac, adminRole, userRole } from "@/lib/auth-permissions";
 import mongoClient from "@/lib/db";
 
 // Server side Better Auth instance
@@ -23,7 +24,13 @@ export const auth = betterAuth({
   ],
   plugins: [
     expo(),
-    admin(),
+    admin({
+      ac,
+      roles: {
+        admin: adminRole,
+        user: userRole,
+      },
+    }),
     nextCookies(), // must be last
   ],
   experimental: {
