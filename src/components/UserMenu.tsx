@@ -17,9 +17,10 @@ import type { SessionUser } from "@/lib/user-utils";
 
 interface UserMenuProps {
   user: SessionUser;
+  canAccessAdmin: boolean;
 }
 
-export default function UserMenu({ user }: UserMenuProps) {
+export default function UserMenu({ user, canAccessAdmin }: UserMenuProps) {
   const router = useRouter();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -91,7 +92,7 @@ export default function UserMenu({ user }: UserMenuProps) {
             />
             <SettingsModal
               isOpen={isSettingsOpen}
-              user={user}
+              canAccessAdmin={canAccessAdmin}
               onClose={() => setIsSettingsOpen(false)}
             />
           </>,

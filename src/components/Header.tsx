@@ -8,11 +8,27 @@ export default async function Header() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
+
+  // Gate the admin UI on the server so it honors both role-based admins and
+  // adminUserIds, which only the server-side permission engine can resolve.
+  let canAccessAdmin = false;
+  if (session) {
+    const { success } = await auth.api.userHasPermission({
+      body: {
+        userId: session.user.id,
+        permissions: {
+          adminPanel: ["access"],
+        },
+      },
+    });
+    canAccessAdmin = success;
+  }
+
   return (
     <header className="border-b border-border bg-background relative z-10">
       <div className="container mx-auto px-4 h-14 flex items-center justify-end gap-2">
         {session ? (
-          <UserMenu user={session.user} />
+          <UserMenu user={session.user} canAccessAdmin={canAccessAdmin} />
         ) : (
           <nav className="flex items-center gap-2">
             <SignInDialog />

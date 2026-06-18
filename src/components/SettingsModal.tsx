@@ -5,11 +5,10 @@ import { type ReactNode, useEffect, useState } from "react";
 import AdminSettingsPage from "@/components/settings/AdminSettingsPage";
 import ModelsSettingsPage from "@/components/settings/ModelsSettingsPage";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { isAdminUser, type SessionUser } from "@/lib/user-utils";
 
 interface SettingsModalProps {
   isOpen: boolean;
-  user: SessionUser;
+  canAccessAdmin: boolean;
   onClose: () => void;
 }
 
@@ -34,20 +33,19 @@ const SETTINGS_SECTIONS: Array<{
 
 export default function SettingsModal({
   isOpen,
-  user,
+  canAccessAdmin,
   onClose,
 }: SettingsModalProps) {
   const [activeSection, setActiveSection] = useState<SettingsSection>("models");
-  const isAdmin = isAdminUser(user);
 
   useEffect(() => {
-    if (!isAdmin && activeSection === "admin") {
+    if (!canAccessAdmin && activeSection === "admin") {
       setActiveSection("models");
     }
-  }, [activeSection, isAdmin]);
+  }, [activeSection, canAccessAdmin]);
 
   const visibleSections = SETTINGS_SECTIONS.filter(
-    (section) => section.id !== "admin" || isAdmin,
+    (section) => section.id !== "admin" || canAccessAdmin,
   );
   const sectionContent: Record<SettingsSection, ReactNode> = {
     models: <ModelsSettingsPage isOpen={isOpen} onClose={onClose} />,
