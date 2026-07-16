@@ -53,6 +53,17 @@ Copy `.env.local.example` — set `MONGODB_URI` and at least one AI key:
 | `OPENROUTER_API_KEY` | [openrouter.ai](https://openrouter.ai/keys) |
 | `CEREBRAS_API_KEY` | [cloud.cerebras.ai](https://cloud.cerebras.ai/) |
 | `FIREWORKS_API_KEY` | [fireworks.ai](https://fireworks.ai/) |
+| `DEV_ADMIN_EMAIL` | Dev-only; default `admin@localhost.dev` |
+| `DEV_ADMIN_PASSWORD` | Dev-only; default `dev-admin-password` |
+
+### Developer admin account
+
+In development (`NODE_ENV=development`), the app seeds a default admin on startup if it does not already exist:
+
+- **Email:** `admin@localhost.dev`
+- **Password:** `dev-admin-password`
+
+Override with `DEV_ADMIN_EMAIL` / `DEV_ADMIN_PASSWORD` / `DEV_ADMIN_NAME`. This account is never created in production.
 
 ## Development
 
