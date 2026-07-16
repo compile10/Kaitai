@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import type { InviteCode } from "@common/types";
 import type { Document } from "mongodb";
 import { ObjectId } from "mongodb";
 import mongoClient from "@/lib/db";
@@ -14,13 +15,6 @@ export interface InviteCodeDocument {
   usedAt?: Date | null;
   usedByUserId?: string | null;
 }
-
-export type InviteCodeResponse = {
-  id: string;
-  code: string;
-  createdAt: string;
-  expiresAt: string;
-};
 
 export const inviteCodesCollection = mongoClient
   .db()
@@ -45,7 +39,7 @@ function generateInviteCode() {
 
 export function serializeInviteCode(
   inviteCode: InviteCodeDocument,
-): InviteCodeResponse {
+): InviteCode {
   return {
     id: inviteCode._id.toHexString(),
     code: inviteCode.code,
