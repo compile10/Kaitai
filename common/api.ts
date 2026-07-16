@@ -1,4 +1,9 @@
-import type { ImageAnalysisResponse, SentenceAnalysis } from "./types";
+import type {
+  CreateInviteCodeResponse,
+  ImageAnalysisResponse,
+  InviteCode,
+  SentenceAnalysis,
+} from "./types";
 
 export class ApiError extends Error {
   constructor(
@@ -64,4 +69,25 @@ export async function analyzeImage(
   }
 
   return data as ImageAnalysisResponse;
+}
+
+/** Generate a temporary invite code for a permitted administrator. */
+export async function createInviteCode(url: string): Promise<InviteCode> {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new ApiError(
+      data.error || "Failed to generate an invite code",
+      response.status,
+    );
+  }
+
+  return (data as CreateInviteCodeResponse).inviteCode;
 }

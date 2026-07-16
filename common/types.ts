@@ -31,6 +31,17 @@ export interface ImageAnalysisResponse {
   analysis: SentenceAnalysis;
 }
 
+export interface InviteCode {
+  id: string;
+  code: string;
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface CreateInviteCodeResponse {
+  inviteCode: InviteCode;
+}
+
 // Provider types
 export type Provider =
   | "anthropic"
