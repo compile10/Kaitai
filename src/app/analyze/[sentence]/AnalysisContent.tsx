@@ -20,6 +20,9 @@ export default function AnalysisContent({ sentence }: { sentence: string }) {
     }
   }, []);
 
+  // TODO: Replace the `cancelled` flag with an AbortController threaded
+  // through analyzeSentence so stale requests are actually aborted instead of
+  // just having their results ignored.
   useEffect(() => {
     let cancelled = false;
 
