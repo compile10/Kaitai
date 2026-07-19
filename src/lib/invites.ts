@@ -48,6 +48,38 @@ export function serializeInviteCode(
   };
 }
 
+export async function findValidInviteCode(
+  code: string,
+): Promise<InviteCodeDocument | null> {
+  return inviteCodesCollection.findOne({
+    code,
+    usedAt: null,
+    expiresAt: { $gt: new Date() },
+  });
+}
+
+/**
+ * Atomically marks an unused, unexpired invite code as used. Returns false if
+ * the code is invalid or was already claimed (e.g. by a concurrent sign-up).
+ */
+export async function claimInviteCode(code: string): Promise<boolean> {
+  const claimed = await inviteCodesCollection.findOneAndUpdate(
+    { code, usedAt: null, expiresAt: { $gt: new Date() } },
+    { $set: { usedAt: new Date() } },
+  );
+  return claimed !== null;
+}
+
+export async function markInviteCodeUsedBy(
+  code: string,
+  userId: string,
+): Promise<void> {
+  await inviteCodesCollection.updateOne(
+    { code },
+    { $set: { usedByUserId: userId } },
+  );
+}
+
 export async function createInviteCode(
   createdByUserId: string,
 ): Promise<InviteCodeDocument> {
