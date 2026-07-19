@@ -71,9 +71,16 @@ export const auth = betterAuth({
             return;
           }
           const inviteCode = inviteCodeFromBody(ctx.body);
-          if (inviteCode) {
-            await markInviteCodeUsedBy(inviteCode, user.id);
+          if (!inviteCode) {
+            // Unreachable via normal flows: the before hooks reject sign-ups
+            // without a valid invite code, so getting here means they were
+            // bypassed and user creation was not gated.
+            console.error(
+              `[auth] Sign-up user ${user.id} was created without an invite code in the request body; invite hooks did not run as expected.`,
+            );
+            return;
           }
+          await markInviteCodeUsedBy(inviteCode, user.id);
         },
       },
     },
