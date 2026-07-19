@@ -16,11 +16,17 @@ export default function SignUpScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignUp = async () => {
-    if (!name.trim() || !email.trim() || !password.trim()) {
+    if (
+      !name.trim() ||
+      !email.trim() ||
+      !password.trim() ||
+      !inviteCode.trim()
+    ) {
       setError("Please fill in all fields.");
       return;
     }
@@ -28,10 +34,14 @@ export default function SignUpScreen() {
     setError(null);
     setIsLoading(true);
 
+    // inviteCode is not in the better-auth client types but is passed through
+    // to the server, where the sign-up hook validates it.
+    const inviteCodeBody = { inviteCode: inviteCode.trim() };
     const { data, error: signUpError } = await authClient.signUp.email({
       name: name.trim(),
       email: email.trim(),
       password,
+      ...inviteCodeBody,
     });
 
     if (signUpError) {
@@ -113,6 +123,26 @@ export default function SignUpScreen() {
               autoComplete="new-password"
               className="p-4 rounded-xl border-2 border-border text-base text-foreground bg-transparent"
             />
+          </View>
+
+          {/* Invite Code */}
+          <View className="mb-5">
+            <ThemedText type="defaultSemiBold" className="mb-2 text-sm">
+              Invite Code
+            </ThemedText>
+            <TextInput
+              value={inviteCode}
+              onChangeText={setInviteCode}
+              placeholder="Your invite code"
+              placeholderTextColor="#9ca3af"
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="off"
+              className="p-4 rounded-xl border-2 border-border text-base text-foreground bg-transparent"
+            />
+            <ThemedText className="text-xs opacity-70 mt-2">
+              Sign-ups are invite only. Ask an admin for a code.
+            </ThemedText>
           </View>
 
           {/* Error */}

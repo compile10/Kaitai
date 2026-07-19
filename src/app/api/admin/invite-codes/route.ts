@@ -7,6 +7,10 @@ export async function OPTIONS() {
   return corsPreflightResponse();
 }
 
+// TODO: Extract the session/permission boilerplate below into withAuth /
+// withPermission higher-order wrappers (e.g. src/lib/api-auth.ts) and adopt
+// them across all API routes, so handlers receive a non-nullable session
+// instead of repeating the getSession + !session checks.
 export async function POST(request: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });

@@ -26,6 +26,7 @@ export default function SignUpPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -34,11 +35,15 @@ export default function SignUpPage() {
     setError(null);
     setIsLoading(true);
 
+    // inviteCode is not in the better-auth client types but is passed through
+    // to the server, where the sign-up hook validates it.
+    const inviteCodeBody = { inviteCode: inviteCode.trim() };
     const { data, error } = await authClient.signUp.email({
       name,
       email,
       password,
       callbackURL: "/", // server side fallback since we already redirect to "/" in the handler
+      ...inviteCodeBody,
     });
 
     if (error) {
@@ -124,6 +129,30 @@ export default function SignUpPage() {
               />
               <FieldDescription>
                 Must be at least 8 characters long.
+              </FieldDescription>
+            </Field>
+
+            <Field>
+              <FieldLabel
+                htmlFor="inviteCode"
+                className="text-sm font-semibold text-foreground"
+              >
+                Invite code
+              </FieldLabel>
+              <Input
+                id="inviteCode"
+                type="text"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value)}
+                required
+                autoComplete="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                placeholder="Your invite code"
+                className="px-4 py-3 border-2 border-input rounded-lg bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-0 focus:outline-none transition-colors"
+              />
+              <FieldDescription>
+                Sign-ups are invite only. Ask an admin for a code.
               </FieldDescription>
             </Field>
 
