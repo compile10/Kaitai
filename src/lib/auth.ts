@@ -41,6 +41,8 @@ export const auth = betterAuth({
     "kaitai://",
     ...(process.env.NODE_ENV === "development" ? ["exp://", "exp://**"] : []),
   ],
+  // The invite gate below is scoped to /sign-up/email, so any new public
+  // signup surface added later (e.g. social login) must be gated separately.
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
       if (ctx.path !== "/sign-up/email") {
