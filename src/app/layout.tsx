@@ -8,7 +8,7 @@ import "@fontsource/rampart-one/400.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Kaitai (解体) - Japanese Sentence Analyzer",
+  title: "Kaitai (解体)",
   description:
     "Visualize Japanese sentence structure with AI-powered analysis. Analyze grammar, particles, and word relationships.",
 };

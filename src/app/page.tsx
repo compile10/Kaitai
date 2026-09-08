@@ -24,7 +24,7 @@ export default function Home() {
               priority
             />
             <p className="text-lg text-muted-foreground">
-              Breaking the language barrier.
+              Bionic Language Learning System
             </p>
           </div>
 
