@@ -15,6 +15,12 @@ export const analysisSchema = z.object({
         .describe(
           "The actual text of the word/phrase in Japanese (NOT including particles - those go in attachedParticle)",
         ),
+      translation: z
+        .string()
+        .min(1)
+        .describe(
+          "Concise English meaning of this word/phrase in this sentence, excluding its attached particle",
+        ),
       reading: z
         .string()
         .nullable()

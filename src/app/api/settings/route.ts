@@ -1,4 +1,4 @@
-import type { UserSettings } from "@common/types";
+import { z } from "zod";
 import { withAuth } from "@/lib/api-auth";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
 import { RATE_LIMIT_POLICIES } from "@/lib/rate-limit";
@@ -18,24 +18,20 @@ export const GET = withAuth(
 export const PUT = withAuth(
   { name: "update settings", rateLimit: RATE_LIMIT_POLICIES.settings },
   async (request, session) => {
-    const settings: unknown = await request.json();
-    // Accept only fields supported by the account settings API.
-    if (
-      !settings ||
-      typeof settings !== "object" ||
-      Array.isArray(settings) ||
-      Object.keys(settings).length > 0
-    ) {
+    const result = z
+      .object({ showWordTranslations: z.boolean().optional() })
+      .strict()
+      .safeParse(await request.json().catch(() => null));
+    if (!result.success) {
       return jsonResponse(
         {
           error:
-            "No account settings can be changed. Send an empty JSON object ({}).",
+            "Send a JSON object with a boolean showWordTranslations setting.",
         },
         400,
       );
     }
-    return jsonResponse(
-      await upsertUserSettings(session.user.id, settings as UserSettings),
-    );
+    const settings = { ...(await resolveSettings(session)), ...result.data };
+    return jsonResponse(await upsertUserSettings(session.user.id, settings));
   },
 );

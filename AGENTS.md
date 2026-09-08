@@ -2,7 +2,7 @@
 
 Kaitai is an invite-only beta for AI-powered Japanese sentence analysis. The repo is a Next.js 16 web app (the product and the API) plus a separate Expo/React Native app in `mobile/` that talks to those same routes. Shared types and fetch helpers live in `common/`. Auth is Better Auth (email/password) on MongoDB; signup is gated by admin-issued invite codes, and `src/proxy.ts` sends signed-out web visitors to `/beta`. Sentence analysis and image text extraction run on the server through LangChain. History documents include provider and model metadata for debugging.
 
-This file is a map of the tree, not a design doc. When you add, remove, rename, or repurpose a path, update the matching line here in the same change. Stale entries are worse than missing ones. Also keep the description above up-to-date as the project evolves. This does not represent every file in the project, just the important ones.
+This file is a map of the tree, not a design doc. Keep entries focused on broad file responsibilities; omit individual settings, UI interactions, and feature-level implementation details. When you add, remove, rename, or repurpose a path, update the matching line here in the same change. Stale entries are worse than missing ones. Also keep the description above up-to-date as the project evolves. This does not represent every file in the project, just the important ones.
 
 When testing, run the web app through the dockerfile with docker compose.
 
@@ -101,10 +101,11 @@ All analysis/history/settings routes require a session (`withAuth`). Invite crea
 | `components/HomeContent.tsx` | Home interactive area |
 | `components/SentenceInput.tsx` | Sentence field + submit |
 | `components/SentenceVisualization.tsx` | React Flow dependency graph |
+| `components/WordCell.tsx` | Word cell for the sentence graph |
 | `components/ImageUploadModal.tsx` | Photo → `/api/analyze-image` |
 | `components/HistoryModal.tsx` | Paginated history |
-| `components/SettingsModal.tsx` | Settings shell: General placeholder + admin invites |
-| `components/settings/GeneralSettingsPage.tsx` | Account settings placeholder |
+| `components/SettingsModal.tsx` | Settings shell: account preferences + admin invites |
+| `components/settings/GeneralSettingsPage.tsx` | Account preferences |
 | `components/settings/AdminSettingsPage.tsx` | Invite generation (admin) |
 | `components/SignInDialog.tsx` | Sign-in |
 | `components/UserMenu.tsx` | Account menu |
@@ -112,9 +113,9 @@ All analysis/history/settings routes require a session (`withAuth`). Invite crea
 | `components/HomeHeroBackground.tsx` | Home background |
 | `components/DiagonalMarquee.tsx` | Decorative marquee |
 | `components/ui/` | shadcn primitives |
-| `stores/settings-store.ts` | Zustand + localStorage account settings scaffold |
+| `stores/settings-store.ts` | Zustand + localStorage account preferences |
 | `providers/settings-store-provider.tsx` | Hydrates store; syncs account preferences from server |
-| `hooks/use-settings-query.ts` | GET/PUT `/api/settings` query + mutation scaffold |
+| `hooks/use-settings-query.ts` | GET/PUT `/api/settings` query + mutation |
 | `providers/query-client-provider.tsx` | TanStack Query |
 | `hooks/use-drag-drop.ts` | Image drag-and-drop |
 | `proxy.ts` | Prelaunch gate: signed-out → `/beta` (cookie presence only; not auth) |
@@ -131,7 +132,7 @@ Separate Expo 56 app (file routing). Dev API host is inferred from Expo `hostUri
 | `app/(tabs)/more.tsx` | More / overflow tab |
 | `app/results.tsx` | Analysis results |
 | `app/history.tsx` | History |
-| `app/settings.tsx` | General settings placeholder |
+| `app/settings.tsx` | Account preferences |
 | `app/sign-in.tsx` / `sign-up.tsx` | Auth |
 | `components/themed-text.tsx` | Geist `ThemedText` / `ThemedTextInput` |
 | `components/dependency-map.tsx` | SVG dependency graph |
@@ -141,7 +142,7 @@ Separate Expo 56 app (file routing). Dev API host is inferred from Expo `hostUri
 | `lib/auth-client.ts` | Better Auth Expo client (SecureStore) |
 | `lib/auth-fetch.ts` | Authenticated fetch |
 | `lib/query-client.ts` | Shared Query client |
-| `hooks/use-settings-sync.ts` | Server account preferences → Zustand; query + mutation scaffold |
+| `hooks/use-settings-sync.ts` | Server account preferences → Zustand; query + mutation |
 | `stores/settings-store.ts` | Persisted account preferences |
 | `android/` / `ios/` | Native projects from `expo prebuild` |
 

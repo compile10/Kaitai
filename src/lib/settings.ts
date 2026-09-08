@@ -1,9 +1,9 @@
-import type { UserSettings } from "@common/types";
+import { DEFAULT_USER_SETTINGS, type UserSettings } from "@common/types";
 import mongoClient from "@/lib/db";
 
 export interface SettingsDocument {
   userId: string;
-  preferences?: UserSettings;
+  preferences?: Partial<UserSettings>;
   updatedAt: Date;
 }
 
@@ -16,7 +16,7 @@ export async function getUserSettings(
 ): Promise<UserSettings | null> {
   const doc = await settingsCollection.findOne({ userId });
   if (!doc) return null;
-  return doc.preferences ?? {};
+  return { ...DEFAULT_USER_SETTINGS, ...doc.preferences };
 }
 
 export async function upsertUserSettings(
@@ -36,5 +36,7 @@ export async function upsertUserSettings(
 export async function resolveSettings(session: {
   user: { id: string };
 }): Promise<UserSettings> {
-  return (await getUserSettings(session.user.id)) ?? {};
+  return (
+    (await getUserSettings(session.user.id)) ?? { ...DEFAULT_USER_SETTINGS }
+  );
 }

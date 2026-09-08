@@ -2,6 +2,12 @@
 @import "tw-animate-css";
 @config "../../common/tailwind.config.js";
 
+:root {
+  --font-geist-sans: "Geist Variable";
+  --font-geist-mono: "Geist Mono Variable";
+  --font-rampart-one: "Rampart One";
+}
+
 /* Class-based dark mode for next-themes */
 @custom-variant dark (&:is(.dark *));
 

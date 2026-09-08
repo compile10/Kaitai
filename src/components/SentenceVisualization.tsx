@@ -17,6 +17,7 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import ParticleModal from "./ParticleModal";
+import WordCell from "./WordCell";
 
 interface SentenceVisualizationProps {
   analysis: SentenceAnalysis;
@@ -59,27 +60,7 @@ function WordNodeComponent({ data }: { data: WordNodeData }) {
         style={{ opacity: 0, top: 0 }}
       />
 
-      {/* Main word box */}
-      <div
-        className={`border-2 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow ${
-          word.isTopic
-            ? "bg-topic-bg border-topic-border"
-            : "bg-card border-border"
-        }`}
-        style={{ minWidth: "120px", maxWidth: "150px" }}
-      >
-        <div className="text-xl font-bold text-foreground mb-1 text-center">
-          {word.text}
-        </div>
-        {word.reading && (
-          <div className="text-sm text-muted-foreground mb-2 text-center">
-            {word.reading}
-          </div>
-        )}
-        <div className="text-xs text-primary font-medium text-center">
-          {word.partOfSpeech}
-        </div>
-      </div>
+      <WordCell word={word} />
 
       {/* Attached particle (if any) */}
       {word.attachedParticle && (
@@ -260,8 +241,6 @@ export default function SentenceVisualization({
         type: "wordNode",
         position: { x: startX + i * spacing, y: 100 },
         data: { word, onParticleClick: handleParticleClick },
-        width: 130,
-        height: 80,
         sourcePosition: Position.Right,
         targetPosition: Position.Left,
       });
@@ -308,27 +287,7 @@ export default function SentenceVisualization({
 
   const renderTopicWord = (word: WordNode) => (
     <div key={word.id} className="relative flex items-start gap-0">
-      {/* Main word box */}
-      <div
-        className={`border-2 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow ${
-          word.isTopic
-            ? "bg-topic-bg border-topic-border"
-            : "bg-card border-border"
-        }`}
-        style={{ maxWidth: "150px" }}
-      >
-        <div className="text-xl font-bold text-foreground mb-1 text-center">
-          {word.text}
-        </div>
-        {word.reading && (
-          <div className="text-sm text-muted-foreground mb-2 text-center">
-            {word.reading}
-          </div>
-        )}
-        <div className="text-xs text-primary font-medium text-center">
-          {word.partOfSpeech}
-        </div>
-      </div>
+      <WordCell word={word} />
 
       {/* Attached particle (if any) */}
       {word.attachedParticle && (
@@ -462,8 +421,9 @@ export default function SentenceVisualization({
                 </span>
               </p>
               <p className="mt-1">
-                <strong>Tip:</strong> You can drag nodes to rearrange them, zoom
-                with the mouse wheel, and pan by dragging the background.
+                <strong>Tip:</strong> Click a blurred translation to reveal it.
+                You can drag nodes to rearrange them, zoom with the
+                mouse wheel, and pan by dragging the background.
               </p>
             </div>
           </div>

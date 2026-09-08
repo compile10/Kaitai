@@ -28,10 +28,15 @@ export function getCachedResponse(cacheKey: string): SentenceAnalysis | null {
   const cached = responseCache.get(cacheKey);
   if (cached) {
     const now = Date.now();
-    if (now - cached.timestamp <= CACHE_DURATION_MS) {
+    const hasWordTranslations = cached.data.words.every(
+      (word) =>
+        typeof word.translation === "string" &&
+        word.translation.trim().length > 0,
+    );
+    if (now - cached.timestamp <= CACHE_DURATION_MS && hasWordTranslations) {
       return cached.data;
     }
-    // Expired, remove it
+    // Discard expired entries and analyses without word translations.
     responseCache.delete(cacheKey);
   }
   return null;

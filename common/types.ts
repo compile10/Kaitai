@@ -1,6 +1,7 @@
 export interface WordNode {
   id: string;
   text: string;
+  translation: string;
   reading: string | null;
   partOfSpeech: string;
   modifies: string[] | null; // IDs of words this word modifies
@@ -58,4 +59,10 @@ export interface PaginatedHistory {
 }
 
 /** Account preferences exposed by the settings API. */
-export type UserSettings = Record<string, never>;
+export interface UserSettings {
+  showWordTranslations: boolean;
+}
+
+export const DEFAULT_USER_SETTINGS: UserSettings = {
+  showWordTranslations: true,
+};

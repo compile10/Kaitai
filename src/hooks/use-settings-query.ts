@@ -10,7 +10,7 @@ export function useSettingsQuery() {
   const setSettings = useSettingsStore((s) => s.setSettings);
 
   return useQuery({
-    queryKey: SETTINGS_QUERY_KEY,
+    queryKey: [...SETTINGS_QUERY_KEY, session?.user.id],
     queryFn: async (): Promise<UserSettings> => {
       const res = await fetch("/api/settings");
       if (!res.ok) {
@@ -28,6 +28,7 @@ export function useSettingsQuery() {
 }
 
 export function useSettingsMutation() {
+  const { data: session } = authClient.useSession();
   const queryClient = useQueryClient();
   const setSettings = useSettingsStore((s) => s.setSettings);
 
@@ -46,7 +47,10 @@ export function useSettingsMutation() {
     },
     onSuccess: (settings) => {
       setSettings(settings);
-      queryClient.setQueryData(SETTINGS_QUERY_KEY, settings);
+      queryClient.setQueryData(
+        [...SETTINGS_QUERY_KEY, session?.user.id],
+        settings,
+      );
     },
   });
 }

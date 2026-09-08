@@ -1,25 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Rampart_One } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { QueryClientProvider } from "@/providers/query-client-provider";
 import { SettingsStoreProvider } from "@/providers/settings-store-provider";
+import "@fontsource-variable/geist";
+import "@fontsource-variable/geist-mono";
+import "@fontsource/rampart-one/400.css";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const rampartOne = Rampart_One({
-  variable: "--font-rampart-one",
-  weight: "400",
-  subsets: [],
-});
 
 export const metadata: Metadata = {
   title: "Kaitai (解体) - Japanese Sentence Analyzer",
@@ -34,9 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${rampartOne.variable} antialiased`}
-      >
+      <body className="antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <QueryClientProvider>
             <SettingsStoreProvider>{children}</SettingsStoreProvider>

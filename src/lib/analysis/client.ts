@@ -1,7 +1,7 @@
 import { ChatOpenAI } from "@langchain/openai";
 
 export const ANALYSIS_PROVIDER = "openrouter";
-export const ANALYSIS_MODEL = "moonshotai/kimi-k3";
+export const ANALYSIS_MODEL = "google/gemini-3.8-flash";
 
 /** Creates the OpenRouter client for sentence analysis and image extraction. */
 export function createChatModel() {

@@ -1,8 +1,27 @@
+import { Ionicons } from "@expo/vector-icons";
 import type { WordNode } from "@common/types";
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import { type LayoutChangeEvent, TouchableOpacity, View } from "react-native";
-import Svg, { Circle, Path } from "react-native-svg";
+import { useCallback, useId, useMemo, useRef, useState } from "react";
+import {
+  type LayoutChangeEvent,
+  type TextLayoutEvent,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from "react-native";
+import Svg, {
+  Circle,
+  Defs,
+  FeGaussianBlur,
+  Filter,
+  G,
+  Path,
+  Rect,
+  Text as SvgText,
+} from "react-native-svg";
 import { ThemedText } from "@/components/themed-text";
+import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
+import { useSettingsQuery } from "@/hooks/use-settings-sync";
+import { geist } from "@/lib/fonts";
 
 // Arc colors — visually distinct, accessible palette
 const ARC_COLORS = [
@@ -254,9 +273,7 @@ export function DependencyMap({ words }: DependencyMapProps) {
       </View>
 
       {/* Legend */}
-      <View
-        className="mt-3 px-3 py-2 rounded-lg flex-row flex-wrap gap-x-4 gap-y-1 items-center bg-muted"
-      >
+      <View className="mt-3 px-3 py-2 rounded-lg flex-row flex-wrap gap-x-4 gap-y-1 items-center bg-muted">
         <View className="flex-row items-center gap-1">
           <View className="w-3 h-3 rounded-sm bg-violet-600" />
           <ThemedText className="text-xs opacity-60">Topic</ThemedText>
@@ -296,6 +313,8 @@ function WordMapCard({
   isAnySelected,
   onPress,
 }: WordMapCardProps) {
+  const { data: settings } = useSettingsQuery();
+  const showTranslation = settings?.showWordTranslations ?? false;
   const isTopic = word.isTopic === true;
 
   // Determine border and background
@@ -308,8 +327,11 @@ function WordMapCard({
   }
 
   const dimmed = isAnySelected && !isConnected;
-  const highlighted = isSelected || (isAnySelected && isConnected);
-  if (highlighted) borderClass = "border-primary";
+  if (isAnySelected && isConnected) borderClass = "border-graph-connected-border";
+  if (isSelected) {
+    bgClass = "bg-graph-selected-bg";
+    borderClass = "border-graph-selected-border";
+  }
 
   return (
     <TouchableOpacity
@@ -318,9 +340,9 @@ function WordMapCard({
       style={{ opacity: dimmed ? 0.4 : 1 }}
     >
       <View
-        className={`px-4 py-3 rounded-xl border-2 ${bgClass} ${borderClass}`}
+        className={`px-3 py-2 rounded-xl border-2 ${bgClass} ${borderClass}`}
       >
-        <View className="flex-row items-center flex-wrap gap-x-2 gap-y-1">
+        <View className="flex-row items-center flex-wrap gap-x-1.5 gap-y-0.5">
           {/* Topic badge */}
           {isTopic && (
             <View className="bg-violet-600 px-1.5 py-0.5 rounded">
@@ -355,6 +377,15 @@ function WordMapCard({
           </ThemedText>
         </View>
 
+        {word.translation && (
+          <CellTranslation
+            key={`${word.id}:${word.translation}:${showTranslation}`}
+            word={word}
+            showTranslation={showTranslation}
+            isSelected={isSelected}
+          />
+        )}
+
         {/* Modifies label */}
         {word.modifies && word.modifies.length > 0 && (
           <ThemedText className="text-xs opacity-50 mt-1">
@@ -378,5 +409,125 @@ function WordMapCard({
         )}
       </View>
     </TouchableOpacity>
+  );
+}
+
+function CellTranslation({
+  word,
+  showTranslation,
+  isSelected,
+}: {
+  word: WordNode;
+  showTranslation: boolean;
+  isSelected: boolean;
+}) {
+  const [revealed, setRevealed] = useState(false);
+  const textColor = useRawCSSTheme("foreground");
+  const visible = showTranslation || revealed;
+  return (
+    <View className="flex-row items-center gap-2 mt-1 min-h-8">
+      <View className="shrink" pointerEvents="none">
+        {visible ? (
+          <ThemedText
+            className="py-1"
+            style={{ fontSize: 14 }}
+            accessibilityLiveRegion="polite"
+          >
+            {word.translation}
+          </ThemedText>
+        ) : (
+          <BlurredTranslation text={word.translation} color={textColor} />
+        )}
+      </View>
+      {!showTranslation && isSelected && (
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={`${revealed ? "Hide" : "Reveal"} English meaning of ${word.text}`}
+          className="items-center justify-center w-8 h-8 shrink-0"
+          hitSlop={6}
+          onPress={(event) => {
+            event.stopPropagation();
+            setRevealed((value) => !value);
+          }}
+        >
+          <Ionicons
+            name={revealed ? "eye-off-outline" : "eye-outline"}
+            size={18}
+            color={textColor}
+          />
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+}
+
+function BlurredTranslation({ text, color }: { text: string; color: string }) {
+  const [lines, setLines] = useState<TextLayoutEvent["nativeEvent"]["lines"]>(
+    [],
+  );
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const { fontScale } = useWindowDimensions();
+  const filterId = useId();
+  return (
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={{ padding: 6, margin: -6 }}
+      onLayout={(event) => {
+        const { width, height } = event.nativeEvent.layout;
+        setSize({ width, height });
+      }}
+    >
+      {/* Measure native wrapping so the blurred text has the same layout. */}
+      <ThemedText
+        className="py-1"
+        selectable={false}
+        style={{ opacity: 0, fontSize: 14 }}
+        onTextLayout={(event) => setLines(event.nativeEvent.lines)}
+      >
+        {text}
+      </ThemedText>
+      <Svg
+        key={`${size.width}:${size.height}`}
+        width={size.width}
+        height={size.height}
+        style={{ position: "absolute", top: 0, left: 0 }}
+      >
+        <Defs>
+          <Filter
+            id={filterId}
+            x="0"
+            y="0"
+            width={size.width}
+            height={size.height}
+            filterUnits="userSpaceOnUse"
+          >
+            <FeGaussianBlur
+              stdDeviation={4}
+              x="0"
+              y="0"
+              width={size.width}
+              height={size.height}
+            />
+          </Filter>
+        </Defs>
+        <G filter={`url(#${filterId})`}>
+          {/* Give the blur room to spread beyond short words. */}
+          <Rect width={size.width} height={size.height} fill="transparent" />
+          {lines.map((line, index) => (
+            <SvgText
+              key={index}
+              x={line.x + 6}
+              y={line.y + line.ascender + 10}
+              fontFamily={geist.regular}
+              fontSize={14 * fontScale}
+              fill={color}
+            >
+              {line.text}
+            </SvgText>
+          ))}
+        </G>
+      </Svg>
+    </View>
   );
 }

@@ -16,7 +16,7 @@ export function useSettingsQuery() {
   const setSettings = useSettingsStore((s) => s.setSettings);
 
   return useQuery({
-    queryKey: SETTINGS_KEY,
+    queryKey: [...SETTINGS_KEY, session?.user.id],
     queryFn: async (): Promise<UserSettings> => {
       const res = await authFetch(`${API_BASE_URL}/api/settings`);
       if (!res.ok) {
@@ -38,6 +38,7 @@ export function useSettingsQuery() {
  * Updates the TanStack Query cache on success.
  */
 export function useSettingsMutation() {
+  const { data: session } = authClient.useSession();
   const queryClient = useQueryClient();
   const setSettings = useSettingsStore((s) => s.setSettings);
 
@@ -56,7 +57,7 @@ export function useSettingsMutation() {
     },
     onSuccess: (settings) => {
       setSettings(settings);
-      queryClient.setQueryData(SETTINGS_KEY, settings);
+      queryClient.setQueryData([...SETTINGS_KEY, session?.user.id], settings);
     },
   });
 }

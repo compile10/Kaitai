@@ -47,6 +47,9 @@ const colors = {
     "warning-border": "#fef08a", // yellow-200
     "topic-bg": "#fff1f2", // rose-50
     "topic-border": "#fda4af", // rose-300
+    "graph-selected-bg": "#dbeafe", // blue-100
+    "graph-selected-border": "#2563eb", // blue-600
+    "graph-connected-border": "#93c5fd", // blue-300
 
     // -- prose (HTML-formatted LLM content) ------------------------------
     "prose-text": "#4b5563", // gray-600
@@ -94,6 +97,9 @@ const colors = {
     "warning-border": "#854d0e", // amber-800
     "topic-bg": "#4c0519", // rose-950
     "topic-border": "#e11d48", // rose-600
+    "graph-selected-bg": "#172554", // blue-950
+    "graph-selected-border": "#60a5fa", // blue-400
+    "graph-connected-border": "#93c5fd", // blue-300
 
     // -- prose (HTML-formatted LLM content) ------------------------------
     "prose-text": "#e5e7eb", // gray-200

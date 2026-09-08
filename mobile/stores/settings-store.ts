@@ -1,4 +1,4 @@
-import type { UserSettings } from "@common/types";
+import { DEFAULT_USER_SETTINGS, type UserSettings } from "@common/types";
 import * as SecureStore from "expo-secure-store";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -13,8 +13,9 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      settings: {},
-      setSettings: (settings) => set({ settings }),
+      settings: { ...DEFAULT_USER_SETTINGS },
+      setSettings: (settings) =>
+        set({ settings: { ...DEFAULT_USER_SETTINGS, ...settings } }),
       isHydrated: false,
       setHydrated: (isHydrated) => set({ isHydrated }),
     }),
