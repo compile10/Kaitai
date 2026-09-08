@@ -65,31 +65,18 @@ export default function HomeContent() {
           <h3 className="text-lg font-semibold mb-3 text-card-foreground">
             How it works
           </h3>
-          <ul className="space-y-2 text-card-foreground/70">
-            <li className="flex items-start">
-              <span className="mr-2">1.</span>
-              <span>Enter a Japanese sentence in the input field above</span>
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2">2.</span>
-              <span>
-                Click &quot;Analyze Sentence&quot; to send it to AI for analysis
-              </span>
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2">3.</span>
-              <span>
-                View the visual representation showing how words modify each
-                other
-              </span>
-            </li>
-            <li className="flex items-start">
-              <span className="mr-2">4.</span>
-              <span>
-                Read the detailed explanation of the sentence structure
-              </span>
-            </li>
-          </ul>
+          <div className="space-y-3 text-card-foreground/70">
+            <p>
+              The best way to learn Japanese is through exposure to real Japanese
+              sentences but unfamiliar words and grammar can make them hard to
+              understand.
+            </p>
+            <p>
+              Kaitai uses AI to break down any sentence into its components,
+              explaining grammar points, sentence structure, and word meanings so
+              you learn beyond normal speed.
+            </p>
+          </div>
         </div>
       )}
 
