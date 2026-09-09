@@ -81,7 +81,7 @@ All analysis/history/settings routes require a session (`withAuth`). Invite crea
 | `settings.ts` | Mongo account preference helpers + authenticated settings resolver |
 | `history.ts` | `history` collection; upsert on `{ userId, sentence }`; stores provider/model metadata for debugging |
 | `invites.ts` | `inviteCodes` collection: create, claim, TTL |
-| `cors.ts` | JSON + preflight helpers (`*` in dev, empty origin in prod) |
+| `cors.ts` | JSON + preflight helpers (`*` in dev, origin header omitted in prod) |
 | `validation.ts` | `sanitizeForLLM` |
 | `dev-seed.ts` | Seeds `admin@localhost.dev` in development only |
 | `user-utils.ts` | `SessionUser` type |

@@ -1,23 +1,18 @@
 import { NextResponse } from "next/server";
 
 /**
- * Resolve the allowed origin for CORS.
+ * Shared CORS headers for JSON and preflight responses.
  *
- * - Development: returns "*" (all origins allowed).
- * - Production: returns "" so the browser blocks any cross-origin request.
+ * - Non-production: allows all origins with "*".
+ * - Production: omits Access-Control-Allow-Origin, so browsers do not allow
+ *   cross-origin access to responses.
  *   Same-origin requests (the web app calling its own API) bypass CORS
  *   entirely. The mobile app uses native HTTP and ignores CORS headers.
  */
-function getAllowedOrigin(): string {
-  if (process.env.NODE_ENV !== "production") {
-    return "*";
-  }
-
-  return "";
-}
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": getAllowedOrigin(),
+const corsHeaders: Record<string, string> = {
+  ...(process.env.NODE_ENV !== "production"
+    ? { "Access-Control-Allow-Origin": "*" }
+    : {}),
   "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
   "Access-Control-Expose-Headers":
