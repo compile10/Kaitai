@@ -1,3 +1,5 @@
+import { clientError } from "@common/monitoring";
+import { reportMobileError } from "@/lib/monitoring";
 import type { SentenceAnalysis } from "@common/types";
 import { Ionicons } from "@expo/vector-icons";
 import RenderHTML from "@native-html/render";
@@ -88,6 +90,7 @@ export default function ResultsScreen() {
         setAnalysis(data as SentenceAnalysis);
       }
     } catch (err) {
+      reportMobileError(err, clientError.mobile_analysis);
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);

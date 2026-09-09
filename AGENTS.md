@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Kaitai is an invite-only beta for AI-powered Japanese sentence analysis. The repo is a Next.js 16 web app (the product and the API) plus a separate Expo/React Native app in `mobile/` that talks to those same routes. Shared types and fetch helpers live in `common/`. Auth is Better Auth (email/password) on MongoDB; signup is gated by admin-issued invite codes, and `src/proxy.ts` sends signed-out web visitors to `/beta`. Sentence analysis and image text extraction run on the server through LangChain. History documents include provider and model metadata for debugging.
+Kaitai is an invite-only beta for AI-powered Japanese sentence analysis. The repo is a Next.js 16 web app (the product and the API) plus a separate Expo/React Native app in `mobile/` that talks to those same routes. Shared types and fetch helpers live in `common/`. Auth is Better Auth (email/password) on MongoDB; signup is gated by admin-issued invite codes, and `src/proxy.ts` sends signed-out web visitors to `/beta`. Sentence analysis and image text extraction run on the server through LangChain. History documents include provider and model metadata for debugging. OpenTelemetry exports server traces, operational logs, and relayed web/mobile JavaScript errors to an existing SigNoz instance.
 
 This file is a map of the tree, not a design doc. Keep entries focused on broad file responsibilities; omit individual settings, UI interactions, and feature-level implementation details. When you add, remove, rename, or repurpose a path, update the matching line here in the same change. Stale entries are worse than missing ones. Also keep the description above up-to-date as the project evolves. This does not represent every file in the project, just the important ones.
 
@@ -14,6 +14,7 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── src/                            Next.js web app + API (imported as @/*)
 ├── mobile/                         Expo app; own package.json, talks to the web API
 ├── public/                         Static assets served by Next
+├── docs/monitoring.md               SigNoz integration, deployment settings, and operational verification
 ├── Dockerfile                      Multi-stage: deps / dev / builder / standalone prod
 ├── docker-compose.yml              Local web + Mongo 7 replica set (not for production)
 ├── package.json                    Web scripts: next (turbopack), biome lint/format
@@ -30,6 +31,8 @@ When testing, run the web app through the dockerfile with docker compose.
 
 | File | Role |
 | --- | --- |
+| `monitoring.ts` | Shared client error labels, error preparation, and reporting |
+| `redaction.ts` | Shared diagnostic text redaction, sensitive attribute detection, and message/stack sanitization |
 | `types.ts` | `SentenceAnalysis`, `WordNode`, `UserSettings`, history/invite shapes |
 | `api.ts` | `analyzeSentence`, `analyzeImage`, `createInviteCode`; `MAX_SENTENCE_LENGTH` |
 | `image.ts` | 20MB cap and allowed MIME types for image upload |
@@ -57,10 +60,11 @@ When testing, run the web app through the dockerfile with docker compose.
 
 ### API routes
 
-All analysis/history/settings routes require a session (`withAuth`). Invite creation requires `{ invite: ["create"] }`. `/api` is excluded from the proxy matcher so the mobile app is never HTML-redirected.
+All analysis/history/settings routes require a session (`withAuth`). Telemetry accepts bounded, rate-limited signed-out reports. Invite creation requires `{ invite: ["create"] }`. `/api` is excluded from the proxy matcher so the mobile app is never HTML-redirected.
 
 | Path | Role |
 | --- | --- |
+| `app/api/telemetry/route.ts` | Bounded, rate-limited web/mobile JavaScript error ingestion |
 | `app/api/health/route.ts` | Public process status and Mongo connectivity probe |
 | `app/api/analyze/route.ts` | POST sentence → LLM analysis; cache + history write |
 | `app/api/analyze-image/route.ts` | POST image → OCR, then same analysis pipeline |
@@ -73,6 +77,7 @@ All analysis/history/settings routes require a session (`withAuth`). Invite crea
 
 | File | Role |
 | --- | --- |
+| `monitoring/` | OpenTelemetry initialization, sanitized traces/events, LangChain monitoring callbacks, structured logging, and error reporting |
 | `auth.ts` | Server Better Auth: Mongo adapter, Expo plugin, admin roles, invite hooks |
 | `auth-client.ts` | Browser Better Auth client |
 | `auth-permissions.ts` | Access control: `adminPanel`, `invite` |
@@ -82,7 +87,7 @@ All analysis/history/settings routes require a session (`withAuth`). Invite crea
 | `settings.ts` | Mongo account preference helpers + authenticated settings resolver |
 | `history.ts` | `history` collection; upsert on `{ userId, sentence }`; stores provider/model metadata for debugging |
 | `invites.ts` | `inviteCodes` collection: create, claim, TTL |
-| `cors.ts` | JSON + preflight helpers (`*` in dev, origin header omitted in prod) |
+| `cors.ts` | JSON + preflight helpers, error trace IDs, and CORS headers (`*` in dev, origin header omitted in prod) |
 | `validation.ts` | `sanitizeForLLM` |
 | `dev-seed.ts` | Seeds `admin@localhost.dev` in development only |
 | `user-utils.ts` | `SessionUser` type |
@@ -120,7 +125,8 @@ All analysis/history/settings routes require a session (`withAuth`). Invite crea
 | `providers/query-client-provider.tsx` | TanStack Query |
 | `hooks/use-drag-drop.ts` | Image drag-and-drop |
 | `proxy.ts` | Prelaunch gate: signed-out → `/beta` (cookie presence only; not auth) |
-| `instrumentation.ts` | Runs `seedDevAdmin()` in Node dev |
+| `instrumentation.ts` | Initializes server telemetry, captures framework errors, and runs the dev seed |
+| `instrumentation-client.ts` | Browser global error and rejection reporting |
 
 ## `mobile/`
 
@@ -146,7 +152,8 @@ Separate Expo 56 app (file routing). Dev API host is inferred from Expo `hostUri
 | `lib/fonts.ts` | Load Geist; NativeWind `font-geist-reg` maps to it |
 | `lib/auth-client.ts` | Better Auth Expo client (SecureStore) |
 | `lib/auth-fetch.ts` | Authenticated fetch |
-| `lib/query-client.ts` | Shared Query client |
+| `lib/query-client.ts` | Shared Query client with failure reporting |
+| `lib/monitoring.ts` | Mobile JavaScript error reporting through the web API |
 | `hooks/use-settings-sync.ts` | Server account preferences → Zustand; query + mutation |
 | `stores/settings-store.ts` | Persisted account preferences |
 | `android/` / `ios/` | Native projects from `expo prebuild` |

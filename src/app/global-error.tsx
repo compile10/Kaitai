@@ -1,7 +1,9 @@
 "use client";
 
+import { clientError } from "@common/monitoring";
 import { useEffect, useState } from "react";
 import ErrorFallback from "@/components/ErrorFallback";
+import { reportClientError } from "@/lib/monitoring/client";
 import type { NextJSError } from "@/lib/utils";
 import "./globals.css";
 
@@ -33,6 +35,10 @@ export default function GlobalError({
 
     setTheme(preferredTheme);
   }, []);
+
+  useEffect(() => {
+    reportClientError(error, clientError.web_boundary);
+  }, [error]);
 
   return (
     <html lang="en" className={theme} style={{ colorScheme: theme }}>

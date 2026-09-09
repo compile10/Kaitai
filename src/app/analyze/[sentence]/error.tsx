@@ -1,6 +1,9 @@
 "use client";
 
+import { clientError } from "@common/monitoring";
+import { useEffect } from "react";
 import ErrorFallback from "@/components/ErrorFallback";
+import { reportClientError } from "@/lib/monitoring/client";
 import type { NextJSError } from "@/lib/utils";
 
 export default function AnalysisError({
@@ -10,6 +13,10 @@ export default function AnalysisError({
   error: NextJSError;
   reset: () => void;
 }) {
+  useEffect(() => {
+    reportClientError(error, clientError.web_boundary);
+  }, [error]);
+
   return (
     <div className="w-full py-12">
       <ErrorFallback

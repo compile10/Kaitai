@@ -11,6 +11,7 @@ import {
   findValidInviteCode,
   markInviteCodeUsedBy,
 } from "@/lib/invites";
+import { reportInviteBypass } from "@/lib/monitoring/security";
 
 const INVITE_CODE_ERROR = "A valid invite code is required to sign up.";
 const clientIpHeader = (process.env.RATE_LIMIT_IP_HEADER ?? "x-forwarded-for")
@@ -92,9 +93,7 @@ export const auth = betterAuth({
             // Unreachable via normal flows: the before hooks reject sign-ups
             // without a valid invite code, so getting here means they were
             // bypassed and user creation was not gated.
-            console.error(
-              `[auth] Sign-up user ${user.id} was created without an invite code in the request body; invite hooks did not run as expected.`,
-            );
+            await reportInviteBypass();
             return;
           }
           await markInviteCodeUsedBy(inviteCode, user.id);

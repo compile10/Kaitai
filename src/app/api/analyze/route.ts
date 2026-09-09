@@ -9,6 +9,7 @@ import {
 import { withAuth } from "@/lib/api-auth";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
 import { saveToHistory } from "@/lib/history";
+import { reportError } from "@/lib/monitoring/logger";
 import { RATE_LIMIT_POLICIES } from "@/lib/rate-limit";
 import { sanitizeForLLM } from "@/lib/validation";
 
@@ -61,7 +62,7 @@ export const POST = withAuth(
         ANALYSIS_MODEL,
       );
     } catch (e) {
-      console.error("Failed to save history:", e);
+      reportError(e, "history.save");
     }
 
     return jsonResponse(analysis);

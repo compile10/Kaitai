@@ -44,6 +44,13 @@ function createPolicy({
 }
 
 export const RATE_LIMIT_POLICIES = {
+  telemetry: createPolicy({
+    name: "telemetry",
+    message: "Too many error reports.",
+    userLimit: 20,
+    ipLimit: 60,
+    windowSeconds: 60,
+  }),
   analyzeSentence: createPolicy({
     name: "analyze-sentence",
     message: "Too many sentence analysis requests.",

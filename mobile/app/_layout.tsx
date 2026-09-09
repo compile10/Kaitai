@@ -1,7 +1,13 @@
 import "../global.css";
 
+import { clientError } from "@common/monitoring";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import {
+  Stack,
+  ErrorBoundary as RouterErrorBoundary,
+  type ErrorBoundaryProps,
+} from "expo-router";
+import { reportMobileError } from "@/lib/monitoring";
 import {
   DarkTheme,
   DefaultTheme,
@@ -123,4 +129,11 @@ export default function RootLayout() {
       </ThemeProvider>
     </QueryClientProvider>
   );
+}
+
+export function ErrorBoundary(props: ErrorBoundaryProps) {
+  useEffect(() => {
+    reportMobileError(props.error, clientError.mobile_boundary);
+  }, [props.error]);
+  return <RouterErrorBoundary {...props} />;
 }

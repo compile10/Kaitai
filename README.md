@@ -19,6 +19,14 @@ cp .env.local.example .env.local   # add OPENROUTER_API_KEY
 docker compose up                   # starts Next.js + MongoDB replica set
 ```
 
+### Application monitoring — SigNoz
+
+The web server exports OpenTelemetry traces and structured logs to an existing
+SigNoz instance. Web and mobile JavaScript error reports are forwarded through
+the API. Set `OTEL_EXPORTER_OTLP_ENDPOINT` and the instance's authentication
+headers on the server to enable export. See [monitoring setup](docs/monitoring.md)
+for coverage, privacy, alert configuration, retention, and verification.
+
 ### Web — without Docker
 
 ```bash

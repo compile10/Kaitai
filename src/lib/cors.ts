@@ -1,3 +1,4 @@
+import { isSpanContextValid, trace } from "@opentelemetry/api";
 import { NextResponse } from "next/server";
 
 /**
@@ -19,12 +20,23 @@ const corsHeaders: Record<string, string> = {
     "Retry-After, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset",
 };
 
-/** Convenience: JSON response with CORS headers attached. */
+/** JSON responses include CORS headers and the originating trace ID on errors. */
 export function jsonResponse(
   data: unknown,
   status = 200,
   responseHeaders?: Record<string, string>,
 ) {
+  if (
+    status >= 400 &&
+    data !== null &&
+    typeof data === "object" &&
+    !Array.isArray(data)
+  ) {
+    const spanContext = trace.getActiveSpan()?.spanContext();
+    if (spanContext && isSpanContextValid(spanContext)) {
+      data = { ...data, traceId: spanContext.traceId };
+    }
+  }
   return NextResponse.json(data, {
     status,
     headers: { ...corsHeaders, ...responseHeaders },

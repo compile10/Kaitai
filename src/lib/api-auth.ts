@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import type { Permissions } from "@/lib/auth-permissions";
 import { jsonResponse } from "@/lib/cors";
+import { observeRoute, reportError } from "@/lib/monitoring/logger";
 import { checkRateLimit, type RateLimitPolicy } from "@/lib/rate-limit";
 
 export type Session = typeof auth.$Infer.Session;
@@ -60,7 +61,7 @@ async function catchingErrors(
   try {
     return await handler();
   } catch (error) {
-    console.error(`[api] Failed to ${label}:`, error);
+    reportError(error, label);
     return jsonResponse({ error: `Failed to ${label}` }, 500);
   }
 }
@@ -69,11 +70,12 @@ function withSessionLookup(
   route: RouteConfig,
   handler: Handler<Session | null>,
 ): RouteExport {
-  return (request) =>
+  return observeRoute(route.name, (request) =>
     catchingErrors(route.name, async () => {
       const session = await auth.api.getSession({ headers: request.headers });
       return handler(request, session);
-    });
+    }),
+  );
 }
 
 /**

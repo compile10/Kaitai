@@ -10,6 +10,7 @@ import {
 import { withAuth } from "@/lib/api-auth";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
 import { saveToHistory } from "@/lib/history";
+import { reportError } from "@/lib/monitoring/logger";
 import { RATE_LIMIT_POLICIES } from "@/lib/rate-limit";
 import { sanitizeForLLM } from "@/lib/validation";
 
@@ -26,7 +27,7 @@ async function extractSentenceFromImage(
   base64Data: string,
   mimeType: string,
 ): Promise<string> {
-  const model = createChatModel();
+  const model = createChatModel("image.extract");
 
   const message = new HumanMessage({
     content: [
@@ -98,7 +99,7 @@ export const POST = withAuth(
         await extractSentenceFromImage(base64Data, imageFile.type),
       );
     } catch (error) {
-      console.error("Error extracting text from image:", error);
+      reportError(error, "image.extract");
       return jsonResponse(
         {
           error:
@@ -133,7 +134,7 @@ export const POST = withAuth(
         ANALYSIS_MODEL,
       );
     } catch (e) {
-      console.error("Failed to save history:", e);
+      reportError(e, "history.save");
     }
 
     return jsonResponse({ sentence, analysis });

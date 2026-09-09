@@ -1,3 +1,5 @@
+import { clientError } from "@common/monitoring";
+import { reportMobileError } from "@/lib/monitoring";
 import type { HistoryEntry, PaginatedHistory } from "@common/types";
 import { Ionicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
@@ -45,6 +47,7 @@ export default function HistoryScreen() {
         setTotalPages(data.totalPages);
         setError(null);
       } catch (err) {
+        reportMobileError(err, clientError.mobile_history);
         setError(err instanceof Error ? err.message : "An error occurred");
       }
     },
