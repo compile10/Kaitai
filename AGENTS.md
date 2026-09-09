@@ -61,6 +61,7 @@ All analysis/history/settings routes require a session (`withAuth`). Invite crea
 
 | Path | Role |
 | --- | --- |
+| `app/api/health/route.ts` | Public process status and Mongo connectivity probe |
 | `app/api/analyze/route.ts` | POST sentence → LLM analysis; cache + history write |
 | `app/api/analyze-image/route.ts` | POST image → OCR, then same analysis pipeline |
 | `app/api/history/route.ts` | GET paginated history for the signed-in user; excludes diagnostic metadata |
