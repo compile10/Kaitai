@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.kaitai"
+      "bundleIdentifier": "app.kaitai.mobile"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +21,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.kaitai"
+      "package": "app.kaitai.mobile"
     },
     "web": {
       "output": "static",
@@ -53,6 +53,7 @@
       "expo-font"
     ],
     "experiments": {
+      "onDemandFilesystem": false,
       "typedRoutes": true,
       "reactCompiler": true
     }

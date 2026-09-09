@@ -124,7 +124,7 @@ All analysis/history/settings routes require a session (`withAuth`). Invite crea
 
 ## `mobile/`
 
-Separate Expo 56 app (file routing). Dev API host is inferred from Expo `hostUri`; Android emulator falls back to `10.0.2.2:3000`. Production URL in `constants/api.ts` is still a placeholder.
+Separate Expo 56 app (file routing). Dev API host is inferred from Expo `hostUri`; Android emulator falls back to `10.0.2.2:3000`. Release builds use the `EXPO_PUBLIC_API_URL` origin from the EAS production environment (`https://kaitai.app`).
 
 | Path | Role |
 | --- | --- |
@@ -139,6 +139,10 @@ Separate Expo 56 app (file routing). Dev API host is inferred from Expo `hostUri
 | `components/dependency-map.tsx` | SVG dependency graph |
 | `components/bottom-sheet.tsx` / `bottom-sheet-picker.tsx` | Sheets |
 | `constants/api.ts` | `API_BASE_URL` + endpoint map |
+| `app.json` / `app.config.ts` | App identity, native configuration, validated release API origin |
+| `eas.json` | Development, internal preview, and store build profiles |
+| `.env.local.example` | Public API origin for local release builds |
+| `README.md` | Mobile setup, EAS configuration, and production acceptance checks |
 | `lib/fonts.ts` | Load Geist; NativeWind `font-geist-reg` maps to it |
 | `lib/auth-client.ts` | Better Auth Expo client (SecureStore) |
 | `lib/auth-fetch.ts` | Authenticated fetch |

@@ -1,8 +1,14 @@
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 
-// Production API URL - update this when you deploy
-const PROD_API_URL = "https://test.com";
+const getProdApiUrl = (): string => {
+  // The Expo config validates and embeds the EAS environment's API origin.
+  const url: unknown = Constants.expoConfig?.extra?.apiUrl;
+  if (typeof url !== "string" || !url) {
+    throw new Error("EXPO_PUBLIC_API_URL is required for release builds.");
+  }
+  return url;
+};
 
 const DEV_API_PORT = 3000;
 
@@ -23,7 +29,7 @@ const getDevApiUrl = (): string => {
  * The base URL for API requests.
  * Automatically selects the appropriate URL based on environment and platform.
  */
-export const API_BASE_URL = __DEV__ ? getDevApiUrl() : PROD_API_URL;
+export const API_BASE_URL = __DEV__ ? getDevApiUrl() : getProdApiUrl();
 
 /**
  * API endpoints
