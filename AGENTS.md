@@ -14,6 +14,7 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── src/                            Next.js web app + API (imported as @/*)
 ├── mobile/                         Expo app; own package.json, talks to the web API
 ├── public/                         Static assets served by Next
+├── scripts/seed-admin.mjs           Explicit production admin bootstrap with transactional credentials
 ├── docs/monitoring.md               SigNoz integration, deployment settings, and operational verification
 ├── Dockerfile                      Multi-stage: deps / dev / builder / standalone prod
 ├── docker-compose.yml              Local web + Mongo 7 replica set (not for production)

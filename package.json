@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
+    "seed:admin": "node scripts/seed-admin.mjs",
     "lint": "biome check",
     "format": "biome format --write"
   },
