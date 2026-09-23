@@ -6,8 +6,7 @@ const WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 20;
 
 /** Bound distributed guesses without storing submitted email addresses. */
-export async function enforceAccountLoginLimit(email: unknown, secret: string) {
-  if (typeof email !== "string") return;
+export async function enforceAccountLoginLimit(email: string, secret: string) {
   try {
     await mongoClient
       .db()

@@ -81,7 +81,10 @@ export const auth = betterAuth({
   // signup surface added later (e.g. social login) must be gated separately.
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
-      if (ctx.path === "/sign-in/email") {
+      if (
+        ctx.path === "/sign-in/email" &&
+        typeof ctx.body?.email === "string"
+      ) {
         await enforceAccountLoginLimit(ctx.body?.email, ctx.context.secret);
       }
       if (ctx.path !== "/sign-up/email") {
