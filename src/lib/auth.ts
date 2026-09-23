@@ -81,14 +81,11 @@ export const auth = betterAuth({
   // signup surface added later (e.g. social login) must be gated separately.
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
-      if (ctx.path === "/sign-in/email") {
-        if (typeof ctx.body?.email !== "string") {
-          throw new APIError("BAD_REQUEST", {
-            code: "INVALID_EMAIL",
-            message: "Invalid email address",
-          });
-        }
-        await enforceAccountLoginLimit(ctx.body.email, ctx.context.secret);
+      if (
+        ctx.path === "/sign-in/email" &&
+        typeof ctx.body?.email === "string"
+      ) {
+        await enforceAccountLoginLimit(ctx.body?.email, ctx.context.secret);
       }
       if (ctx.path !== "/sign-up/email") {
         return;
