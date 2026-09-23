@@ -16,17 +16,6 @@ export const historyCollection = mongoClient
   .db()
   .collection<HistoryDocument & Document>("history");
 
-// Ensure compound indexes exist once per process (HMR-safe)
-// biome-ignore lint/suspicious/noExplicitAny: globalThis augmentation without declaration merging
-if (!(globalThis as any)["kaitai.history.indexes"]) {
-  (globalThis as any)["kaitai.history.indexes"] = true;
-  void historyCollection.createIndex({ userId: 1, createdAt: -1 });
-  void historyCollection.createIndex(
-    { userId: 1, sentence: 1 },
-    { unique: true },
-  );
-}
-
 /**
  * Save a sentence to the user's history.
  *
@@ -42,6 +31,18 @@ export async function saveToHistory(
   provider: string,
   model: string,
 ): Promise<void> {
+  try {
+    await historyCollection.createIndex({ userId: 1, createdAt: -1 });
+    await historyCollection.createIndex(
+      { userId: 1, sentence: 1 },
+      { unique: true },
+    );
+  } catch {
+    // Driver errors can contain stored values; keep the failure diagnostic generic.
+    throw new Error(
+      "History index initialization failed; check duplicates and index permissions",
+    );
+  }
   await historyCollection.updateOne(
     { userId, sentence },
     {

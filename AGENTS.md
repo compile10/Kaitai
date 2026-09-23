@@ -66,7 +66,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | Path | Role |
 | --- | --- |
 | `app/api/telemetry/route.ts` | Bounded, rate-limited web/mobile JavaScript error ingestion |
-| `app/api/health/route.ts` | Public process status and Mongo connectivity probe |
+| `app/api/health/route.ts` | Public process status and coalesced, briefly cached Mongo connectivity probe |
 | `app/api/analyze/route.ts` | POST sentence → LLM analysis; cache + history write |
 | `app/api/analyze-image/route.ts` | POST image → OCR, then same analysis pipeline |
 | `app/api/history/route.ts` | GET paginated history for the signed-in user; excludes diagnostic metadata |
@@ -85,7 +85,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `api-auth.ts` | Route-configured auth, permission, and rate-limit wrappers |
 | `login-limit.ts` | Shared, privacy-preserving per-account sign-in attempt limits |
 | `db.ts` | Mongo client (dev: reused on `globalThis`) |
-| `rate-limit.ts` | Atomic Mongo per-user/per-IP application route limits; trusted proxy IP extraction |
+| `rate-limit.ts` | Mongo per-user/per-IP application route limits and trusted proxy IP extraction |
 | `settings.ts` | Mongo account preference helpers + authenticated settings resolver |
 | `history.ts` | `history` collection; upsert on `{ userId, sentence }`; stores provider/model metadata for debugging |
 | `invites.ts` | `inviteCodes` collection: creation, validation, and serialization; auth claims use the signup transaction |

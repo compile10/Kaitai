@@ -1,6 +1,10 @@
 const PING_TIMEOUT_MS = 2_000;
 
-export async function GET() {
+// Coalesce concurrent probes and briefly cache their result per server process.
+let pendingProbe: Promise<boolean> | undefined;
+let cachedProbe: { healthy: boolean; expiresAt: number } | undefined;
+
+async function probeMongo() {
   let mongoHealthy = false;
 
   try {
@@ -18,6 +22,23 @@ export async function GET() {
   } catch {
     // Public probes expose availability without database or configuration details.
   }
+
+  return mongoHealthy;
+}
+
+export async function GET() {
+  if (!cachedProbe || cachedProbe.expiresAt <= Date.now()) {
+    pendingProbe ??= probeMongo()
+      .then((healthy) => {
+        cachedProbe = { healthy, expiresAt: Date.now() + 1000 };
+        return healthy;
+      })
+      .finally(() => {
+        pendingProbe = undefined;
+      });
+    await pendingProbe;
+  }
+  const mongoHealthy = cachedProbe?.healthy ?? false;
 
   return Response.json(
     {

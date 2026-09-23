@@ -23,7 +23,14 @@ export async function upsertUserSettings(
   userId: string,
   preferences: UserSettings,
 ): Promise<UserSettings> {
-  await settingsCollection.createIndex({ userId: 1 }, { unique: true });
+  try {
+    await settingsCollection.createIndex({ userId: 1 }, { unique: true });
+  } catch {
+    // Driver errors can contain stored values; keep the failure diagnostic generic.
+    throw new Error(
+      "Settings index initialization failed; check duplicates and index permissions",
+    );
+  }
   await settingsCollection.updateOne(
     { userId },
     { $set: { preferences, updatedAt: new Date() } },
