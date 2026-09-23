@@ -28,7 +28,7 @@ export async function enforceAccountLoginLimit(email: string, secret: string) {
       "accountLoginLimits",
     );
   const filter = { _id: `login:${key}:${Math.floor(now / WINDOW_MS)}` };
-  // The collection's built-in unique _id makes first-use races atomic.
+  // Matching the unique _id lets concurrent upserts increment the same counter.
   const counter = await counters.findOneAndUpdate(
     filter,
     {
