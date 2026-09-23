@@ -16,8 +16,7 @@ export type ClientErrorOperation =
 
 export function monitoringError(error: unknown, operation: string): Error {
   const safe = new Error(safeMessage(error) ?? operation);
-  const stack = safeStack(error);
-  safe.stack = stack ?? `Error: ${safe.message}`;
+  safe.stack = safeStack(error);
   return safe;
 }
 
