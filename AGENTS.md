@@ -35,7 +35,7 @@ When testing, run the web app through the dockerfile with docker compose.
 | `monitoring.ts` | Shared client error labels, error preparation, and reporting |
 | `redaction.ts` | Shared diagnostic text redaction, sensitive attribute detection, and message/stack sanitization |
 | `types.ts` | `SentenceAnalysis`, `WordNode`, `UserSettings`, history/invite shapes |
-| `api.ts` | `analyzeSentence`, `analyzeImage`, `createInviteCode`; `MAX_SENTENCE_LENGTH` |
+| `api.ts` | `analyzeSentence`, `analyzeImage`, `createInviteCode`; `MAX_SENTENCE_LENGTH`, mutation request header |
 | `image.ts` | 20MB cap and allowed MIME types for image upload |
 | `tailwind.config.js` | Shared light/dark color tokens (web + NativeWind) |
 | `assets/branding/logo.svg` | Wordmark used on web |
@@ -83,13 +83,14 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `auth-client.ts` | Browser Better Auth client |
 | `auth-permissions.ts` | Access control: `adminPanel`, `invite` |
 | `api-auth.ts` | Route-configured auth, permission, and rate-limit wrappers |
+| `request-security.ts` | Mutation request-header checks and bounded request-body reading |
 | `login-limit.ts` | Shared, privacy-preserving per-account sign-in attempt limits |
 | `db.ts` | Mongo client (dev: reused on `globalThis`) |
 | `rate-limit.ts` | Atomic Mongo per-user/per-IP application route limits; trusted proxy IP extraction |
 | `settings.ts` | Mongo account preference helpers + authenticated settings resolver |
 | `history.ts` | `history` collection; upsert on `{ userId, sentence }`; stores provider/model metadata for debugging |
 | `invites.ts` | `inviteCodes` collection: creation, validation, and serialization; auth claims use the signup transaction |
-| `cors.ts` | JSON + preflight helpers, error trace IDs, and CORS headers (`*` in dev, origin header omitted in prod) |
+| `cors.ts` | JSON + preflight helpers, error trace IDs, and same-origin browser CORS policy |
 | `validation.ts` | `sanitizeForLLM` |
 | `dev-seed.ts` | Seeds `admin@localhost.dev` in development only |
 | `user-utils.ts` | `SessionUser` type |
