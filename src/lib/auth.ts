@@ -1,26 +1,17 @@
+import { getCurrentAdapter } from "@better-auth/core/context";
 import { expo } from "@better-auth/expo";
-import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { APIError, createAuthMiddleware } from "better-auth/api";
+import { betterAuth } from "better-auth/minimal";
 import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins";
+import { ObjectId } from "mongodb";
 import { ac, adminRole, userRole } from "@/lib/auth-permissions";
 import mongoClient from "@/lib/db";
-import {
-  claimInviteCode,
-  findValidInviteCode,
-  markInviteCodeUsedBy,
-} from "@/lib/invites";
-import { reportInviteBypass } from "@/lib/monitoring/security";
+import { findValidInviteCode } from "@/lib/invites";
+import { enforceAccountLoginLimit } from "@/lib/login-limit";
 
 const INVITE_CODE_ERROR = "A valid invite code is required to sign up.";
-const clientIpHeader = (process.env.RATE_LIMIT_IP_HEADER ?? "x-forwarded-for")
-  .trim()
-  .toLowerCase();
-
-if (!/^[a-z0-9-]+$/.test(clientIpHeader)) {
-  throw new Error("RATE_LIMIT_IP_HEADER is not a valid HTTP header name");
-}
 
 function inviteCodeFromBody(body: unknown): string | null {
   if (typeof body !== "object" || body === null) {
@@ -33,7 +24,36 @@ function inviteCodeFromBody(body: unknown): string | null {
   return inviteCode.trim();
 }
 
-// Server side Better Auth instance
+if (process.env.NODE_ENV === "production") {
+  const secret = process.env.BETTER_AUTH_SECRET;
+  if (!secret || secret.trim().length < 32) {
+    throw new Error("BETTER_AUTH_SECRET must contain at least 32 characters");
+  }
+  let url: URL;
+  try {
+    url = new URL(process.env.BETTER_AUTH_URL ?? "");
+  } catch {
+    throw new Error("BETTER_AUTH_URL must be an HTTPS origin");
+  }
+  if (
+    url.protocol !== "https:" ||
+    url.username ||
+    url.password ||
+    url.pathname !== "/" ||
+    url.search ||
+    url.hash
+  ) {
+    throw new Error("BETTER_AUTH_URL must be an HTTPS origin");
+  }
+}
+const clientIpHeader = (process.env.RATE_LIMIT_IP_HEADER ?? "x-forwarded-for")
+  .trim()
+  .toLowerCase();
+
+if (!/^[a-z0-9-]+$/.test(clientIpHeader)) {
+  throw new Error("RATE_LIMIT_IP_HEADER is not a valid HTTP header name");
+}
+
 export const auth = betterAuth({
   database: mongodbAdapter(mongoClient.db(), { client: mongoClient }),
   emailAndPassword: {
@@ -41,8 +61,8 @@ export const auth = betterAuth({
   },
   session: {
     cookieCache: {
-      enabled: true,
-      maxAge: 5 * 60, // 5 minutes
+      // Every authenticated request must observe revoked sessions and bans.
+      enabled: false,
     },
   },
   rateLimit: {
@@ -61,6 +81,9 @@ export const auth = betterAuth({
   // signup surface added later (e.g. social login) must be gated separately.
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path === "/sign-in/email") {
+        await enforceAccountLoginLimit(ctx.body?.email, ctx.context.secret);
+      }
       if (ctx.path !== "/sign-up/email") {
         return;
       }
@@ -76,32 +99,59 @@ export const auth = betterAuth({
         // Only /sign-up/email carries an invite code; other user-creation
         // paths (admin createUser, dev seeding) are exempt from the check.
         before: async (_user, ctx) => {
-          if (ctx?.path !== "/sign-up/email") {
-            return;
-          }
+          if (ctx?.path !== "/sign-up/email") return;
           const inviteCode = inviteCodeFromBody(ctx.body);
-          if (!inviteCode || !(await claimInviteCode(inviteCode))) {
+          if (!inviteCode)
             throw new APIError("BAD_REQUEST", { message: INVITE_CODE_ERROR });
+          const userId = new ObjectId().toHexString();
+          // The current adapter shares the signup transaction, including rollback.
+          const adapter = await getCurrentAdapter(ctx.context.adapter);
+          let claimed: unknown;
+          try {
+            claimed = await adapter.update({
+              model: "inviteCodes",
+              where: [
+                { field: "code", value: inviteCode },
+                { field: "usedAt", value: null },
+                { field: "expiresAt", operator: "gt", value: new Date() },
+              ],
+              update: { usedAt: new Date(), usedByUserId: userId },
+            });
+          } catch (error) {
+            // Two transactions claiming one invite can conflict before commit.
+            if (
+              error &&
+              typeof error === "object" &&
+              "code" in error &&
+              error.code === 112
+            ) {
+              throw new APIError("BAD_REQUEST", {
+                message: INVITE_CODE_ERROR,
+              });
+            }
+            throw error;
           }
-        },
-        after: async (user, ctx) => {
-          if (ctx?.path !== "/sign-up/email") {
-            return;
-          }
-          const inviteCode = inviteCodeFromBody(ctx.body);
-          if (!inviteCode) {
-            // Unreachable via normal flows: the before hooks reject sign-ups
-            // without a valid invite code, so getting here means they were
-            // bypassed and user creation was not gated.
-            await reportInviteBypass();
-            return;
-          }
-          await markInviteCodeUsedBy(inviteCode, user.id);
+          if (!claimed)
+            throw new APIError("BAD_REQUEST", { message: INVITE_CODE_ERROR });
+          return { data: { ..._user, id: userId } };
         },
       },
     },
   },
   plugins: [
+    {
+      id: "invite-gate",
+      schema: {
+        inviteCodes: {
+          fields: {
+            code: { type: "string", required: true },
+            expiresAt: { type: "date", required: true },
+            usedAt: { type: "date", required: false },
+            usedByUserId: { type: "string", required: false },
+          },
+        },
+      },
+    },
     expo(),
     admin({
       ac,
