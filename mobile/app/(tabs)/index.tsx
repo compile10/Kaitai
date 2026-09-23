@@ -9,6 +9,7 @@ import { BottomSheet } from "@/components/bottom-sheet";
 import { ThemedText, ThemedTextInput } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
+import { registerPickedImage } from "@/lib/picked-image";
 
 const EXAMPLE_SENTENCES = [
   "私は美しい花を見ました。",
@@ -23,9 +24,11 @@ function navigateToImageResults(asset: ImagePicker.ImagePickerAsset) {
   router.push({
     pathname: "/results",
     params: {
-      imageUri: asset.uri,
-      imageMimeType: mimeType,
-      imageFileName: fileName,
+      imageId: registerPickedImage({
+        uri: asset.uri,
+        type: mimeType,
+        name: fileName,
+      }),
     },
   });
 }
