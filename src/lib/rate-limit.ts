@@ -1,5 +1,5 @@
 import { createHmac } from "node:crypto";
-import { getIp } from "better-auth/api";
+import { getIP } from "better-auth/api";
 import type { NextRequest } from "next/server";
 import { RateLimiterMongo, RateLimiterRes } from "rate-limiter-flexible";
 import { auth } from "@/lib/auth";
@@ -109,7 +109,7 @@ function identifierKey(
 }
 
 function getClientIp(request: NextRequest): string {
-  const ip = getIp(request, auth.options);
+  const ip = getIP(request, auth.options);
   if (ip) return ip;
 
   throw new Error("Trusted client IP header is missing or invalid");
