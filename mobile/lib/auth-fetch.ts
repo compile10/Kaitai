@@ -1,3 +1,4 @@
+import { API_REQUEST_HEADER } from "@common/api";
 import { authClient } from "./auth-client";
 
 /**
@@ -11,13 +12,17 @@ export async function authFetch(
   url: string,
   init?: RequestInit,
 ): Promise<Response> {
-  const cookie = authClient.getCookie();
+  const cookie = await authClient.getCookie();
+  const headers = new Headers(init?.headers);
+  headers.set("Cookie", cookie);
+  if (
+    !["GET", "HEAD", "OPTIONS"].includes((init?.method ?? "GET").toUpperCase())
+  ) {
+    headers.set(API_REQUEST_HEADER, "1");
+  }
   return fetch(url, {
     ...init,
     credentials: "omit",
-    headers: {
-      ...init?.headers,
-      Cookie: cookie,
-    },
+    headers,
   });
 }
