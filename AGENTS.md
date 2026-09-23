@@ -16,14 +16,14 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── public/                         Static assets served by Next
 ├── scripts/seed-admin.mjs           Explicit production admin bootstrap with transactional credentials
 ├── docs/monitoring.md               SigNoz integration, deployment settings, and operational verification
-├── Dockerfile                      Multi-stage: deps / dev / builder / standalone prod
+├── Dockerfile                      Dependency install and non-root development server
 ├── docker-compose.yml              Local web + Mongo 7 replica set (not for production)
 ├── package.json                    Web scripts: next (turbopack), biome lint/format
 ├── next.config.ts                  standalone output
 ├── tsconfig.json                   @/* → src/*, @common/* → common/*; excludes mobile
 ├── biome.json                      Lint/format for the web tree
 ├── components.json                 shadcn/ui config
-├── .env.local.example              OpenRouter key + optional DEV_ADMIN_* overrides
+├── .env.local.example              Runtime server configuration and optional development overrides
 ├── .github/workflows/              Claude Code GitHub Actions
 └── README.md                       Project overview, setup instructions
 ```
@@ -84,7 +84,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `auth-permissions.ts` | Access control: `adminPanel`, `invite` |
 | `api-auth.ts` | Route-configured auth, permission, and rate-limit wrappers |
 | `login-limit.ts` | Shared, privacy-preserving per-account sign-in attempt limits |
-| `db.ts` | Mongo client (dev: reused on `globalThis`) |
+| `db.ts` | Shared Mongo client (dev: reused on `globalThis`) |
 | `rate-limit.ts` | Mongo per-user/per-IP application route limits and trusted proxy IP extraction |
 | `settings.ts` | Mongo account preference helpers + authenticated settings resolver |
 | `history.ts` | `history` collection; upsert on `{ userId, sentence }`; stores provider/model metadata for debugging |
@@ -127,7 +127,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `providers/query-client-provider.tsx` | TanStack Query |
 | `hooks/use-drag-drop.ts` | Image drag-and-drop |
 | `proxy.ts` | Per-request nonce CSP and prelaunch routing gate (cookie presence only; not auth) |
-| `instrumentation.ts` | Initializes server telemetry, captures framework errors, and runs the dev seed |
+| `instrumentation.ts` | Runtime configuration validation, auth/database initialization, telemetry, framework error capture, and dev seed |
 | `instrumentation-client.ts` | Browser global error and rejection reporting |
 
 ## `mobile/`
