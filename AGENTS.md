@@ -23,7 +23,7 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── tsconfig.json                   @/* → src/*, @common/* → common/*; excludes mobile
 ├── biome.json                      Lint/format for the web tree
 ├── components.json                 shadcn/ui config
-├── .env.local.example              Runtime server configuration and optional development overrides
+├── .env.local.example              OpenRouter key, server/auth configuration, and optional DEV_ADMIN_* overrides
 ├── .github/workflows/              Claude Code GitHub Actions
 └── README.md                       Project overview, setup instructions
 ```
