@@ -79,15 +79,16 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | File | Role |
 | --- | --- |
 | `monitoring/` | OpenTelemetry initialization, sanitized traces/events, LangChain monitoring callbacks, structured logging, and error reporting |
-| `auth.ts` | Server Better Auth: Mongo adapter, Expo plugin, admin roles, invite hooks |
+| `auth.ts` | Server Better Auth initialization: Mongo adapter, Expo plugin, admin roles, invite hooks |
 | `auth-client.ts` | Browser Better Auth client |
 | `auth-permissions.ts` | Access control: `adminPanel`, `invite` |
 | `api-auth.ts` | Route-configured auth, permission, and rate-limit wrappers |
+| `login-limit.ts` | Shared, privacy-preserving per-account sign-in attempt limits |
 | `db.ts` | Mongo client (dev: reused on `globalThis`) |
 | `rate-limit.ts` | Atomic Mongo per-user/per-IP application route limits; trusted proxy IP extraction |
 | `settings.ts` | Mongo account preference helpers + authenticated settings resolver |
 | `history.ts` | `history` collection; upsert on `{ userId, sentence }`; stores provider/model metadata for debugging |
-| `invites.ts` | `inviteCodes` collection: create, claim, TTL |
+| `invites.ts` | `inviteCodes` collection: creation, validation, and serialization; auth claims use the signup transaction |
 | `cors.ts` | JSON + preflight helpers, error trace IDs, and CORS headers (`*` in dev, origin header omitted in prod) |
 | `validation.ts` | `sanitizeForLLM` |
 | `dev-seed.ts` | Seeds `admin@localhost.dev` in development only |

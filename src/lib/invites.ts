@@ -20,19 +20,6 @@ export const inviteCodesCollection = mongoClient
   .db()
   .collection<InviteCodeDocument & Document>("inviteCodes");
 
-// Ensure indexes exist once per process (HMR-safe)
-const globalWithInviteIndexes = globalThis as typeof globalThis &
-  Record<"kaitai.inviteCodes.indexes", boolean | undefined>;
-
-if (!globalWithInviteIndexes["kaitai.inviteCodes.indexes"]) {
-  globalWithInviteIndexes["kaitai.inviteCodes.indexes"] = true;
-  void inviteCodesCollection.createIndex({ code: 1 }, { unique: true });
-  void inviteCodesCollection.createIndex(
-    { expiresAt: 1 },
-    { expireAfterSeconds: 0 },
-  );
-}
-
 function generateInviteCode() {
   return randomBytes(18).toString("base64url");
 }
@@ -58,31 +45,21 @@ export async function findValidInviteCode(
   });
 }
 
-/**
- * Atomically marks an unused, unexpired invite code as used. Returns false if
- * the code is invalid or was already claimed (e.g. by a concurrent sign-up).
- */
-export async function claimInviteCode(code: string): Promise<boolean> {
-  const claimed = await inviteCodesCollection.findOneAndUpdate(
-    { code, usedAt: null, expiresAt: { $gt: new Date() } },
-    { $set: { usedAt: new Date() } },
-  );
-  return claimed !== null;
-}
-
-export async function markInviteCodeUsedBy(
-  code: string,
-  userId: string,
-): Promise<void> {
-  await inviteCodesCollection.updateOne(
-    { code },
-    { $set: { usedByUserId: userId } },
-  );
-}
-
 export async function createInviteCode(
   createdByUserId: string,
 ): Promise<InviteCodeDocument> {
+  try {
+    await inviteCodesCollection.createIndex({ code: 1 }, { unique: true });
+    await inviteCodesCollection.createIndex(
+      { expiresAt: 1 },
+      { expireAfterSeconds: 0 },
+    );
+  } catch {
+    // Driver errors can contain stored values; keep the failure diagnostic generic.
+    throw new Error(
+      "Invite index initialization failed; check duplicates and index permissions",
+    );
+  }
   const now = new Date();
   const inviteCode: InviteCodeDocument = {
     _id: new ObjectId(),
