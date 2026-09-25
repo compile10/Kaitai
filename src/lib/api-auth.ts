@@ -10,7 +10,7 @@ import {
   RequestError,
 } from "@/lib/request-security";
 
-export type Session = (typeof auth.$Infer)["Session"];
+export type Session = typeof auth.$Infer.Session;
 
 /** The handler a route author writes; `S` says whether a session is guaranteed. */
 type Handler<S extends Session | null> = (
