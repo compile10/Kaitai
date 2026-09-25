@@ -5,9 +5,6 @@ import type {
   SentenceAnalysis,
 } from "./types";
 
-/** Required on API mutations so cross-origin browsers must pass CORS preflight. */
-export const API_REQUEST_HEADER = "X-Kaitai-Request";
-
 /**
  * Newspaper Japanese is 97.5% ≤ 100 characters; academic ~70; literary
  * (Tanizaki) commonly exceeds 200. 220 covers long single sentences without
@@ -35,7 +32,6 @@ export async function analyzeSentence(
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      [API_REQUEST_HEADER]: "1",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ sentence }),
@@ -65,7 +61,6 @@ export async function analyzeImage(
 
   const response = await fetch(url, {
     method: "POST",
-    headers: { [API_REQUEST_HEADER]: "1" },
     body: formData,
   });
 
@@ -86,7 +81,6 @@ export async function createInviteCode(url: string): Promise<InviteCode> {
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      [API_REQUEST_HEADER]: "1",
       Accept: "application/json",
     },
   });
