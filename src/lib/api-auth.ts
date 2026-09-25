@@ -6,7 +6,7 @@ import { observeRoute, reportError } from "@/lib/monitoring/logger";
 import { checkRateLimit, type RateLimitPolicy } from "@/lib/rate-limit";
 import {
   boundedRequest,
-  checkRequestHeader,
+  checkRequestOrigin,
   RequestError,
 } from "@/lib/request-security";
 
@@ -81,7 +81,7 @@ function withSessionLookup(
 ): RouteExport {
   return observeRoute(route.name, (request) =>
     catchingErrors(route.name, async () => {
-      checkRequestHeader(request);
+      await checkRequestOrigin(request);
       const session = await auth.api.getSession({
         headers: request.headers,
       });

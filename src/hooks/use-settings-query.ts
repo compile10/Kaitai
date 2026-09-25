@@ -1,4 +1,3 @@
-import { API_REQUEST_HEADER } from "@common/api";
 import type { UserSettings } from "@common/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
@@ -37,10 +36,7 @@ export function useSettingsMutation() {
     mutationFn: async (settings: UserSettings) => {
       const res = await fetch("/api/settings", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          [API_REQUEST_HEADER]: "1",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       });
       if (!res.ok) {
