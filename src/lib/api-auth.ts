@@ -4,7 +4,6 @@ import type { Permissions } from "@/lib/auth-permissions";
 import { jsonResponse } from "@/lib/cors";
 import { observeRoute, reportError } from "@/lib/monitoring/logger";
 import { checkRateLimit, type RateLimitPolicy } from "@/lib/rate-limit";
-import { checkRequestOrigin, RequestError } from "@/lib/request-security";
 
 export type Session = typeof auth.$Infer.Session;
 
@@ -24,6 +23,32 @@ interface RouteConfig {
 
 interface PermissionRouteConfig extends RouteConfig {
   permissions: Permissions;
+}
+
+/**
+ * Reject browser mutations sent from other sites (CSRF).
+ *
+ * Browsers set Sec-Fetch-Site, falling back to Origin in older versions; pages
+ * cannot forge either. Requests with neither come from native clients or tools,
+ * which cannot act on a signed-in browser's behalf.
+ */
+async function rejectCrossSite(request: NextRequest): Promise<Response | null> {
+  if (["GET", "HEAD", "OPTIONS"].includes(request.method)) return null;
+  if (!(await isCrossSite(request))) return null;
+
+  return jsonResponse({ error: "Cross-site request blocked" }, 403);
+}
+
+async function isCrossSite(request: NextRequest): Promise<boolean> {
+  const site = request.headers.get("sec-fetch-site");
+  if (site) return site !== "same-origin" && site !== "none";
+
+  const origin = request.headers.get("origin");
+  if (!origin) return false;
+  const context = await auth.$context;
+  // Without a configured base URL (local dev outside Docker), trust the app's own origin.
+  if (!context.baseURL && origin === new URL(request.url).origin) return false;
+  return !context.isTrustedOrigin(origin, { allowRelativePaths: false });
 }
 
 async function enforceRateLimit(
@@ -50,7 +75,7 @@ async function enforceRateLimit(
 }
 
 /**
- * Preserve request-validation errors; log unexpected failures and return a generic 500.
+ * Run `handler`, turning anything it throws into a logged 500.
  *
  * Responses the handler *returns* pass through untouched, so routes keep
  * emitting their own 4xx/5xx (validation failures, upstream errors) directly.
@@ -62,9 +87,6 @@ async function catchingErrors(
   try {
     return await handler();
   } catch (error) {
-    if (error instanceof RequestError) {
-      return jsonResponse({ error: error.message }, error.status);
-    }
     reportError(error, label);
     return jsonResponse({ error: `Failed to ${label}` }, 500);
   }
@@ -76,7 +98,8 @@ function withSessionLookup(
 ): RouteExport {
   return observeRoute(route.name, (request) =>
     catchingErrors(route.name, async () => {
-      await checkRequestOrigin(request);
+      const blocked = await rejectCrossSite(request);
+      if (blocked) return blocked;
       const session = await auth.api.getSession({ headers: request.headers });
       return handler(request, session);
     }),
