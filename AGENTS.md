@@ -153,6 +153,7 @@ Separate Expo 56 app (file routing). Dev API host is inferred from Expo `hostUri
 | `README.md` | Mobile overview and local development setup |
 | `lib/fonts.ts` | Load Geist; NativeWind `font-geist-reg` maps to it |
 | `lib/auth-client.ts` | Better Auth Expo client (SecureStore) |
+| `lib/picked-image.ts` | Ephemeral transfer of picker-selected images to the results screen |
 | `lib/auth-fetch.ts` | Authenticated fetch |
 | `lib/query-client.ts` | Shared Query client with failure reporting |
 | `lib/monitoring.ts` | Mobile JavaScript error reporting through the web API |
