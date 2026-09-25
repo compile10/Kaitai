@@ -83,7 +83,6 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `auth-client.ts` | Browser Better Auth client |
 | `auth-permissions.ts` | Access control: `adminPanel`, `invite` |
 | `api-auth.ts` | Route-configured auth, permission, and rate-limit wrappers |
-| `request-security.ts` | Cross-site mutation checks (Fetch Metadata + trusted origins) |
 | `login-limit.ts` | Shared, privacy-preserving per-account sign-in attempt limits |
 | `db.ts` | Mongo client (dev: reused on `globalThis`) |
 | `rate-limit.ts` | Atomic Mongo per-user/per-IP application route limits; trusted proxy IP extraction |
