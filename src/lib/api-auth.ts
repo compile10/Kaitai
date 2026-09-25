@@ -25,6 +25,32 @@ interface PermissionRouteConfig extends RouteConfig {
   permissions: Permissions;
 }
 
+/**
+ * Reject browser mutations sent from other sites (CSRF).
+ *
+ * Browsers set Sec-Fetch-Site, falling back to Origin in older versions; pages
+ * cannot forge either. Requests with neither come from native clients or tools,
+ * which cannot act on a signed-in browser's behalf.
+ */
+async function rejectCrossSite(request: NextRequest): Promise<Response | null> {
+  if (["GET", "HEAD", "OPTIONS"].includes(request.method)) return null;
+  if (!(await isCrossSite(request))) return null;
+
+  return jsonResponse({ error: "Cross-site request blocked" }, 403);
+}
+
+async function isCrossSite(request: NextRequest): Promise<boolean> {
+  const site = request.headers.get("sec-fetch-site");
+  if (site) return site !== "same-origin" && site !== "none";
+
+  const origin = request.headers.get("origin");
+  if (!origin) return false;
+  const context = await auth.$context;
+  // Without a configured base URL (local dev outside Docker), trust the app's own origin.
+  if (!context.baseURL && origin === new URL(request.url).origin) return false;
+  return !context.isTrustedOrigin(origin, { allowRelativePaths: false });
+}
+
 async function enforceRateLimit(
   request: NextRequest,
   session: Session | null,
@@ -72,6 +98,8 @@ function withSessionLookup(
 ): RouteExport {
   return observeRoute(route.name, (request) =>
     catchingErrors(route.name, async () => {
+      const blocked = await rejectCrossSite(request);
+      if (blocked) return blocked;
       const session = await auth.api.getSession({ headers: request.headers });
       return handler(request, session);
     }),

@@ -89,7 +89,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `settings.ts` | Mongo account preference helpers + authenticated settings resolver |
 | `history.ts` | `history` collection; upsert on `{ userId, sentence }`; stores provider/model metadata for debugging |
 | `invites.ts` | `inviteCodes` collection: creation, validation, and serialization; auth claims use the signup transaction |
-| `cors.ts` | JSON + preflight helpers, error trace IDs, and CORS headers (`*` in dev, origin header omitted in prod) |
+| `cors.ts` | JSON + preflight helpers, error trace IDs, and same-origin browser CORS policy |
 | `validation.ts` | `sanitizeForLLM` |
 | `dev-seed.ts` | Seeds `admin@localhost.dev` in development only |
 | `user-utils.ts` | `SessionUser` type |

@@ -59,9 +59,8 @@ export const POST = withAuth(
     rateLimit: RATE_LIMIT_POLICIES.analyzeImage,
   },
   async (request, session) => {
-    const formData = (await request.formData()) as unknown as {
-      get(name: string): File | string | null;
-    };
+    const formData = await request.formData().catch(() => null);
+    if (!formData) return jsonResponse({ error: "Invalid image upload" }, 400);
     const imageFile = formData.get("image");
 
     if (!imageFile || !(imageFile instanceof File)) {
@@ -81,7 +80,7 @@ export const POST = withAuth(
       return jsonResponse({ error: "Image exceeds maximum size of 20MB" }, 400);
     }
 
-    const openRouterApiKey = process.env.OPENROUTER_API_KEY;
+    const openRouterApiKey = process.env.OPENROUTER_API_KEY?.trim();
     if (!openRouterApiKey) {
       return jsonResponse(
         {
@@ -102,10 +101,7 @@ export const POST = withAuth(
       reportError(error, "image.extract");
       return jsonResponse(
         {
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to extract text from image",
+          error: "Failed to extract text from image",
         },
         502,
       );
