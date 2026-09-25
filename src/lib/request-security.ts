@@ -21,6 +21,26 @@ export function checkRequestHeader(request: NextRequest) {
   }
 }
 
+/** Slow uploads may take any time; a body that stops sending this long is abandoned. */
+const BODY_IDLE_TIMEOUT_MS = 20_000;
+
+async function readWithIdleTimeout(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+) {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const idle = new Promise<never>((_, reject) => {
+    timeout = setTimeout(() => {
+      reject(new RequestError("Request body timed out", 408));
+      void reader.cancel().catch(() => {});
+    }, BODY_IDLE_TIMEOUT_MS);
+  });
+  try {
+    return await Promise.race([reader.read(), idle]);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 /** Bound actual bytes before JSON/multipart parsers allocate the full body. */
 export async function boundedRequest(request: Request, maxBytes = 16_384) {
   const init = {
@@ -39,16 +59,9 @@ export async function boundedRequest(request: Request, maxBytes = 16_384) {
   const reader = request.body.getReader();
   const chunks: Uint8Array[] = [];
   let size = 0;
-  let timeout: ReturnType<typeof setTimeout> | undefined;
-  const deadline = new Promise<never>((_, reject) => {
-    timeout = setTimeout(() => {
-      reject(new RequestError("Request body timed out", 408));
-      void reader.cancel().catch(() => {});
-    }, 30_000);
-  });
   try {
     while (true) {
-      const { done, value } = await Promise.race([reader.read(), deadline]);
+      const { done, value } = await readWithIdleTimeout(reader);
       if (done) break;
       size += value.byteLength;
       if (size > maxBytes) {
@@ -58,7 +71,6 @@ export async function boundedRequest(request: Request, maxBytes = 16_384) {
       chunks.push(value);
     }
   } finally {
-    clearTimeout(timeout);
     reader.releaseLock();
   }
   const body = new Uint8Array(size);
