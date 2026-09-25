@@ -17,11 +17,18 @@ export const GET = withAuth(
   async (request, session) => {
     // Parse pagination params
     const { searchParams } = new URL(request.url);
-    const page = Math.max(1, Number(searchParams.get("page")) || 1);
-    const limit = Math.min(
-      100,
-      Math.max(1, Number(searchParams.get("limit")) || 20),
-    );
+    const page = Number(searchParams.get("page") ?? 1);
+    const limit = Number(searchParams.get("limit") ?? 20);
+    if (
+      !Number.isSafeInteger(page) ||
+      page < 1 ||
+      page > 10_000 ||
+      !Number.isSafeInteger(limit) ||
+      limit < 1 ||
+      limit > 100
+    ) {
+      return jsonResponse({ error: "Invalid pagination parameters" }, 400);
+    }
     const skip = (page - 1) * limit;
 
     // Run count and paginated query in parallel

@@ -34,6 +34,8 @@ function createPolicy({
       keyPrefix: `${name}:${dimension}`,
       points,
       duration: windowSeconds,
+      // Index creation is awaited before consuming counters.
+      disableIndexesCreation: true,
     });
 
   return {
@@ -144,6 +146,16 @@ export async function checkRateLimit(
   userId: string | undefined,
   policy: RateLimitPolicy,
 ): Promise<RateLimitDecision> {
+  try {
+    const counters = mongoClient.db().collection("apiRateLimits");
+    await counters.createIndex({ key: 1 }, { unique: true });
+    await counters.createIndex({ expire: -1 }, { expireAfterSeconds: 0 });
+  } catch {
+    // Driver errors can contain stored values; keep the failure diagnostic generic.
+    throw new Error(
+      "API rate-limit index initialization failed; check duplicates and index permissions",
+    );
+  }
   const { secret } = await auth.$context;
 
   if (userId) {
