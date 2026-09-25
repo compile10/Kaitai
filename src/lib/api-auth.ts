@@ -4,11 +4,7 @@ import type { Permissions } from "@/lib/auth-permissions";
 import { jsonResponse } from "@/lib/cors";
 import { observeRoute, reportError } from "@/lib/monitoring/logger";
 import { checkRateLimit, type RateLimitPolicy } from "@/lib/rate-limit";
-import {
-  boundedRequest,
-  checkRequestOrigin,
-  RequestError,
-} from "@/lib/request-security";
+import { checkRequestOrigin, RequestError } from "@/lib/request-security";
 
 export type Session = typeof auth.$Infer.Session;
 
@@ -24,7 +20,6 @@ type RouteExport = (request: NextRequest) => Promise<Response>;
 interface RouteConfig {
   name: string;
   rateLimit?: RateLimitPolicy;
-  maxBodyBytes?: number;
 }
 
 interface PermissionRouteConfig extends RouteConfig {
@@ -82,9 +77,7 @@ function withSessionLookup(
   return observeRoute(route.name, (request) =>
     catchingErrors(route.name, async () => {
       await checkRequestOrigin(request);
-      const session = await auth.api.getSession({
-        headers: request.headers,
-      });
+      const session = await auth.api.getSession({ headers: request.headers });
       return handler(request, session);
     }),
   );
@@ -102,7 +95,7 @@ export function withOptionalAuth(
     const limited = await enforceRateLimit(request, session, route.rateLimit);
     if (limited) return limited;
 
-    return handler(await boundedRequest(request, route.maxBodyBytes), session);
+    return handler(request, session);
   });
 }
 
@@ -119,7 +112,7 @@ export function withAuth(
     const limited = await enforceRateLimit(request, session, route.rateLimit);
     if (limited) return limited;
 
-    return handler(await boundedRequest(request, route.maxBodyBytes), session);
+    return handler(request, session);
   });
 }
 

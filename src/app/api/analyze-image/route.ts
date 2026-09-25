@@ -57,7 +57,6 @@ export const POST = withAuth(
   {
     name: "analyze image",
     rateLimit: RATE_LIMIT_POLICIES.analyzeImage,
-    maxBodyBytes: MAX_IMAGE_SIZE + 65_536,
   },
   async (request, session) => {
     const formData = await request.formData().catch(() => null);
