@@ -52,9 +52,10 @@ Copy `.env.local.example` — set `MONGODB_URI` and `OPENROUTER_API_KEY`:
 | Variable | Notes |
 |----------|-------|
 | `MONGODB_URI` | Auto-set in Docker; must be a replica set |
-| `BETTER_AUTH_URL` | Defaults to `http://localhost:3000` |
+| `BETTER_AUTH_URL` | Required HTTPS origin in production; Docker dev uses `http://localhost:3000` |
+| `BETTER_AUTH_SECRET` | Required in production; generate a random secret of at least 32 characters |
 | `RATE_LIMIT_IP_HEADER` | Trusted proxy client-IP header; defaults to `x-forwarded-for` |
-| `OPENROUTER_API_KEY` | [openrouter.ai](https://openrouter.ai/keys) |
+| `OPENROUTER_API_KEY` | Required at production startup; optional for local UI development. Obtain from [OpenRouter](https://openrouter.ai/keys) |
 | `DEV_ADMIN_EMAIL` | Dev-only; default `admin@localhost.dev` |
 | `DEV_ADMIN_PASSWORD` | Dev-only; default `dev-admin-password` |
 
