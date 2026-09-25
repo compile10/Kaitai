@@ -36,6 +36,10 @@ async function readWithIdleTimeout(
   });
   try {
     return await Promise.race([reader.read(), idle]);
+  } catch (error) {
+    if (error instanceof RequestError) throw error;
+    // The client aborted or the connection reset mid-upload; not a server fault.
+    throw new RequestError("Request body could not be read", 400);
   } finally {
     clearTimeout(timeout);
   }
