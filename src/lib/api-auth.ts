@@ -19,15 +19,12 @@ type Handler<S extends Session | null> = (
 ) => Promise<Response>;
 
 /** What a wrapper hands back: the value assigned to `export const GET`. */
-const activeRequests = new Map<string, number>();
-
 type RouteExport = (request: NextRequest) => Promise<Response>;
 
 interface RouteConfig {
   name: string;
   rateLimit?: RateLimitPolicy;
   maxBodyBytes?: number;
-  maxConcurrent?: number;
 }
 
 interface PermissionRouteConfig extends RouteConfig {
@@ -93,34 +90,6 @@ function withSessionLookup(
   );
 }
 
-async function boundedHandler<S extends Session | null>(
-  route: RouteConfig,
-  request: NextRequest,
-  session: S,
-  handler: Handler<S>,
-): Promise<Response> {
-  if (!route.maxConcurrent) {
-    return handler(await boundedRequest(request, route.maxBodyBytes), session);
-  }
-  const active = activeRequests.get(route.name) ?? 0;
-  if (route.maxConcurrent && active >= route.maxConcurrent) {
-    return jsonResponse({ error: "Service is busy. Try again shortly." }, 503, {
-      "Retry-After": "5",
-    });
-  }
-  activeRequests.set(route.name, active + 1);
-  try {
-    return await handler(
-      await boundedRequest(request, route.maxBodyBytes),
-      session,
-    );
-  } finally {
-    const remaining = (activeRequests.get(route.name) ?? 1) - 1;
-    if (remaining) activeRequests.set(route.name, remaining);
-    else activeRequests.delete(route.name);
-  }
-}
-
 /**
  * Wrap a route that works signed in or signed out; the handler receives the
  * session or null and decides what an anonymous caller gets.
@@ -133,7 +102,7 @@ export function withOptionalAuth(
     const limited = await enforceRateLimit(request, session, route.rateLimit);
     if (limited) return limited;
 
-    return boundedHandler(route, request, session, handler);
+    return handler(await boundedRequest(request, route.maxBodyBytes), session);
   });
 }
 
@@ -150,7 +119,7 @@ export function withAuth(
     const limited = await enforceRateLimit(request, session, route.rateLimit);
     if (limited) return limited;
 
-    return boundedHandler(route, request, session, handler);
+    return handler(await boundedRequest(request, route.maxBodyBytes), session);
   });
 }
 
