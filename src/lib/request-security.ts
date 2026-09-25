@@ -64,13 +64,16 @@ async function readWithIdleTimeout(
 }
 
 /** Bound actual bytes before JSON/multipart parsers allocate the full body. */
-export async function boundedRequest(request: Request, maxBytes = 16_384) {
+export async function boundedRequest<R extends Request>(
+  request: R,
+  maxBytes = 16_384,
+): Promise<R | NextRequest> {
+  if (!request.body) return request;
   const init = {
     method: request.method,
     headers: request.headers,
     signal: request.signal,
   };
-  if (!request.body) return new NextRequest(request.url, init);
   const length = request.headers.get("content-length");
   if (length !== null && !/^\d+$/.test(length)) {
     throw new RequestError("Invalid Content-Length header", 400);
