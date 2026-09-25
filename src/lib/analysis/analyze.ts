@@ -57,7 +57,7 @@ export async function analyzeSentence(
   });
 
   // Build prompt with the sentence
-  const prompt = ANALYSIS_PROMPT.replace("{{SENTENCE}}", sentence);
+  const prompt = ANALYSIS_PROMPT.replace("{{SENTENCE}}", () => sentence);
 
   // Invoke the model
   const analysis = (await structuredModel.invoke(prompt)) as SentenceAnalysis;
