@@ -1,23 +1,20 @@
 import { createHmac } from "node:crypto";
 import { APIError } from "better-auth/api";
-import mongoClient from "@/lib/db";
+import mongoClient, { onceIndexes } from "@/lib/db";
 
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 20;
 
+const ensureLoginLimitIndexes = onceIndexes("Login rate-limit", () =>
+  mongoClient
+    .db()
+    .collection("accountLoginLimits")
+    .createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
+);
+
 /** Bound distributed guesses without storing submitted email addresses. */
 export async function enforceAccountLoginLimit(email: string, secret: string) {
-  try {
-    await mongoClient
-      .db()
-      .collection("accountLoginLimits")
-      .createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-  } catch {
-    // Driver errors can contain stored values; keep the failure diagnostic generic.
-    throw new Error(
-      "Login rate-limit index initialization failed; check duplicates and index permissions",
-    );
-  }
+  await ensureLoginLimitIndexes();
   const now = Date.now();
   const key = createHmac("sha256", secret)
     .update(email.trim().toLowerCase())
