@@ -11,14 +11,6 @@ export interface RateLimitPolicy {
   ip: RateLimiterMongo;
 }
 
-const ensureRateLimitIndexes = onceIndexes("API rate-limit", () => {
-  const counters = mongoClient.db().collection("apiRateLimits");
-  return Promise.all([
-    counters.createIndex({ key: 1 }, { unique: true }),
-    counters.createIndex({ expire: -1 }, { expireAfterSeconds: 0 }),
-  ]);
-});
-
 interface PolicyOptions {
   name: string;
   message: string;
@@ -97,6 +89,12 @@ export const RATE_LIMIT_POLICIES = {
     windowSeconds: 60 * 60,
   }),
 };
+
+// Every limiter shares the apiRateLimits collection, so any one of them can
+// create the library's indexes for all of them.
+const ensureRateLimitIndexes = onceIndexes("API rate-limit", () =>
+  RATE_LIMIT_POLICIES.telemetry.user.createIndexes(),
+);
 
 export type RateLimitDecision =
   | { allowed: true }
