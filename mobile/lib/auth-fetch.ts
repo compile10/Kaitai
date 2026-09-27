@@ -11,13 +11,12 @@ export async function authFetch(
   url: string,
   init?: RequestInit,
 ): Promise<Response> {
-  const cookie = authClient.getCookie();
+  const cookie = await authClient.getCookie();
+  const headers = new Headers(init?.headers);
+  headers.set("Cookie", cookie);
   return fetch(url, {
     ...init,
     credentials: "omit",
-    headers: {
-      ...init?.headers,
-      Cookie: cookie,
-    },
+    headers,
   });
 }

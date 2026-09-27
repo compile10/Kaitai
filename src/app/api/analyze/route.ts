@@ -23,7 +23,8 @@ export const POST = withAuth(
     rateLimit: RATE_LIMIT_POLICIES.analyzeSentence,
   },
   async (request, session) => {
-    const { sentence } = await request.json();
+    const body = await request.json().catch(() => null);
+    const sentence = body?.sentence;
 
     if (!sentence || typeof sentence !== "string") {
       return jsonResponse({ error: "Invalid sentence provided" }, 400);
