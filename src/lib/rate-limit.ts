@@ -3,13 +3,21 @@ import { getIP } from "better-auth/api";
 import type { NextRequest } from "next/server";
 import { RateLimiterMongo, RateLimiterRes } from "rate-limiter-flexible";
 import { auth } from "@/lib/auth";
-import mongoClient from "@/lib/db";
+import mongoClient, { onceIndexes } from "@/lib/db";
 
 export interface RateLimitPolicy {
   message: string;
   user: RateLimiterMongo;
   ip: RateLimiterMongo;
 }
+
+const ensureRateLimitIndexes = onceIndexes("API rate-limit", () => {
+  const counters = mongoClient.db().collection("apiRateLimits");
+  return Promise.all([
+    counters.createIndex({ key: 1 }, { unique: true }),
+    counters.createIndex({ expire: -1 }, { expireAfterSeconds: 0 }),
+  ]);
+});
 
 interface PolicyOptions {
   name: string;
@@ -146,16 +154,7 @@ export async function checkRateLimit(
   userId: string | undefined,
   policy: RateLimitPolicy,
 ): Promise<RateLimitDecision> {
-  try {
-    const counters = mongoClient.db().collection("apiRateLimits");
-    await counters.createIndex({ key: 1 }, { unique: true });
-    await counters.createIndex({ expire: -1 }, { expireAfterSeconds: 0 });
-  } catch {
-    // Driver errors can contain stored values; keep the failure diagnostic generic.
-    throw new Error(
-      "API rate-limit index initialization failed; check duplicates and index permissions",
-    );
-  }
+  await ensureRateLimitIndexes();
   const { secret } = await auth.$context;
 
   if (userId) {

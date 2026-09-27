@@ -1,5 +1,5 @@
 import { DEFAULT_USER_SETTINGS, type UserSettings } from "@common/types";
-import mongoClient from "@/lib/db";
+import mongoClient, { onceIndexes } from "@/lib/db";
 
 export interface SettingsDocument {
   userId: string;
@@ -10,6 +10,10 @@ export interface SettingsDocument {
 const settingsCollection = mongoClient
   .db()
   .collection<SettingsDocument>("user_settings");
+
+const ensureSettingsIndexes = onceIndexes("Settings", () =>
+  settingsCollection.createIndex({ userId: 1 }, { unique: true }),
+);
 
 export async function getUserSettings(
   userId: string,
@@ -23,14 +27,7 @@ export async function upsertUserSettings(
   userId: string,
   preferences: UserSettings,
 ): Promise<UserSettings> {
-  try {
-    await settingsCollection.createIndex({ userId: 1 }, { unique: true });
-  } catch {
-    // Driver errors can contain stored values; keep the failure diagnostic generic.
-    throw new Error(
-      "Settings index initialization failed; check duplicates and index permissions",
-    );
-  }
+  await ensureSettingsIndexes();
   await settingsCollection.updateOne(
     { userId },
     { $set: { preferences, updatedAt: new Date() } },

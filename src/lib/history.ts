@@ -1,6 +1,6 @@
 import type { Document } from "mongodb";
 import { ObjectId } from "mongodb";
-import mongoClient from "@/lib/db";
+import mongoClient, { onceIndexes } from "@/lib/db";
 
 /** Shape of a document in the `history` collection. */
 export interface HistoryDocument {
@@ -15,6 +15,13 @@ export interface HistoryDocument {
 export const historyCollection = mongoClient
   .db()
   .collection<HistoryDocument & Document>("history");
+
+const ensureHistoryIndexes = onceIndexes("History", () =>
+  Promise.all([
+    historyCollection.createIndex({ userId: 1, createdAt: -1 }),
+    historyCollection.createIndex({ userId: 1, sentence: 1 }, { unique: true }),
+  ]),
+);
 
 /**
  * Save a sentence to the user's history.
@@ -31,18 +38,7 @@ export async function saveToHistory(
   provider: string,
   model: string,
 ): Promise<void> {
-  try {
-    await historyCollection.createIndex({ userId: 1, createdAt: -1 });
-    await historyCollection.createIndex(
-      { userId: 1, sentence: 1 },
-      { unique: true },
-    );
-  } catch {
-    // Driver errors can contain stored values; keep the failure diagnostic generic.
-    throw new Error(
-      "History index initialization failed; check duplicates and index permissions",
-    );
-  }
+  await ensureHistoryIndexes();
   await historyCollection.updateOne(
     { userId, sentence },
     {
