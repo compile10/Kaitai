@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import { STATIC_CSP } from "./src/lib/csp";
 
 const nextConfig: NextConfig = {
   output: "standalone",
@@ -11,8 +10,11 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Referrer-Policy", value: "no-referrer" },
-          // The proxy replaces this on pages with it plus a nonce script policy.
-          { key: "Content-Security-Policy", value: STATIC_CSP },
+          {
+            // The proxy adds the per-request script policy to document responses.
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'",
+          },
           ...(process.env.NODE_ENV === "production"
             ? [{ key: "Strict-Transport-Security", value: "max-age=31536000" }]
             : []),

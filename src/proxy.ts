@@ -1,7 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
-import { nonceScriptPolicy, STATIC_CSP } from "@/lib/csp";
 
 /**
  * Prelaunch gate: signed-out visitors only ever see /beta.
@@ -23,7 +22,21 @@ const PUBLIC_PATHS = new Set([
 
 export function proxy(request: NextRequest) {
   const nonce = randomBytes(16).toString("base64");
-  const policy = nonceScriptPolicy(nonce);
+  const isDev = process.env.NODE_ENV === "development";
+  const policy = [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`,
+    "script-src-attr 'none'",
+    // React Flow and the theme provider use inline styles, not inline handlers.
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' blob: data:",
+    "font-src 'self'",
+    `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+  ].join("; ");
   const requestHeaders = new Headers(request.headers);
   // Overwrite client-supplied values before Next.js extracts the script nonce.
   requestHeaders.set("x-nonce", nonce);
@@ -37,7 +50,7 @@ export function proxy(request: NextRequest) {
   } else if (
     isSignedIn ||
     PUBLIC_PATHS.has(pathname) ||
-    // Asset-like paths bypass the beta gate but still receive the script policy.
+    // Asset-like paths bypass the beta gate but still receive the document policy.
     pathname.includes(".")
   ) {
     response = NextResponse.next({ request: { headers: requestHeaders } });
@@ -45,12 +58,7 @@ export function proxy(request: NextRequest) {
     response = NextResponse.redirect(new URL("/beta", request.url));
   }
 
-  // Setting this header drops next.config.ts's copy, so send both policies;
-  // browsers enforce each, so scripts must also carry this request's nonce.
-  // Next.js also copies this header onto the request and reads the first
-  // script-src for its nonce, so the nonce policy must come first.
   response.headers.set("Content-Security-Policy", policy);
-  response.headers.append("Content-Security-Policy", STATIC_CSP);
   // HTML and its nonce must never be reused across document requests.
   response.headers.set("Cache-Control", "private, no-store");
   return response;

@@ -19,7 +19,7 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── Dockerfile                      Multi-stage: deps / dev / builder / standalone prod
 ├── docker-compose.yml              Local web + Mongo 7 replica set (not for production)
 ├── package.json                    Web scripts: next (turbopack), biome lint/format
-├── next.config.ts                  standalone output, security headers + static CSP
+├── next.config.ts                  standalone output
 ├── tsconfig.json                   @/* → src/*, @common/* → common/*; excludes mobile
 ├── biome.json                      Lint/format for the web tree
 ├── components.json                 shadcn/ui config
@@ -89,7 +89,6 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `settings.ts` | Mongo account preference helpers + authenticated settings resolver |
 | `history.ts` | `history` collection; upsert on `{ userId, sentence }`; stores provider/model metadata for debugging |
 | `invites.ts` | `inviteCodes` collection: creation, validation, and serialization; auth claims use the signup transaction |
-| `csp.ts` | Static content security policy and per-request nonce script policy |
 | `cors.ts` | JSON + preflight helpers, error trace IDs, and same-origin browser CORS policy |
 | `validation.ts` | `sanitizeForLLM` |
 | `dev-seed.ts` | Seeds `admin@localhost.dev` in development only |
@@ -127,7 +126,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `hooks/use-settings-query.ts` | GET/PUT `/api/settings` query + mutation |
 | `providers/query-client-provider.tsx` | TanStack Query |
 | `hooks/use-drag-drop.ts` | Image drag-and-drop |
-| `proxy.ts` | Per-request nonce script policy and prelaunch routing gate (cookie presence only; not auth) |
+| `proxy.ts` | Per-request nonce CSP and prelaunch routing gate (cookie presence only; not auth) |
 | `instrumentation.ts` | Initializes server telemetry, captures framework errors, and runs the dev seed |
 | `instrumentation-client.ts` | Browser global error and rejection reporting |
 
