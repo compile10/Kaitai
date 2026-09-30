@@ -71,6 +71,24 @@ let records: BatchLogRecordProcessor | undefined;
 
 export function startMonitoring() {
   if (sdk || !process.env.OTEL_EXPORTER_OTLP_ENDPOINT) return;
+  // Reject invalid configuration instead of silently exporting to a fallback URL.
+  for (const name of [
+    "OTEL_EXPORTER_OTLP_ENDPOINT",
+    "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
+    "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT",
+  ]) {
+    const value = process.env[name];
+    if (value === undefined) continue;
+    let url: URL;
+    try {
+      url = new URL(value);
+    } catch {
+      throw new Error(`${name} must be an HTTP or HTTPS URL`);
+    }
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      throw new Error(`${name} must be an HTTP or HTTPS URL`);
+    }
+  }
   const exporter = new OTLPTraceExporter();
   const safeExporter: SpanExporter = {
     export: (items, callback) =>
