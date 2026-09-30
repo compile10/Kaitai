@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { ThemeProvider } from "next-themes";
 import { QueryClientProvider } from "@/providers/query-client-provider";
 import { SettingsStoreProvider } from "@/providers/settings-store-provider";
@@ -14,22 +13,15 @@ export const metadata: Metadata = {
     "Visualize Japanese sentence structure with AI-powered analysis. Analyze grammar, particles, and word relationships.",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
-        <ThemeProvider
-          nonce={nonce}
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-        >
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <QueryClientProvider>
             <SettingsStoreProvider>{children}</SettingsStoreProvider>
           </QueryClientProvider>

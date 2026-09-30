@@ -19,7 +19,7 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── Dockerfile                      Multi-stage: deps / dev / builder / standalone prod
 ├── docker-compose.yml              Local web + Mongo 7 replica set (not for production)
 ├── package.json                    Web scripts: next (turbopack), biome lint/format
-├── next.config.ts                  standalone output
+├── next.config.ts                  standalone output, security headers + CSP
 ├── tsconfig.json                   @/* → src/*, @common/* → common/*; excludes mobile
 ├── biome.json                      Lint/format for the web tree
 ├── components.json                 shadcn/ui config
@@ -46,7 +46,7 @@ When testing, run the web app through the dockerfile with docker compose.
 
 | Path | Role |
 | --- | --- |
-| `app/layout.tsx` | Dynamic root layout: fonts, nonce-aware theme, Query + settings providers |
+| `app/layout.tsx` | Root layout: fonts, theme, Query + settings providers |
 | `app/error.tsx` | Branded page error boundary with retry + home recovery |
 | `app/global-error.tsx` | Standalone root-layout error boundary; owns document + styles, reads saved/system theme without providers |
 | `app/not-found.tsx` | Branded 404 with home recovery |
@@ -126,7 +126,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `hooks/use-settings-query.ts` | GET/PUT `/api/settings` query + mutation |
 | `providers/query-client-provider.tsx` | TanStack Query |
 | `hooks/use-drag-drop.ts` | Image drag-and-drop |
-| `proxy.ts` | Per-request nonce CSP and prelaunch routing gate (cookie presence only; not auth) |
+| `proxy.ts` | Prelaunch gate: signed-out → `/beta` (cookie presence only; not auth) |
 | `instrumentation.ts` | Initializes server telemetry, captures framework errors, and runs the dev seed |
 | `instrumentation-client.ts` | Browser global error and rejection reporting |
 
