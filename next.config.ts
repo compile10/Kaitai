@@ -11,7 +11,8 @@ const nextConfig: NextConfig = {
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Referrer-Policy", value: "no-referrer" },
           {
-            // The proxy adds the per-request script policy to document responses.
+            // Only reaches responses the proxy skips (API routes, _next assets);
+            // on everything else the proxy's full per-request policy replaces it.
             key: "Content-Security-Policy",
             value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'",
           },

@@ -59,8 +59,6 @@ export function proxy(request: NextRequest) {
   }
 
   response.headers.set("Content-Security-Policy", policy);
-  // HTML and its nonce must never be reused across document requests.
-  response.headers.set("Cache-Control", "private, no-store");
   return response;
 }
 
