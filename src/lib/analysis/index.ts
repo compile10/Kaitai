@@ -12,5 +12,6 @@ export {
   ANALYSIS_MODEL,
   ANALYSIS_PROVIDER,
   createChatModel,
+  getOpenRouterApiKey,
 } from "./client";
 export { analysisSchema } from "./schema";

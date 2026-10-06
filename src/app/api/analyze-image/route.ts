@@ -6,6 +6,7 @@ import {
   ANALYSIS_PROVIDER,
   analyzeSentence,
   createChatModel,
+  getOpenRouterApiKey,
 } from "@/lib/analysis";
 import { withAuth } from "@/lib/api-auth";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
@@ -80,8 +81,10 @@ export const POST = withAuth(
       return jsonResponse({ error: "Image exceeds maximum size of 20MB" }, 400);
     }
 
-    const openRouterApiKey = process.env.OPENROUTER_API_KEY?.trim();
-    if (!openRouterApiKey) {
+    try {
+      getOpenRouterApiKey();
+    } catch (error) {
+      reportError(error, "image.extract");
       return jsonResponse(
         {
           error: "Server Error: AI service not configured.",

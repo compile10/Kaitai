@@ -47,6 +47,8 @@ export function getCachedResponse(cacheKey: string): SentenceAnalysis | null {
  * Store response in cache
  */
 export function setCachedResponse(cacheKey: string, data: SentenceAnalysis) {
+  // Re-insert so a refreshed entry moves to the end of the eviction order.
+  responseCache.delete(cacheKey);
   responseCache.set(cacheKey, {
     data,
     timestamp: Date.now(),
