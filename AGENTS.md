@@ -84,7 +84,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `auth-permissions.ts` | Access control: `adminPanel`, `invite` |
 | `api-auth.ts` | Route-configured auth, permission, and rate-limit wrappers |
 | `login-limit.ts` | Shared, privacy-preserving per-account sign-in attempt limits |
-| `db.ts` | Shared Mongo client (dev: reused on `globalThis`) and once-per-process index setup |
+| `db.ts` | Single server-side Mongo client (dev: reused on `globalThis`) and once-per-process index setup |
 | `rate-limit.ts` | Mongo per-user/per-IP application route limits and trusted proxy IP extraction |
 | `settings.ts` | Mongo account preference helpers + authenticated settings resolver |
 | `history.ts` | `history` collection; upsert on `{ userId, sentence }`; stores provider/model metadata for debugging |
