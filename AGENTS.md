@@ -39,6 +39,7 @@ When testing, run the web app through the dockerfile with docker compose.
 | `image.ts` | 20MB cap and allowed MIME types for image upload |
 | `tailwind.config.js` | Shared light/dark color tokens (web + NativeWind) |
 | `assets/branding/logo.svg` | Wordmark used on web |
+| `assets/branding/icon.svg` | Square app icon source (logo K on brand red) |
 
 ## `src/` — web + API
 
@@ -58,6 +59,7 @@ When testing, run the web app through the dockerfile with docker compose.
 | `app/analyze/[sentence]/error.tsx` | Analysis error recovery without unmounting the shell |
 | `app/analyze/[sentence]/AnalysisContent.tsx` | Client analysis fetch + visualization |
 | `app/globals.css` | Tailwind v4 + theme tokens |
+| `app/icon.svg` / `apple-icon.png` / `favicon.ico` | Browser and home-screen icons |
 
 ### API routes
 
@@ -150,6 +152,7 @@ Separate Expo 56 app (file routing). Dev API host is inferred from Expo `hostUri
 | `app.json` / `app.config.ts` | App identity, native configuration, validated release API origin |
 | `eas.json` | Development, internal preview, and store build profiles |
 | `.env.local.example` | Public API origin for local release builds |
+| `assets/images/` | App icon, Android adaptive icon layers, splash image, web favicon |
 | `README.md` | Mobile overview and local development setup |
 | `lib/fonts.ts` | Load Geist; NativeWind `font-geist-reg` maps to it |
 | `lib/auth-client.ts` | Better Auth Expo client (SecureStore) |
