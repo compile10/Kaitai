@@ -71,7 +71,7 @@ monitoring phase. An unavailable API also prevents client report delivery.
 ## Data handling
 
 `common/redaction.ts` owns shared credential, email, URL, and labelled-content
-redaction rules. Message formatting, stack parsing, and event attribute handling
+redaction rules. Message formatting, stack-text sanitization, and event attribute handling
 reuse these rules while preserving their own structure and limits.
 
 Error logs include a sanitized `exception.message` alongside the stable operation
@@ -84,10 +84,13 @@ URL credentials and query parameters, analysis URL sentences, email addresses,
 common authentication tokens, labelled credentials/request/provider content, and
 structured payloads. Request bodies, headers, and user identities are not attached
 to reports. These patterns cannot identify every sensitive value in arbitrary
-free text. Stack frames retain code locations with URL credentials, query
-parameters, and analysis URLs removed.
-Stack locations are parsed with `error-stack-parser-es` and formatted consistently
-across clients and the server. Hermes bytecode offsets remain unsymbolicated.
+free text. Stack text is sanitized line by line, including URL credentials, query
+parameters, analysis URLs, and embedded structured payloads.
+Stacks retain their runtime text format without parsing or reconstructing frames.
+Sanitization bounds input to 12,000 characters, 40 lines, and 512 characters per
+line, then caps exported text at 6,000 characters. Exception messages already
+present in stacks are sanitized in place; no duplicate heading is added.
+Hermes bytecode offsets remain unsymbolicated.
 Framework spans are filtered before export to exclude request URLs and arbitrary
 attributes; only explicitly captured errors retain sanitized stack traces.
 All span event types are exported with their names and timestamps preserved, so

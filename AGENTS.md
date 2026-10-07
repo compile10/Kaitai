@@ -16,14 +16,14 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── public/                         Static assets served by Next
 ├── scripts/seed-admin.mjs           Explicit production admin bootstrap with transactional credentials
 ├── docs/monitoring.md               SigNoz integration, deployment settings, and operational verification
-├── Dockerfile                      Multi-stage: deps / dev / builder / standalone prod
+├── Dockerfile                      Dependency install and non-root development server
 ├── docker-compose.yml              Local web + Mongo 7 replica set (not for production)
 ├── package.json                    Web scripts: next (turbopack), biome lint/format
 ├── next.config.ts                  standalone output
 ├── tsconfig.json                   @/* → src/*, @common/* → common/*; excludes mobile
 ├── biome.json                      Lint/format for the web tree
 ├── components.json                 shadcn/ui config
-├── .env.local.example              OpenRouter key + optional DEV_ADMIN_* overrides
+├── .env.local.example              OpenRouter key, server/auth configuration, and optional DEV_ADMIN_* overrides
 ├── .github/workflows/              Claude Code GitHub Actions
 └── README.md                       Project overview, setup instructions
 ```
@@ -46,7 +46,7 @@ When testing, run the web app through the dockerfile with docker compose.
 
 | Path | Role |
 | --- | --- |
-| `app/layout.tsx` | Root layout: fonts, theme, Query + settings providers |
+| `app/layout.tsx` | Dynamic root layout: fonts, nonce-aware theme, Query + settings providers |
 | `app/error.tsx` | Branded page error boundary with retry + home recovery |
 | `app/global-error.tsx` | Standalone root-layout error boundary; owns document + styles, reads saved/system theme without providers |
 | `app/not-found.tsx` | Branded 404 with home recovery |
@@ -66,7 +66,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | Path | Role |
 | --- | --- |
 | `app/api/telemetry/route.ts` | Bounded, rate-limited web/mobile JavaScript error ingestion |
-| `app/api/health/route.ts` | Public process status and Mongo connectivity probe |
+| `app/api/health/route.ts` | Public process status and coalesced, briefly cached Mongo connectivity probe |
 | `app/api/analyze/route.ts` | POST sentence → LLM analysis; cache + history write |
 | `app/api/analyze-image/route.ts` | POST image → OCR, then same analysis pipeline |
 | `app/api/history/route.ts` | GET paginated history for the signed-in user; excludes diagnostic metadata |
@@ -79,16 +79,17 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | File | Role |
 | --- | --- |
 | `monitoring/` | OpenTelemetry initialization, sanitized traces/events, LangChain monitoring callbacks, structured logging, and error reporting |
-| `auth.ts` | Server Better Auth: Mongo adapter, Expo plugin, admin roles, invite hooks |
+| `auth.ts` | Server Better Auth initialization: Mongo adapter, Expo plugin, admin roles, invite hooks |
 | `auth-client.ts` | Browser Better Auth client |
 | `auth-permissions.ts` | Access control: `adminPanel`, `invite` |
 | `api-auth.ts` | Route-configured auth, permission, and rate-limit wrappers |
-| `db.ts` | Mongo client (dev: reused on `globalThis`) |
-| `rate-limit.ts` | Atomic Mongo per-user/per-IP application route limits; trusted proxy IP extraction |
+| `login-limit.ts` | Shared, privacy-preserving per-account sign-in attempt limits |
+| `db.ts` | Single server-side Mongo client (dev: reused on `globalThis`) and once-per-process index setup |
+| `rate-limit.ts` | Mongo per-user/per-IP application route limits and trusted proxy IP extraction |
 | `settings.ts` | Mongo account preference helpers + authenticated settings resolver |
 | `history.ts` | `history` collection; upsert on `{ userId, sentence }`; stores provider/model metadata for debugging |
-| `invites.ts` | `inviteCodes` collection: create, claim, TTL |
-| `cors.ts` | JSON + preflight helpers, error trace IDs, and CORS headers (`*` in dev, origin header omitted in prod) |
+| `invites.ts` | `inviteCodes` collection: creation, validation, and serialization; auth claims use the signup transaction |
+| `cors.ts` | JSON + preflight helpers, error trace IDs, and same-origin browser CORS policy |
 | `validation.ts` | `sanitizeForLLM` |
 | `dev-seed.ts` | Seeds `admin@localhost.dev` in development only |
 | `user-utils.ts` | `SessionUser` type |
@@ -125,8 +126,8 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `hooks/use-settings-query.ts` | GET/PUT `/api/settings` query + mutation |
 | `providers/query-client-provider.tsx` | TanStack Query |
 | `hooks/use-drag-drop.ts` | Image drag-and-drop |
-| `proxy.ts` | Prelaunch gate: signed-out → `/beta` (cookie presence only; not auth) |
-| `instrumentation.ts` | Initializes server telemetry, captures framework errors, and runs the dev seed |
+| `proxy.ts` | Per-request nonce CSP and prelaunch routing gate (cookie presence only; not auth) |
+| `instrumentation.ts` | Runtime configuration validation, auth/database initialization, telemetry, framework error capture, and dev seed |
 | `instrumentation-client.ts` | Browser global error and rejection reporting |
 
 ## `mobile/`
@@ -152,6 +153,7 @@ Separate Expo 56 app (file routing). Dev API host is inferred from Expo `hostUri
 | `README.md` | Mobile overview and local development setup |
 | `lib/fonts.ts` | Load Geist; NativeWind `font-geist-reg` maps to it |
 | `lib/auth-client.ts` | Better Auth Expo client (SecureStore) |
+| `lib/picked-image.ts` | Ephemeral transfer of picker-selected images to the results screen |
 | `lib/auth-fetch.ts` | Authenticated fetch |
 | `lib/query-client.ts` | Shared Query client with failure reporting |
 | `lib/monitoring.ts` | Mobile JavaScript error reporting through the web API |

@@ -8,6 +8,7 @@ export interface CacheEntry {
 
 export const responseCache = new Map<string, CacheEntry>();
 export const CACHE_DURATION_MS = 60 * 60 * 1000; // 1 hour
+export const MAX_CACHE_ENTRIES = 500;
 
 /**
  * Clean up expired cache entries
@@ -46,6 +47,8 @@ export function getCachedResponse(cacheKey: string): SentenceAnalysis | null {
  * Store response in cache
  */
 export function setCachedResponse(cacheKey: string, data: SentenceAnalysis) {
+  // Re-insert so a refreshed entry moves to the end of the eviction order.
+  responseCache.delete(cacheKey);
   responseCache.set(cacheKey, {
     data,
     timestamp: Date.now(),
@@ -54,5 +57,10 @@ export function setCachedResponse(cacheKey: string, data: SentenceAnalysis) {
   // Periodically clean up expired entries
   if (responseCache.size > 100) {
     cleanExpiredCache();
+  }
+  while (responseCache.size > MAX_CACHE_ENTRIES) {
+    const oldest = responseCache.keys().next().value;
+    if (oldest === undefined) break;
+    responseCache.delete(oldest);
   }
 }

@@ -1,5 +1,3 @@
-import { parseStack } from "error-stack-parser-es/lite";
-
 export const MAX_ERROR_MESSAGE_LENGTH = 1000;
 // biome-ignore lint/suspicious/noControlCharactersInRegex: Exported messages must not contain control characters.
 const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/g;
@@ -29,35 +27,27 @@ export function safeMessage(error: unknown): string | undefined {
   );
 }
 
-/** Retain code locations, excluding exception messages and navigation parameters. */
+/** Keep bounded runtime stack text, sanitizing each line without parsing frames. */
 export function safeStack(error: unknown): string | undefined {
-  if (!(error instanceof Error) || !error.stack) return undefined;
-  try {
-    return (
-      parseStack(error.stack)
-        .filter(
-          (frame) =>
-            frame.file &&
-            frame.line !== undefined &&
-            !frame.raw?.startsWith(`${error.name}:`),
-        )
-        .slice(0, 20)
-        .map((frame) => {
-          const name = redactDiagnosticText(frame.function ?? "<anonymous>");
-          const file = redactDiagnosticText(frame.file ?? "");
-          const column = frame.col === undefined ? "" : `:${frame.col}`;
-          return `    at ${name} (${file}:${frame.line}${column})`;
-        })
-        .join("\n")
-        .slice(0, 6000) || undefined
-    );
-  } catch {
-    // Unsupported stack formats must not interrupt error reporting.
+  if (!(error instanceof Error) || typeof error.stack !== "string")
     return undefined;
-  }
+  return (
+    error.stack
+      .slice(0, 12_000)
+      .split(/\r?\n/)
+      .slice(0, 40)
+      .map((line) =>
+        redactDiagnosticText(line.slice(0, 512)).replace(
+          /(?:\{|\[(?!sentence\])).*$/,
+          "<redacted>",
+        ),
+      )
+      .join("\n")
+      .slice(0, 6000) || undefined
+  );
 }
 
-/** Redact sensitive text shared by messages, stack-frame fields, and event attributes. */
+/** Redact sensitive text shared by messages, stack text, and event attributes. */
 export function redactDiagnosticText(value: string): string {
   return value
     .replace(/\/analyze\/[^\s)"'<>]+/g, "/analyze/[sentence]")

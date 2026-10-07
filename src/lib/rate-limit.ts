@@ -1,9 +1,9 @@
 import { createHmac } from "node:crypto";
-import { getIp } from "better-auth/api";
+import { getIP } from "better-auth/api";
 import type { NextRequest } from "next/server";
 import { RateLimiterMongo, RateLimiterRes } from "rate-limiter-flexible";
 import { auth } from "@/lib/auth";
-import mongoClient from "@/lib/db";
+import mongoClient, { onceIndexes } from "@/lib/db";
 
 export interface RateLimitPolicy {
   message: string;
@@ -34,6 +34,8 @@ function createPolicy({
       keyPrefix: `${name}:${dimension}`,
       points,
       duration: windowSeconds,
+      // Index creation is awaited before consuming counters.
+      disableIndexesCreation: true,
     });
 
   return {
@@ -88,6 +90,12 @@ export const RATE_LIMIT_POLICIES = {
   }),
 };
 
+// Every limiter shares the apiRateLimits collection, so any one of them can
+// create the library's indexes for all of them.
+const ensureRateLimitIndexes = onceIndexes("API rate-limit", () =>
+  RATE_LIMIT_POLICIES.telemetry.user.createIndexes(),
+);
+
 export type RateLimitDecision =
   | { allowed: true }
   | {
@@ -109,7 +117,7 @@ function identifierKey(
 }
 
 function getClientIp(request: NextRequest): string {
-  const ip = getIp(request, auth.options);
+  const ip = getIP(request, auth.options);
   if (ip) return ip;
 
   throw new Error("Trusted client IP header is missing or invalid");
@@ -144,6 +152,7 @@ export async function checkRateLimit(
   userId: string | undefined,
   policy: RateLimitPolicy,
 ): Promise<RateLimitDecision> {
+  await ensureRateLimitIndexes();
   const { secret } = await auth.$context;
 
   if (userId) {

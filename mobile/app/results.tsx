@@ -4,7 +4,7 @@ import type { SentenceAnalysis } from "@common/types";
 import { Ionicons } from "@expo/vector-icons";
 import RenderHTML from "@native-html/render";
 import { useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -19,15 +19,25 @@ import { buildApiUrl } from "@/constants/api";
 import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 import { authFetch } from "@/lib/auth-fetch";
 import { geist } from "@/lib/fonts";
+import { takePickedImage, type PickedImage } from "@/lib/picked-image";
+
+type ResultsParams = {
+  sentence?: string;
+  imageId?: string;
+};
 
 export default function ResultsScreen() {
-  const { sentence, imageUri, imageMimeType, imageFileName } =
-    useLocalSearchParams<{
-      sentence?: string;
-      imageUri?: string;
-      imageMimeType?: string;
-      imageFileName?: string;
-    }>();
+  const params = useLocalSearchParams<ResultsParams>();
+  return (
+    <ResultsContent
+      key={JSON.stringify([params.sentence, params.imageId])}
+      sentence={params.sentence}
+      imageId={params.imageId}
+    />
+  );
+}
+
+function ResultsContent({ sentence, imageId }: ResultsParams) {
   const { width } = useWindowDimensions();
 
   const [analysis, setAnalysis] = useState<SentenceAnalysis | null>(null);
@@ -36,32 +46,40 @@ export default function ResultsScreen() {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
-  const isImageMode = Boolean(imageUri);
+  const isImageMode = Boolean(imageId);
+  const claimed = useRef<{ image?: PickedImage }>(undefined);
 
   const textColor = useRawCSSTheme("foreground");
   const tintColor = useRawCSSTheme("primary");
 
-  const fetchAnalysis = useCallback(async () => {
-    if (!imageUri && !sentence) return;
+  useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
 
-    setIsLoading(true);
-    setError(null);
-    setAnalysis(null);
-    setExtractedSentence(null);
-
-    try {
-      if (imageUri) {
+    async function fetchAnalysis() {
+      if (imageId) {
+        if (typeof imageId !== "string")
+          throw new Error(
+            "Unable to access the photo. Go back and select it again.",
+          );
+        // The handoff is single-use; keep the photo for retries.
+        claimed.current ??= { image: takePickedImage(imageId) };
+        const image = claimed.current.image;
+        if (!image)
+          throw new Error(
+            "Unable to access the photo. Go back and select it again.",
+          );
         const formData = new FormData();
         formData.append("image", {
-          uri: imageUri,
-          type: imageMimeType || "image/jpeg",
-          name: imageFileName || "image.jpg",
+          ...image,
         } as unknown as Blob);
 
         const response = await authFetch(buildApiUrl("analyzeImage"), {
           method: "POST",
           body: formData,
+          signal,
         });
 
         const data = await response.json();
@@ -70,15 +88,20 @@ export default function ResultsScreen() {
           throw new Error(data.error || "Failed to analyze image");
         }
 
-        setExtractedSentence(data.sentence);
-        setAnalysis(data.analysis);
+        return {
+          sentence: data.sentence as string,
+          analysis: data.analysis as SentenceAnalysis,
+        };
       } else {
-        setExtractedSentence(sentence || null);
+        if (typeof sentence !== "string" || !sentence.trim()) {
+          throw new Error("No sentence to analyze. Go back and enter one.");
+        }
 
         const response = await authFetch(buildApiUrl("analyze"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ sentence }),
+          signal,
         });
 
         const data = await response.json();
@@ -87,20 +110,26 @@ export default function ResultsScreen() {
           throw new Error(data.error || "Failed to analyze sentence");
         }
 
-        setAnalysis(data as SentenceAnalysis);
+        return { sentence, analysis: data as SentenceAnalysis };
       }
-    } catch (err) {
-      reportMobileError(err, clientError.mobile_analysis);
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setIsLoading(false);
     }
-  }, [sentence, imageUri, imageMimeType, imageFileName]);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- route param changes intentionally trigger a fetch
-    fetchAnalysis();
-  }, [fetchAnalysis]);
+    fetchAnalysis()
+      .then((result) => {
+        if (signal.aborted) return;
+        setExtractedSentence(result.sentence);
+        setAnalysis(result.analysis);
+      })
+      .catch((err: unknown) => {
+        if (signal.aborted) return;
+        reportMobileError(err, clientError.mobile_analysis);
+        setError(err instanceof Error ? err.message : "An error occurred");
+      })
+      .finally(() => {
+        if (!signal.aborted) setIsLoading(false);
+      });
+    return () => controller.abort();
+  }, [sentence, imageId, attempt]);
 
   if (isLoading) {
     return (
@@ -133,7 +162,11 @@ export default function ResultsScreen() {
           <ThemedText className="opacity-80">{error}</ThemedText>
           <TouchableOpacity
             className="p-3 rounded-lg items-center mt-2 bg-primary"
-            onPress={fetchAnalysis}
+            onPress={() => {
+              setIsLoading(true);
+              setError(null);
+              setAttempt((value) => value + 1);
+            }}
           >
             <ThemedText className="text-primary-foreground font-semibold">
               Retry

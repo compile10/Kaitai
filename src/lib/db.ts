@@ -20,3 +20,27 @@ if (process.env.NODE_ENV === "development") {
 }
 
 export default mongoClient;
+
+/**
+ * Return a function that creates indexes once per process. Callers await it
+ * before writing; a failure clears the cached attempt so the next call retries.
+ */
+export function onceIndexes(
+  name: string,
+  create: () => Promise<unknown>,
+): () => Promise<void> {
+  let ready: Promise<void> | undefined;
+  return () => {
+    ready ??= create().then(
+      () => {},
+      () => {
+        ready = undefined;
+        // Driver errors can contain stored values; keep the failure diagnostic generic.
+        throw new Error(
+          `${name} index initialization failed; check duplicates and index permissions`,
+        );
+      },
+    );
+    return ready;
+  };
+}

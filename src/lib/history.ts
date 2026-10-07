@@ -1,6 +1,6 @@
 import type { Document } from "mongodb";
 import { ObjectId } from "mongodb";
-import mongoClient from "@/lib/db";
+import mongoClient, { onceIndexes } from "@/lib/db";
 
 /** Shape of a document in the `history` collection. */
 export interface HistoryDocument {
@@ -16,16 +16,12 @@ export const historyCollection = mongoClient
   .db()
   .collection<HistoryDocument & Document>("history");
 
-// Ensure compound indexes exist once per process (HMR-safe)
-// biome-ignore lint/suspicious/noExplicitAny: globalThis augmentation without declaration merging
-if (!(globalThis as any)["kaitai.history.indexes"]) {
-  (globalThis as any)["kaitai.history.indexes"] = true;
-  void historyCollection.createIndex({ userId: 1, createdAt: -1 });
-  void historyCollection.createIndex(
-    { userId: 1, sentence: 1 },
-    { unique: true },
-  );
-}
+const ensureHistoryIndexes = onceIndexes("History", () =>
+  Promise.all([
+    historyCollection.createIndex({ userId: 1, createdAt: -1 }),
+    historyCollection.createIndex({ userId: 1, sentence: 1 }, { unique: true }),
+  ]),
+);
 
 /**
  * Save a sentence to the user's history.
@@ -42,6 +38,7 @@ export async function saveToHistory(
   provider: string,
   model: string,
 ): Promise<void> {
+  await ensureHistoryIndexes();
   await historyCollection.updateOne(
     { userId, sentence },
     {
