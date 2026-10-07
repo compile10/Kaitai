@@ -4,7 +4,7 @@ import type { SentenceAnalysis } from "@common/types";
 import { Ionicons } from "@expo/vector-icons";
 import RenderHTML from "@native-html/render";
 import { useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -49,27 +49,24 @@ function ResultsContent({ sentence, imageId }: ResultsParams) {
   const [attempt, setAttempt] = useState(0);
 
   const isImageMode = Boolean(imageId);
-  const selection = useRef<{ id: string; image?: PickedImage } | undefined>(
-    undefined,
-  );
+  const claimed = useRef<{ image?: PickedImage }>(undefined);
 
   const textColor = useRawCSSTheme("foreground");
   const tintColor = useRawCSSTheme("primary");
 
-  const fetchAnalysis = useCallback(
-    async (signal: AbortSignal) => {
+  useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    async function fetchAnalysis() {
       if (imageId) {
         if (typeof imageId !== "string")
           throw new Error(
             "Unable to access the photo. Go back and select it again.",
           );
-        if (selection.current?.id !== imageId) {
-          selection.current = {
-            id: imageId,
-            image: takePickedImage(imageId),
-          };
-        }
-        const image = selection.current.image;
+        // The handoff is single-use; keep the photo for retries.
+        claimed.current ??= { image: takePickedImage(imageId) };
+        const image = claimed.current.image;
         if (!image)
           throw new Error(
             "Unable to access the photo. Go back and select it again.",
@@ -115,28 +112,24 @@ function ResultsContent({ sentence, imageId }: ResultsParams) {
 
         return { sentence, analysis: data as SentenceAnalysis };
       }
-    },
-    [sentence, imageId],
-  );
+    }
 
-  useEffect(() => {
-    const controller = new AbortController();
-    fetchAnalysis(controller.signal)
+    fetchAnalysis()
       .then((result) => {
-        if (controller.signal.aborted) return;
+        if (signal.aborted) return;
         setExtractedSentence(result.sentence);
         setAnalysis(result.analysis);
       })
       .catch((err: unknown) => {
-        if (controller.signal.aborted) return;
+        if (signal.aborted) return;
         reportMobileError(err, clientError.mobile_analysis);
         setError(err instanceof Error ? err.message : "An error occurred");
       })
       .finally(() => {
-        if (!controller.signal.aborted) setIsLoading(false);
+        if (!signal.aborted) setIsLoading(false);
       });
     return () => controller.abort();
-  }, [fetchAnalysis, attempt]);
+  }, [sentence, imageId, attempt]);
 
   if (isLoading) {
     return (
