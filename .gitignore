@@ -36,6 +36,12 @@ yarn-error.log*
 !.env.local.example
 !deploy/.env.production.example
 
+# opentofu
+/deploy/infra/.terraform/
+/deploy/infra/*.tfstate*
+/deploy/infra/*.tfplan
+/deploy/infra/terraform.tfvars
+
 # vercel
 .vercel
 

@@ -16,8 +16,9 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── public/                         Static assets served by Next
 ├── scripts/seed-admin.mjs           Explicit production admin bootstrap with transactional credentials
 ├── docs/monitoring.md               SigNoz integration, deployment settings, and operational verification
-├── docs/deployment.md               Single-host production deploy through Cloudflare Tunnel
+├── docs/deployment.md               Provisioning and single-host production deploy through Cloudflare Tunnel
 ├── deploy/                         Production Compose stack (web, Mongo, cloudflared) and env example
+├── deploy/infra/                   OpenTofu: Lightsail host, Cloudflare Tunnel/DNS/zone settings, budget alert
 ├── Dockerfile                      Dependencies, dev server, production build, and standalone runner
 ├── docker-compose.yml              Local web + Mongo 7 replica set (not for production)
 ├── package.json                    Web scripts: next (turbopack), biome lint/format
