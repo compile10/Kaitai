@@ -55,12 +55,13 @@ docker compose -f deploy/compose.yml up -d --build
 ```
 
 Create the first admin. The variables pass through from the shell, so the
-password stays out of the command line:
+password stays out of the command line, and are cleared afterward:
 
 ```bash
 read -r ADMIN_EMAIL && read -r ADMIN_NAME && read -rs ADMIN_PASSWORD
 export ADMIN_EMAIL ADMIN_NAME ADMIN_PASSWORD
 docker compose -f deploy/compose.yml run --rm --build seed
+unset ADMIN_EMAIL ADMIN_NAME ADMIN_PASSWORD
 ```
 
 ## Operations
