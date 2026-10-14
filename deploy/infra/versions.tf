@@ -15,7 +15,7 @@ terraform {
   # The bucket is passed at init: tofu init -backend-config="bucket=..."
   backend "s3" {
     key          = "beta/terraform.tfstate"
-    region       = "us-east-1"
+    region       = "us-west-2"
     encrypt      = true
     use_lockfile = true
   }

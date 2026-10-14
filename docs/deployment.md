@@ -53,7 +53,8 @@ Create the state bucket once:
 
 ```bash
 BUCKET=kaitai-tofu-state-$(aws sts get-caller-identity --query Account --output text)
-aws s3api create-bucket --bucket "$BUCKET" --region us-east-1
+aws s3api create-bucket --bucket "$BUCKET" --region us-west-2 \
+  --create-bucket-configuration LocationConstraint=us-west-2
 aws s3api put-bucket-versioning --bucket "$BUCKET" \
   --versioning-configuration Status=Enabled
 ```
