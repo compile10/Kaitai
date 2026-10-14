@@ -87,7 +87,7 @@ For hosts not provisioned by `deploy/infra/`:
 - Docker Engine with the Compose v2 plugin.
 - 2 GB RAM. The running stack uses roughly 200 MB, but `next build` needs more;
   add 2 GB of swap if building on the host.
-- Outbound HTTPS to Cloudflare, OpenRouter, and (optionally) SigNoz.
+- Outbound HTTPS to Cloudflare, OpenRouter, and (optionally) Grafana Cloud.
 - A Cloudflare Tunnel configured like the one in `deploy/infra/main.tf`.
 
 ## First deploy

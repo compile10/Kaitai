@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Kaitai is an invite-only beta for AI-powered Japanese sentence analysis. The repo is a Next.js 16 web app (the product and the API) plus a separate Expo/React Native app in `mobile/` that talks to those same routes. Shared types and fetch helpers live in `common/`. Auth is Better Auth (email/password) on MongoDB; signup is gated by admin-issued invite codes, and `src/proxy.ts` sends signed-out web visitors to `/beta`. Sentence analysis and image text extraction run on the server through LangChain. History documents include provider and model metadata for debugging. OpenTelemetry exports server traces, operational logs, and relayed web/mobile JavaScript errors to an existing SigNoz instance.
+Kaitai is an invite-only beta for AI-powered Japanese sentence analysis. The repo is a Next.js 16 web app (the product and the API) plus a separate Expo/React Native app in `mobile/` that talks to those same routes. Shared types and fetch helpers live in `common/`. Auth is Better Auth (email/password) on MongoDB; signup is gated by admin-issued invite codes, and `src/proxy.ts` sends signed-out web visitors to `/beta`. Sentence analysis and image text extraction run on the server through LangChain. History documents include provider and model metadata for debugging. OpenTelemetry exports server traces, operational logs, and relayed web/mobile JavaScript errors to Grafana Cloud.
 
 This file is a map of the tree, not a design doc. Keep entries focused on broad file responsibilities; omit individual settings, UI interactions, and feature-level implementation details. When you add, remove, rename, or repurpose a path, update the matching line here in the same change. Stale entries are worse than missing ones. Also keep the description above up-to-date as the project evolves. This does not represent every file in the project, just the important ones.
 
@@ -15,7 +15,7 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── mobile/                         Expo app; own package.json, talks to the web API
 ├── public/                         Static assets served by Next
 ├── scripts/seed-admin.mjs           Explicit production admin bootstrap with transactional credentials
-├── docs/monitoring.md               SigNoz integration, deployment settings, and operational verification
+├── docs/monitoring.md               Grafana Cloud integration, deployment settings, and operational verification
 ├── docs/deployment.md               Provisioning and single-host production deploy through Cloudflare Tunnel
 ├── deploy/                         Production Compose stack (web, Mongo, cloudflared) and env example
 ├── deploy/infra/                   OpenTofu: Lightsail host, Cloudflare Tunnel/DNS/zone settings, budget alert
