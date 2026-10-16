@@ -45,6 +45,11 @@ cd mobile && npm install && npx expo start
 
 Android emulator uses `10.0.2.2:3000` (pre-configured). For physical devices, update `mobile/constants/api.ts` with your machine's IP.
 
+### Production
+
+The beta deploys to a single host with Docker Compose behind a Cloudflare
+Tunnel. See [deployment](docs/deployment.md).
+
 ## Environment Variables
 
 Copy `.env.local.example` — set `MONGODB_URI` and `OPENROUTER_API_KEY`:

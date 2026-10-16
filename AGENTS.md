@@ -16,6 +16,8 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── public/                         Static assets served by Next
 ├── scripts/seed-admin.mjs           Explicit production admin bootstrap with transactional credentials
 ├── docs/monitoring.md               SigNoz integration, deployment settings, and operational verification
+├── docs/deployment.md               Single-host production deploy through Cloudflare Tunnel
+├── deploy/                         Production Compose stack (web, Mongo, cloudflared) and env example
 ├── Dockerfile                      Dependencies, dev server, production build, and standalone runner
 ├── docker-compose.yml              Local web + Mongo 7 replica set (not for production)
 ├── package.json                    Web scripts: next (turbopack), biome lint/format
@@ -174,4 +176,4 @@ Separate Expo 56 app (file routing). Dev API host is inferred from Expo `hostUri
 - Dev admin is seeded only when `NODE_ENV=development`. Never rely on those credentials in production.
 - Signup invite hooks cover `/sign-up/email` only. Any new public signup path must be gated the same way.
 - `src/proxy.ts` is a routing gate. Real auth is `withAuth` / `withPermission` against Mongo.
-- Production ingress must overwrite `RATE_LIMIT_IP_HEADER` (default `x-forwarded-for`); API and Better Auth limits use Mongo-backed counters.
+- Production ingress must overwrite `RATE_LIMIT_IP_HEADER` (default `x-forwarded-for`; `cf-connecting-ip` behind Cloudflare Tunnel); API and Better Auth limits use Mongo-backed counters.
