@@ -1,27 +1,29 @@
-# SigNoz monitoring
+# Grafana Cloud monitoring
 
-Kaitai exports OpenTelemetry traces and structured logs to an existing SigNoz
-collector over OTLP/HTTP.
+Kaitai exports OpenTelemetry traces and structured logs to Grafana Cloud over
+OTLP/HTTP. Traces land in Tempo and logs in Loki.
 
-## Connect an instance
+## Connect a stack
 
-Set these **server-only** environment variables on the web deployment:
+In the Grafana Cloud Portal, open your stack and click **Configure** on the
+**OpenTelemetry** tile. Generate a token there, then copy the endpoint and
+headers it shows into these **server-only** environment variables on the web
+deployment:
 
 ```dotenv
-OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.us.signoz.cloud:443
-OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=YOUR_INGESTION_KEY
+OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp-gateway-prod-us-west-0.grafana.net/otlp
+OTEL_EXPORTER_OTLP_HEADERS=Authorization=Basic%20YOUR_BASE64_CREDENTIALS
 OTEL_SERVICE_NAME=kaitai-web
 OTEL_RESOURCE_ATTRIBUTES=deployment.environment.name=production,service.version=YOUR_RELEASE_ID
 ```
 
-Use the endpoint and ingestion key supplied by your SigNoz instance. The base
-endpoint must support OTLP/HTTP; the exporters append `/v1/traces` and `/v1/logs`.
-For self-hosted SigNoz, use its reachable collector address and authentication
-settings.
+Use the endpoint from your own stack's tile; its region may differ. The
+exporters append `/v1/traces` and `/v1/logs` to the base endpoint. Keep `%20`
+between `Basic` and the credentials; the exporter decodes it.
 
 Leave `OTEL_EXPORTER_OTLP_ENDPOINT` unset to disable export. JSON logs still go to
 standard output. Restart the web process after changing configuration. Never put
-the ingestion key in `NEXT_PUBLIC_*`, `EXPO_PUBLIC_*`, or a mobile binary.
+the token in `NEXT_PUBLIC_*`, `EXPO_PUBLIC_*`, or a mobile binary.
 
 ## Coverage
 
@@ -57,7 +59,7 @@ confirm delivery to the collector.
 
 Application error responses created by `jsonResponse` include `traceId` for
 HTTP 4xx and 5xx responses when a valid active span exists. This identifies the
-original failing API request for lookup in SigNoz. Success responses omit it,
+original failing API request for lookup in Grafana Tempo. Success responses omit it,
 including telemetry acknowledgments. A rejected telemetry submission can carry
 the trace ID of that rejected submission. Better Auth's own responses and the
 health probe do not use this JSON helper.
@@ -94,7 +96,7 @@ Hermes bytecode offsets remain unsymbolicated.
 Framework spans are filtered before export to exclude request URLs and arbitrary
 attributes; only explicitly captured errors retain sanitized stack traces.
 All span event types are exported with their names and timestamps preserved, so
-operators can filter them in SigNoz. Event attributes, including extra exception
+operators can filter them in Grafana Tempo. Event attributes, including extra exception
 attributes, retain numeric/boolean values and sanitize string values, including
 string arrays.
 Attributes labelled as credentials or request/provider content are redacted.
@@ -106,35 +108,44 @@ Operators should control access to retained traces and logs, including stack
 locations. Default SDK batching is memory-based and can lose pending records on
 an abrupt process exit.
 
-## SigNoz setup
+## Grafana Cloud setup
 
-1. Find service `kaitai-web` in Services/APM after exercising an API route.
-2. Search Logs for `api.request`; use `request_id` and trace IDs to correlate a
-   request with its exception. Search `web.boundary` or `mobile.boundary` for
-   client reports. Exceptions are also recorded as span events for SigNoz's
-   Exceptions view.
-3. Create a **log-based alert** filtering `service.name = 'kaitai-web'` and
-   `event = 'auth.invite_bypass'`. Aggregate `count()`, trigger when the total is
-   above zero over five minutes, and evaluate every minute. Configure notification
-   routing and repeat notifications, then use SigNoz's Test Notification action.
-   A sustained alert may group several incidents into one notification.
-4. Configure error alerts for server exceptions or returned 5xx responses as
-   needed. Client reports and operational errors are distinguishable from the
-   fatal invite-bypass event.
-5. Set log and trace retention to cover the beta window, for example 90 days,
-   **before** beta traffic begins. SigNoz's documented default for logs/traces is
-   15 days; retention increases do not restore expired data.
+Loki keeps log attributes as structured metadata and replaces dots with
+underscores, so `client.platform` is queried as `client_platform`.
 
-Alert destinations and retention belong to your SigNoz instance. The application
-integration does not configure them or send notification messages itself.
+1. In **Explore**, pick the Tempo data source and run
+   `{ resource.service.name = "kaitai-web" }` after exercising an API route.
+   Exceptions are recorded as span events on the failing span.
+2. In **Explore** with the Loki data source, run
+   `{service_name="kaitai-web"} |= "api.request"`; use `request_id` and
+   `trace_id` to correlate a request with its trace. Query
+   `{service_name="kaitai-web"} | operation=~"web.boundary|mobile.boundary"`
+   for client reports.
+3. Under **Alerting → Alert rules**, create a Grafana-managed rule on the Loki
+   data source with
+   `sum(count_over_time({service_name="kaitai-web"} | event="auth.invite_bypass" [5m]))`.
+   Trigger when it is above zero, evaluate every minute, and treat no data as
+   OK. Route it to a contact point, then use the contact point's **Test**
+   action. A sustained alert may group several incidents into one notification.
+4. Add error alerts for server exceptions or returned 5xx responses as needed,
+   for example on `{service_name="kaitai-web"} | status >= 500`. Client
+   reports and operational errors are distinguishable from the fatal
+   invite-bypass event.
+5. The free tier retains logs and traces for 14 days and cannot be extended.
+   Export anything needed for longer, or move to a paid plan before beta
+   traffic begins; retention increases do not restore expired data.
+
+Alert rules, contact points, and retention belong to your Grafana Cloud stack.
+The application integration does not configure them or send notification
+messages itself.
 
 ## Verification
 
-After configuring your real collector, exercise an API route, verify its trace
-and log in SigNoz, and verify the notification channel using Test Notification.
-Use a release mobile build for mobile validation. Native crash coverage and
-readable release stack traces are not implied by these basic checks.
+After configuring your stack, exercise an API route, verify its trace in Tempo
+and its log in Loki, and verify the contact point with **Test**. Use a release
+mobile build for mobile validation. Native crash coverage and readable release
+stack traces are not implied by these basic checks.
 
 References: [Next.js OpenTelemetry](https://nextjs.org/docs/app/guides/open-telemetry),
-[SigNoz log alerts](https://signoz.io/docs/alerts-management/log-based-alerts/),
-[SigNoz retention](https://signoz.io/docs/userguide/retention-period/).
+[Grafana Cloud OTLP](https://grafana.com/docs/grafana-cloud/send-data/otlp/send-data-otlp/),
+[Loki OTLP ingestion](https://grafana.com/docs/loki/latest/send-data/otel/).

@@ -14,7 +14,7 @@ Run the web API and MongoDB with `docker compose up --build` from the repository
 ## Basic error monitoring
 
 Render-boundary, analysis/history, and query/mutation failures are reported to
-Kaitai's `/api/telemetry` route using the configured API origin. SigNoz credentials
+Kaitai's `/api/telemetry` route using the configured API origin. Grafana Cloud credentials
 are configured only on the server. Reporting is best effort; native crashes,
 offline persistence, and release stack symbolication are not included.
 See [monitoring setup](../docs/monitoring.md).
