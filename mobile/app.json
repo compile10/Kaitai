@@ -56,6 +56,13 @@
       "onDemandFilesystem": false,
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "344998b8-5b99-4798-ac33-0c239d9e54da"
+      }
+    },
+    "owner": "compile10"
   }
 }
