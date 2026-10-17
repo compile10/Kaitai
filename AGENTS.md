@@ -156,6 +156,7 @@ Separate Expo 56 app (file routing). Dev API host is inferred from Expo `hostUri
 | `eas.json` | Development, internal preview, and store build profiles |
 | `.env.local.example` | Public API origin for local release builds |
 | `assets/images/` | App icon, Android adaptive icon layers, splash image, web favicon |
+| `store-assets/android/` | Google Play listing icon, feature graphic, and phone/7"/10" tablet screenshots |
 | `README.md` | Mobile overview and local development setup |
 | `lib/fonts.ts` | Load Geist; NativeWind `font-geist-reg` maps to it |
 | `lib/auth-client.ts` | Better Auth Expo client (SecureStore) |
