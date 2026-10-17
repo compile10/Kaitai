@@ -2,7 +2,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { AIMonitoringHandler, type AIStage } from "@/lib/monitoring/ai";
 
 export const ANALYSIS_PROVIDER = "openrouter";
-export const ANALYSIS_MODEL = "google/gemini-3.8-flash";
+export const ANALYSIS_MODEL = "anthropic/claude-haiku-5.5";
 
 export function getOpenRouterApiKey(): string {
   const apiKey = process.env.OPENROUTER_API_KEY?.trim();
