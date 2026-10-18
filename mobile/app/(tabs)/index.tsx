@@ -112,7 +112,7 @@ export default function HomeScreen() {
       <View className="flex-[1]" />
       <Logo width={300} height={76} />
       <ThemedText type="subtitle" className="text-center mt-2">
-        Breaking the language barrier.
+        Bionic Language Learning System
       </ThemedText>
       <View className="mt-5 w-[90%] flex-row items-stretch gap-2 h-12">
         <ThemedTextInput

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Header from "@/components/Header";
 import HomeContent from "@/components/HomeContent";
 import HomeHeroBackground from "@/components/HomeHeroBackground";
+import MobileAppsDialog from "@/components/MobileAppsDialog";
 
 export default function Home() {
   return (
@@ -32,6 +33,8 @@ export default function Home() {
           <HomeContent />
         </div>
       </main>
+
+      <MobileAppsDialog />
     </div>
   );
 }
