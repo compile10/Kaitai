@@ -123,6 +123,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `components/SignInDialog.tsx` | Sign-in |
 | `components/UserMenu.tsx` | Account menu |
 | `components/ParticleModal.tsx` | Particle explanation |
+| `components/MobileAppsDialog.tsx` | Home corner link + mobile beta access modal with iOS screenshots (`public/mobile/`) |
 | `components/HomeHeroBackground.tsx` | Home background |
 | `components/DiagonalMarquee.tsx` | Decorative marquee |
 | `components/ui/` | shadcn primitives |
