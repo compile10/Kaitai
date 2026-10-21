@@ -1,41 +1,64 @@
 "use client";
 
-import { ExternalLink, Smartphone } from "lucide-react";
+import { Smartphone } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
+
+export type MobilePlatform = "ios" | "android" | "desktop";
 
 const APPS_EMAIL = "apps@efrain.io";
 
-const SCREENSHOTS = [
-  { src: "/mobile/iphone-home.png", alt: "Kaitai iOS app home screen" },
+const IPHONE_SCREENSHOTS = [
+  {
+    src: "/mobile/iphone-home.png",
+    alt: "Kaitai iOS app home screen",
+    width: 603,
+    height: 1311,
+  },
   {
     src: "/mobile/iphone-analysis.png",
     alt: "Kaitai iOS app analyzing 彼女は新しい本を読んでいる。",
+    width: 603,
+    height: 1311,
   },
 ];
 
-export default function MobileAppsDialog() {
-  const [open, setOpen] = useState(false);
+const ANDROID_SCREENSHOTS = [
+  {
+    src: "/mobile/android-home.png",
+    alt: "Kaitai Android app home screen",
+    width: 540,
+    height: 960,
+  },
+  {
+    src: "/mobile/android-analysis.png",
+    alt: "Kaitai Android app analyzing 私は美しい花を見ました。",
+    width: 540,
+    height: 960,
+  },
+];
+
+interface MobileAppsDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  platform: MobilePlatform;
+}
+
+export default function MobileAppsDialog({
+  open,
+  onOpenChange,
+  platform,
+}: MobileAppsDialogProps) {
+  const screenshots =
+    platform === "android" ? ANDROID_SCREENSHOTS : IPHONE_SCREENSHOTS;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button
-          type="button"
-          className="fixed bottom-4 right-4 z-20 hidden sm:inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-        >
-          App available on iOS and Android
-          <ExternalLink className="w-3 h-3" aria-hidden="true" />
-        </button>
-      </DialogTrigger>
-
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
         className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-0 sm:max-w-lg bg-card text-card-foreground border-border"
@@ -50,7 +73,7 @@ export default function MobileAppsDialog() {
           </div>
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={() => onOpenChange(false)}
             className="w-8 h-8 flex items-center justify-center rounded-full text-primary-foreground hover:bg-white/20 transition-colors text-2xl font-bold leading-none"
             aria-label="Close"
           >
@@ -61,13 +84,13 @@ export default function MobileAppsDialog() {
         {/* Content */}
         <div className="p-6 space-y-6">
           <div className="flex justify-center gap-4">
-            {SCREENSHOTS.map(({ src, alt }) => (
+            {screenshots.map(({ src, alt, width, height }) => (
               <Image
                 key={src}
                 src={src}
                 alt={alt}
-                width={603}
-                height={1311}
+                width={width}
+                height={height}
                 className="h-auto w-[42%] max-w-40 rounded-[1.5rem] border-4 border-card-foreground/15 shadow-lg"
               />
             ))}
