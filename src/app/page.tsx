@@ -3,11 +3,12 @@ import Image from "next/image";
 import Header from "@/components/Header";
 import HomeContent from "@/components/HomeContent";
 import HomeHeroBackground from "@/components/HomeHeroBackground";
-import MobileAppsDialog from "@/components/MobileAppsDialog";
+import MobileAppPromo from "@/components/MobileAppPromo";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-background relative">
+      <MobileAppPromo />
       <HomeHeroBackground />
 
       <Header />
@@ -33,8 +34,6 @@ export default function Home() {
           <HomeContent />
         </div>
       </main>
-
-      <MobileAppsDialog />
     </div>
   );
 }
