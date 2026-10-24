@@ -18,18 +18,9 @@ const EXAMPLE_SENTENCES = [
 ];
 
 function navigateToImageResults(asset: ImagePicker.ImagePickerAsset) {
-  const fileName = asset.fileName ?? asset.uri.split("/").pop() ?? "image.jpg";
-  const mimeType = asset.mimeType ?? "image/jpeg";
-
   router.push({
     pathname: "/results",
-    params: {
-      imageId: registerPickedImage({
-        uri: asset.uri,
-        type: mimeType,
-        name: fileName,
-      }),
-    },
+    params: { imageId: registerPickedImage({ uri: asset.uri }) },
   });
 }
 

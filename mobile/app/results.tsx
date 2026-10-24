@@ -3,6 +3,7 @@ import { reportMobileError } from "@/lib/monitoring";
 import type { SentenceAnalysis } from "@common/types";
 import { Ionicons } from "@expo/vector-icons";
 import RenderHTML from "@native-html/render";
+import { File } from "expo-file-system";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -72,9 +73,7 @@ function ResultsContent({ sentence, imageId }: ResultsParams) {
             "Unable to access the photo. Go back and select it again.",
           );
         const formData = new FormData();
-        formData.append("image", {
-          ...image,
-        } as unknown as Blob);
+        formData.append("image", new File(image.uri));
 
         const response = await authFetch(buildApiUrl("analyzeImage"), {
           method: "POST",

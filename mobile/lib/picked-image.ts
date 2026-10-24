@@ -1,7 +1,5 @@
 export interface PickedImage {
   uri: string;
-  type: string;
-  name: string;
 }
 
 let sequence = 0;
