@@ -140,7 +140,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 
 ## `mobile/`
 
-Separate Expo 56 app (file routing). Dev API host is inferred from Expo `hostUri`; Android emulator falls back to `10.0.2.2:3000`. Release builds use the `EXPO_PUBLIC_API_URL` origin from the EAS production environment (`https://kaitai.app`).
+Separate Expo 58 app (file routing). Dev API host is inferred from Expo `hostUri`; Android emulator falls back to `10.0.2.2:3000`. Release builds use the `EXPO_PUBLIC_API_URL` origin from the EAS production environment (`https://kaitai.app`).
 
 | Path | Role |
 | --- | --- |

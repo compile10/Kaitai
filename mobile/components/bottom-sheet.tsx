@@ -1,9 +1,9 @@
 import { type ReactNode, useEffect } from "react";
 import { Dimensions, Modal, Pressable, View } from "react-native";
 import {
-  Gesture,
   GestureDetector,
   GestureHandlerRootView,
+  usePanGesture,
 } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedStyle,
@@ -52,12 +52,12 @@ export function BottomSheet({
     transform: [{ translateY: translateY.value }],
   }));
 
-  const panGesture = Gesture.Pan()
-    .onUpdate((e) => {
+  const panGesture = usePanGesture({
+    onUpdate: (e) => {
       // eslint-disable-next-line react-hooks/immutability -- Reanimated shared values are intentionally mutable
       translateY.value = Math.max(0, e.translationY);
-    })
-    .onEnd((e) => {
+    },
+    onDeactivate: (e) => {
       if (e.translationY > DISMISS_THRESHOLD) {
         // eslint-disable-next-line react-hooks/immutability -- Reanimated shared values are intentionally mutable
         translateY.value = withTiming(SCREEN_HEIGHT, { duration: 200 }, () => {
@@ -66,7 +66,8 @@ export function BottomSheet({
       } else {
         translateY.value = withTiming(0, { duration: 200 });
       }
-    });
+    },
+  });
 
   return (
     <Modal
