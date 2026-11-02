@@ -156,7 +156,7 @@ Separate Expo 58 app (file routing). Dev API host is inferred from Expo `hostUri
 | `components/bottom-sheet.tsx` / `bottom-sheet-picker.tsx` | Sheets |
 | `constants/api.ts` | `API_BASE_URL` + endpoint map |
 | `app.json` / `app.config.ts` | App identity, native configuration, validated release API origin |
-| `eas.json` | Development, internal preview, and store build profiles |
+| `eas.json` | Development, internal preview, and store build profiles; Play Store submit profile |
 | `.env.local.example` | Public API origin for local release builds |
 | `assets/images/` | App icon, Android adaptive icon layers, splash image, web favicon |
 | `store-assets/android/` | Google Play listing icon, feature graphic, and phone/7"/10" tablet screenshots |
