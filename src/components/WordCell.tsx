@@ -8,11 +8,18 @@ export default function WordCell({ word }: { word: WordNode }) {
   const { data: settings } = useSettingsQuery();
   const showTranslation = settings?.showWordTranslations ?? false;
 
+  const isTopic = word.isTopic === true;
+
   return (
     <div
-      className={`border-2 rounded-lg px-3 py-2 shadow-md hover:shadow-lg transition-shadow ${word.isTopic ? "bg-topic-bg border-topic-border" : "bg-card border-border"}`}
+      className={`relative border-2 rounded-lg px-3 py-2 shadow-md hover:shadow-lg transition-shadow ${isTopic ? "bg-topic-bg border-dashed border-topic-border pt-3" : "bg-card border-border"}`}
       style={{ minWidth: "120px", maxWidth: "150px" }}
     >
+      {isTopic && (
+        <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wider text-white shadow-sm">
+          Topic
+        </span>
+      )}
       <span className="block text-xl font-bold text-foreground mb-0.5 leading-snug text-center">
         {word.text}
       </span>

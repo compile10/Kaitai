@@ -219,16 +219,13 @@ export default function SentenceVisualization({
     setParticleDescription(null);
   }, []);
 
-  const topicWords = analysis.words.filter((word) => word.isTopic);
-  const mainSentenceWords = analysis.words.filter((word) => !word.isTopic);
-
   // Create nodes and edges for React Flow
   const { initialNodes, initialEdges } = useMemo(() => {
     const nodes: Node<WordNodeData>[] = [];
     const edges: Edge[] = [];
 
-    // Create nodes for main sentence words
-    const sortedWords = [...mainSentenceWords].sort(
+    // Create nodes for every word, topics included, in sentence order
+    const sortedWords = [...analysis.words].sort(
       (a, b) => a.position - b.position,
     );
     const spacing = 220; // Horizontal spacing between nodes
@@ -280,46 +277,10 @@ export default function SentenceVisualization({
     }
 
     return { initialNodes: nodes, initialEdges: edges };
-  }, [mainSentenceWords, handleParticleClick]);
+  }, [analysis.words, handleParticleClick]);
 
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
-
-  const renderTopicWord = (word: WordNode) => (
-    <div key={word.id} className="relative flex items-start gap-0">
-      <WordCell word={word} />
-
-      {/* Attached particle (if any) */}
-      {word.attachedParticle && (
-        <button
-          type="button"
-          onClick={() =>
-            handleParticleClick(
-              word.attachedParticle!.text,
-              word.attachedParticle!.description,
-            )
-          }
-          className="bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 border-2 border-orange-600 dark:border-orange-700 rounded-md px-2 py-1 shadow-md hover:shadow-lg -ml-2 mt-1 transition-all cursor-pointer transform hover:scale-110"
-          style={{
-            maxWidth: "60px",
-            fontSize: "0.75rem",
-            transform: "translateY(10px)",
-          }}
-          title="Click to learn about this particle"
-        >
-          <div className="text-sm font-bold text-white text-center">
-            {word.attachedParticle.text}
-          </div>
-          {word.attachedParticle.reading &&
-            word.attachedParticle.reading !== word.attachedParticle.text && (
-              <div className="text-xs text-orange-100 text-center">
-                {word.attachedParticle.reading}
-              </div>
-            )}
-        </button>
-      )}
-    </div>
-  );
 
   return (
     <div className="w-full space-y-6">
@@ -369,20 +330,6 @@ export default function SentenceVisualization({
               </div>
             )}
 
-            {/* Topic Section */}
-            {topicWords.length > 0 && (
-              <div className="mb-6 pb-4 border-b-2 border-dashed border-topic-border">
-                <div className="text-sm font-medium text-purple-600 dark:text-purple-400 mb-2">
-                  Topic (Context)
-                </div>
-                <div className="flex flex-wrap gap-4 justify-center">
-                  {topicWords
-                    .sort((a, b) => a.position - b.position)
-                    .map(renderTopicWord)}
-                </div>
-              </div>
-            )}
-
             {/* React Flow Visualization */}
             <div className="relative h-[400px] lg:h-[500px] bg-muted rounded-lg overflow-hidden">
               <ReactFlow
@@ -407,8 +354,8 @@ export default function SentenceVisualization({
 
             <div className="mt-4 text-sm text-muted-foreground">
               <p>
-                <strong>Purple boxes:</strong> Topic - provides context but
-                doesn&apos;t modify the sentence
+                <strong>Dashed rose boxes marked TOPIC:</strong> The sentence
+                topic - provides context but doesn&apos;t modify other words
               </p>
               <p className="mt-1">
                 <strong>Arrows:</strong> Show which words modify or relate to
@@ -422,8 +369,8 @@ export default function SentenceVisualization({
               </p>
               <p className="mt-1">
                 <strong>Tip:</strong> Click a blurred translation to reveal it.
-                You can drag nodes to rearrange them, zoom with the
-                mouse wheel, and pan by dragging the background.
+                You can drag nodes to rearrange them, zoom with the mouse wheel,
+                and pan by dragging the background.
               </p>
             </div>
           </div>
