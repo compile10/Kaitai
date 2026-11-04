@@ -99,7 +99,8 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `dev-seed.ts` | Seeds `admin@localhost.dev` in development only |
 | `user-utils.ts` | `SessionUser` type |
 | `utils.ts` | `cn()` (clsx + tailwind-merge), shared `NextJSError` type for web error boundaries |
-| `analysis/analyze.ts` | Prompt + structured-output call |
+| `analysis/analyze.ts` | Prompt + structured-output call with validation repair rounds |
+| `analysis/validate.ts` | Checks word nodes rebuild the sentence and form a valid graph |
 | `analysis/client.ts` | Server-side AI client configuration for text and images |
 | `analysis/schema.ts` | Zod schema for structured analysis |
 | `analysis/cache.ts` | In-process 1h response cache |

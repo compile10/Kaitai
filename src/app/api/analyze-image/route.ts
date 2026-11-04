@@ -110,7 +110,7 @@ export const POST = withAuth(
       );
     }
 
-    const analysis = await analyzeSentence(sentence);
+    const { analysis } = await analyzeSentence(sentence);
 
     try {
       await saveToHistory(

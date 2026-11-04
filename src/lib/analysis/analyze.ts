@@ -1,7 +1,17 @@
 import type { SentenceAnalysis } from "@common/types";
+import {
+  AIMessage,
+  type BaseMessage,
+  HumanMessage,
+} from "@langchain/core/messages";
 import sanitizeHtml from "sanitize-html";
+import { log } from "@/lib/monitoring/logger";
 import { createChatModel } from "./client";
 import { analysisSchema } from "./schema";
+import { validateAnalysis } from "./validate";
+
+/** Correction rounds after the first answer fails validation. */
+const MAX_REPAIR_ATTEMPTS = 2;
 
 const ANALYSIS_PROMPT = `Analyze the following Japanese sentence and break it down into its constituent words and phrases. For each word/phrase, identify what it modifies or relates to in the sentence. This will be used to create a visual diagram showing the grammatical relationships.
 
@@ -32,6 +42,15 @@ IMPORTANT RULES:
    - Topics (は) do NOT modify anything - they provide context only
    - Subjects (が) modify the verb or an adjective they are attached to
 
+5. Copy each word's "text" exactly as it is written in the sentence. Do NOT convert kana to kanji or kanji to kana, and do not include punctuation (。、？！) in any word.
+
+6. WORD BOUNDARIES: Each word entry is ONE content word (noun, verb, adjective, adverb) plus its own conjugation and auxiliary verbs. Do NOT merge separate words into one entry.
+   - Keep together: verb/adjective stems with their endings and auxiliaries (聞いています, 掃除させた, 忘れてしまった, 叱られた, 甘くなかった, 見てみたい).
+   - Split off as attachedParticle: particles that link clauses (から, ので, のに, ながら, けど, たら's ら, と, て is NOT split). Example: "読みながら" → { text: "読み", attachedParticle: { text: "ながら", ... } }; "降ったら" → { text: "降った", attachedParticle: { text: "ら", ... } }.
+   - Split off as their own word: copulas and sentence-ending auxiliaries (だ, です, でしょう, らしい). Examples: "中止になるでしょう" → "中止" (に) | "なる" | "でしょう"; "マンションになっている" → "マンション" (に) | "なっている".
+   - Nouns joined by の are separate words: "子供の頃" → "子供" (の) | "頃".
+   - Each character of the sentence belongs to exactly one word or attached particle. A word's text never starts with the particle attached to the previous word (wrong: "マンション" (に) | "になっている").
+
 TRANSLATION GUIDANCE:
 Represent particles by their grammatical function in parentheses in the sentence translation.
 Example: "彼女は新しい本を読んでいる。" → "She (topic) new book (object) reading is."
@@ -45,10 +64,16 @@ EXPLANATION FORMATTING:
 - Use lists for multiple points
 Example: "<p>This sentence follows the <strong>SOV pattern</strong>. The topic <strong>私</strong> is marked with は.</p>"`;
 
+export interface AnalysisResult {
+  analysis: SentenceAnalysis;
+  /** False when validation errors remained after every repair round. */
+  valid: boolean;
+}
+
 /** Analyzes a Japanese sentence through OpenRouter. */
 export async function analyzeSentence(
   sentence: string,
-): Promise<SentenceAnalysis> {
+): Promise<AnalysisResult> {
   const chatModel = createChatModel();
 
   // Wrap with structured output
@@ -59,8 +84,34 @@ export async function analyzeSentence(
   // Build prompt with the sentence
   const prompt = ANALYSIS_PROMPT.replace("{{SENTENCE}}", () => sentence);
 
-  // Invoke the model
-  const analysis = (await structuredModel.invoke(prompt)) as SentenceAnalysis;
+  // Invoke the model, then send validation errors back until the words
+  // rebuild the sentence or the repair budget runs out.
+  const messages: BaseMessage[] = [new HumanMessage(prompt)];
+  let analysis = (await structuredModel.invoke(messages)) as SentenceAnalysis;
+  let valid = true;
+  for (let attempt = 1; ; attempt++) {
+    const errors = validateAnalysis(sentence, analysis);
+    if (errors.length === 0) break;
+    if (attempt > MAX_REPAIR_ATTEMPTS) {
+      valid = false;
+      log("warn", "analysis.validation", {
+        operation: "analysis.validate",
+        event: "unresolved",
+      });
+      break;
+    }
+    log("info", "analysis.validation", {
+      operation: "analysis.validate",
+      event: `repair_${attempt}`,
+    });
+    messages.push(
+      new AIMessage(JSON.stringify(analysis)),
+      new HumanMessage(
+        `Your analysis failed validation:\n- ${errors.join("\n- ")}\n\nReturn the complete corrected analysis for the same sentence. Fix the word boundaries and ids so the words, read in position order with their attached particles, reproduce the sentence exactly.`,
+      ),
+    );
+    analysis = (await structuredModel.invoke(messages)) as SentenceAnalysis;
+  }
 
   // Sanitize HTML content to prevent XSS attacks
   const sanitizedAnalysis: SentenceAnalysis = {
@@ -84,5 +135,5 @@ export async function analyzeSentence(
     })),
   };
 
-  return sanitizedAnalysis;
+  return { analysis: sanitizedAnalysis, valid };
 }
