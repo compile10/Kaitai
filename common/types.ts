@@ -1,19 +1,35 @@
-export interface WordNode {
+/** Fields shared by every node in a sentence analysis. */
+interface BaseNode {
   id: string;
-  /** "punctuation" nodes hold a single mark (。、？「」…♪) and never modify or carry particles. */
-  kind: "word" | "punctuation";
   text: string;
+  position: number; // Position in the sentence, counting every node
+}
+
+export interface WordNode extends BaseNode {
+  type: "word";
   translation: string;
   reading: string | null;
   partOfSpeech: string;
-  modifies: string[] | null; // IDs of words this word modifies
-  position: number; // Position in the sentence
+  modifies: string[] | null; // IDs of word nodes this word modifies
   attachedParticle: {
     text: string;
     reading: string | null;
     description: string; // Brief explanation of the particle's function in this context
   } | null; // Particle attached to this word (if any)
   isTopic: boolean | null; // True if this is the sentence topic
+}
+
+/** A punctuation mark or symbol (。、？「」…♪); never modifies or carries particles. */
+export interface PunctuationNode extends BaseNode {
+  type: "punctuation";
+  description: string; // Its function in this sentence
+}
+
+export type SentenceNode = WordNode | PunctuationNode;
+
+/** Older API responses carry no `type`; treat those nodes as words. */
+export function isPunctuationNode(node: SentenceNode): node is PunctuationNode {
+  return node.type === "punctuation";
 }
 
 export interface GrammarPoint {
@@ -23,7 +39,7 @@ export interface GrammarPoint {
 
 export interface SentenceAnalysis {
   directTranslation: string;
-  words: WordNode[];
+  words: SentenceNode[]; // Kept as "words" so older mobile builds still read it
   explanation: string;
   isFragment: boolean; // True if this is a sentence fragment/incomplete sentence
   grammarPoints: GrammarPoint[];

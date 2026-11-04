@@ -1,4 +1,4 @@
-import type { SentenceAnalysis } from "@common/types";
+import { isPunctuationNode, type SentenceAnalysis } from "@common/types";
 import {
   AIMessage,
   type BaseMessage,
@@ -51,12 +51,12 @@ IMPORTANT RULES:
    - Nouns joined by の are separate words: "子供の頃" → "子供" (の) | "頃".
    - Each character of the sentence belongs to exactly one word, attached particle, or punctuation entry. A word's text never starts with the particle attached to the previous word (wrong: "マンション" (に) | "になっている").
 
-7. PUNCTUATION: Punctuation is part of the grammar. Give every punctuation mark or symbol (。、？！「」『』…・〜♪ etc.) its own entry, in sentence order, with:
-   kind: "punctuation", text: the mark, reading: null, partOfSpeech: "punctuation", attachedParticle: null, modifies: [], isTopic: false,
-   translation: its function in THIS sentence in a few words (e.g. "pause after the reason clause", "marks a question", "opens quoted speech").
-   All other entries use kind: "word". Words never modify punctuation entries. Punctuation entries never carry an attachedParticle: a particle after a closing quote is its own word ("「…」と言った" → "」" | "と" | "言った").
+7. PUNCTUATION: Punctuation is part of the grammar. The "words" array holds two node types, in sentence order:
+   - Word nodes (type: "word") for everything except punctuation.
+   - Punctuation nodes (type: "punctuation") for every punctuation mark or symbol (。、？！「」『』…・〜♪ etc.), one mark per node, with "description" giving its function in THIS sentence in a few words (e.g. "pause after the reason clause", "marks a question", "opens quoted speech").
+   Words never modify punctuation nodes. A particle after a closing quote is its own word node ("「…」と言った" → "」" | "と" | "言った").
    Exception: the ・ inside a single foreign name stays part of that word ("トム・クルーズ" is one word).
-   Example: "雨なので、" → { text: "雨", kind: "word", attachedParticle: { text: "なので", ... } } | { text: "、", kind: "punctuation", translation: "pause after the reason clause" }
+   Example: "雨なので、" → { type: "word", text: "雨", attachedParticle: { text: "なので", ... } } | { type: "punctuation", text: "、", description: "pause after the reason clause" }
 
 TRANSLATION GUIDANCE:
 Represent particles by their grammatical function in parentheses in the sentence translation.
@@ -65,7 +65,7 @@ Example: "彼女は新しい本を読んでいる。" → "She (topic) new book 
 Do not include SOV (subject-object-verb) word order in the grammar points.
 
 EXPLANATION FORMATTING:
-- Explain the Japanese, not this output format: never mention entries, nodes, ids, "kind", "attachedParticle", or the rules above in the explanation or grammar points
+- Explain the Japanese, not this output format: never mention entries, nodes, ids, node types, "attachedParticle", or the rules above in the explanation or grammar points
 - Do not include a translation in the explanation
 - Structure the explanation with clear sections
 - Highlight important grammatical terms with <strong>
@@ -135,18 +135,22 @@ export async function analyzeSentence(
       allowedAttributes: {},
     }),
     grammarPoints: analysis.grammarPoints ?? [],
-    words: analysis.words.map((word) => ({
-      ...word,
-      attachedParticle: word.attachedParticle
-        ? {
-            ...word.attachedParticle,
-            description: sanitizeHtml(word.attachedParticle.description, {
-              allowedTags: ["strong", "em", "br"],
-              allowedAttributes: {},
-            }),
-          }
-        : null,
-    })),
+    words: analysis.words.map((node) =>
+      isPunctuationNode(node)
+        ? node
+        : {
+            ...node,
+            attachedParticle: node.attachedParticle
+              ? {
+                  ...node.attachedParticle,
+                  description: sanitizeHtml(node.attachedParticle.description, {
+                    allowedTags: ["strong", "em", "br"],
+                    allowedAttributes: {},
+                  }),
+                }
+              : null,
+          },
+    ),
   };
 
   return sanitizedAnalysis;

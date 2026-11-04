@@ -1,5 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
-import type { WordNode } from "@common/types";
+import {
+  isPunctuationNode,
+  type PunctuationNode,
+  type SentenceNode,
+  type WordNode,
+} from "@common/types";
 import { useCallback, useId, useMemo, useRef, useState } from "react";
 import {
   type LayoutChangeEvent,
@@ -40,7 +45,7 @@ const ARC_SCALE_FACTOR = 10;
 const CARD_GAP = 10;
 
 interface DependencyMapProps {
-  words: WordNode[];
+  words: SentenceNode[];
 }
 
 interface CardLayout {
@@ -97,6 +102,7 @@ export function DependencyMap({ words }: DependencyMapProps) {
     const wordIndexMap = new Map(sortedWords.map((w, i) => [w.id, i]));
 
     for (const word of sortedWords) {
+      if (isPunctuationNode(word)) continue;
       if (!word.modifies || word.modifies.length === 0) continue;
 
       for (const targetId of word.modifies) {
@@ -210,14 +216,21 @@ export function DependencyMap({ words }: DependencyMapProps) {
                 onLayout={(e) => handleCardLayout(word.id, e)}
                 style={{ marginBottom: CARD_GAP }}
               >
-                <WordMapCard
-                  word={word}
-                  allWords={words}
-                  isSelected={selectedId === word.id}
-                  isConnected={connectedIds.has(word.id)}
-                  isAnySelected={selectedId !== null}
-                  onPress={handleCardPress}
-                />
+                {isPunctuationNode(word) ? (
+                  <PunctuationRow
+                    punctuation={word}
+                    isAnySelected={selectedId !== null}
+                  />
+                ) : (
+                  <WordMapCard
+                    word={word}
+                    allWords={words}
+                    isSelected={selectedId === word.id}
+                    isConnected={connectedIds.has(word.id)}
+                    isAnySelected={selectedId !== null}
+                    onPress={handleCardPress}
+                  />
+                )}
               </View>
             ))}
           </View>
@@ -298,11 +311,38 @@ export function DependencyMap({ words }: DependencyMapProps) {
   );
 }
 
+// --- Punctuation row: compact, never selectable or connected ---
+
+function PunctuationRow({
+  punctuation,
+  isAnySelected,
+}: {
+  punctuation: PunctuationNode;
+  isAnySelected: boolean;
+}) {
+  return (
+    <View
+      className="flex-row items-center gap-2 px-3"
+      style={{ opacity: isAnySelected ? 0.4 : 1 }}
+      accessibilityLabel={`${punctuation.text}: ${punctuation.description}`}
+    >
+      <View className="min-w-8 h-8 px-1.5 items-center justify-center rounded-full border border-dashed border-border bg-muted">
+        <ThemedText className="text-base font-bold opacity-70">
+          {punctuation.text}
+        </ThemedText>
+      </View>
+      <ThemedText className="flex-1 text-xs opacity-50">
+        {punctuation.description}
+      </ThemedText>
+    </View>
+  );
+}
+
 // --- Word card used inside the dependency map ---
 
 interface WordMapCardProps {
   word: WordNode;
-  allWords: WordNode[];
+  allWords: SentenceNode[];
   isSelected: boolean;
   isConnected: boolean;
   isAnySelected: boolean;
@@ -320,25 +360,6 @@ function WordMapCard({
   const { data: settings } = useSettingsQuery();
   const showTranslation = settings?.showWordTranslations ?? false;
   const isTopic = word.isTopic === true;
-
-  if (word.kind === "punctuation") {
-    return (
-      <View
-        className="flex-row items-center gap-2 px-3"
-        style={{ opacity: isAnySelected ? 0.4 : 1 }}
-        accessibilityLabel={`${word.text}: ${word.translation}`}
-      >
-        <View className="min-w-8 h-8 px-1.5 items-center justify-center rounded-full border border-dashed border-border bg-muted">
-          <ThemedText className="text-base font-bold opacity-70">
-            {word.text}
-          </ThemedText>
-        </View>
-        <ThemedText className="flex-1 text-xs opacity-50">
-          {word.translation}
-        </ThemedText>
-      </View>
-    );
-  }
 
   // Determine border and background
   let borderClass = "border-border";

@@ -1,6 +1,12 @@
 "use client";
 
-import type { SentenceAnalysis, WordNode } from "@common/types";
+import {
+  isPunctuationNode,
+  type PunctuationNode,
+  type SentenceAnalysis,
+  type SentenceNode,
+  type WordNode,
+} from "@common/types";
 import {
   Background,
   Controls,
@@ -26,6 +32,10 @@ interface SentenceVisualizationProps {
 interface WordNodeData extends Record<string, unknown> {
   word: WordNode;
   onParticleClick: (particle: string, description: string) => void;
+}
+
+interface PunctuationNodeData extends Record<string, unknown> {
+  punctuation: PunctuationNode;
 }
 
 // Custom node component for word boxes
@@ -96,19 +106,19 @@ function WordNodeComponent({ data }: { data: WordNodeData }) {
 }
 
 // Punctuation marks sit in sentence order but never take part in edges
-function PunctuationNodeComponent({ data }: { data: WordNodeData }) {
-  const { word } = data;
+function PunctuationNodeComponent({ data }: { data: PunctuationNodeData }) {
+  const { punctuation } = data;
   return (
     <div
       className="flex flex-col items-center gap-1"
       style={{ width: `${PUNCTUATION_WIDTH}px` }}
-      title={word.translation}
+      title={punctuation.description}
     >
       <span className="flex h-11 min-w-11 items-center justify-center rounded-full border-2 border-dashed border-border bg-muted px-2 text-xl font-bold text-muted-foreground">
-        {word.text}
+        {punctuation.text}
       </span>
       <span className="text-center text-[11px] leading-tight text-muted-foreground">
-        {word.translation}
+        {punctuation.description}
       </span>
     </div>
   );
@@ -246,35 +256,47 @@ export default function SentenceVisualization({
 
   // Create nodes and edges for React Flow
   const { initialNodes, initialEdges } = useMemo(() => {
-    const nodes: Node<WordNodeData>[] = [];
+    const nodes: Node<WordNodeData | PunctuationNodeData>[] = [];
     const edges: Edge[] = [];
 
     // Create nodes for every word, topics included, in sentence order
     const sortedWords = [...analysis.words].sort(
       (a, b) => a.position - b.position,
     );
-    const spacingOf = (word: WordNode) =>
-      word.kind === "punctuation" ? PUNCTUATION_SPACING : WORD_SPACING;
+    const spacingOf = (node: SentenceNode) =>
+      isPunctuationNode(node) ? PUNCTUATION_SPACING : WORD_SPACING;
     const totalWidth = sortedWords.reduce((sum, w) => sum + spacingOf(w), 0);
     let x = -totalWidth / 2; // Center the nodes
 
-    for (const word of sortedWords) {
-      const isPunctuation = word.kind === "punctuation";
-      nodes.push({
-        id: word.id,
-        type: isPunctuation ? "punctuationNode" : "wordNode",
-        // Drop punctuation slightly so it lines up with the word text baseline
-        position: { x, y: isPunctuation ? 108 : 100 },
-        data: { word, onParticleClick: handleParticleClick },
+    for (const node of sortedWords) {
+      const shared = {
+        id: node.id,
         sourcePosition: Position.Right,
         targetPosition: Position.Left,
         connectable: false,
-      });
-      x += spacingOf(word);
+      };
+      nodes.push(
+        isPunctuationNode(node)
+          ? {
+              ...shared,
+              type: "punctuationNode",
+              // Drop punctuation slightly so it lines up with the word text baseline
+              position: { x, y: 108 },
+              data: { punctuation: node },
+            }
+          : {
+              ...shared,
+              type: "wordNode",
+              position: { x, y: 100 },
+              data: { word: node, onParticleClick: handleParticleClick },
+            },
+      );
+      x += spacingOf(node);
     }
 
     // Create edges for modifications
     for (const word of sortedWords) {
+      if (isPunctuationNode(word)) continue;
       if (word.modifies && word.modifies.length > 0) {
         for (const targetId of word.modifies) {
           // Calculate how many nodes are between source and target

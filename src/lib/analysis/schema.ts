@@ -1,5 +1,81 @@
 import { z } from "zod";
 
+// Fields shared by every node in the sentence, in reading order
+const nodeBase = {
+  id: z.string().describe("Unique identifier for this node"),
+  position: z
+    .number()
+    .describe("Position in the sentence (0-indexed), counting every node"),
+};
+
+const wordNodeSchema = z.object({
+  type: z.literal("word"),
+  ...nodeBase,
+  text: z
+    .string()
+    .describe(
+      "The actual text of the word/phrase in Japanese (NOT including particles - those go in attachedParticle)",
+    ),
+  translation: z
+    .string()
+    .min(1)
+    .describe(
+      "Concise English meaning of this word/phrase in this sentence, excluding its attached particle.",
+    ),
+  reading: z
+    .string()
+    .nullable()
+    .describe("Hiragana reading of the word (optional)"),
+  partOfSpeech: z
+    .string()
+    .describe("Part of speech (e.g., noun, verb, adjective, particle, etc.)"),
+  modifies: z
+    .array(z.string())
+    .nullable()
+    .describe(
+      "Array of IDs of words/phrases that this word modifies or relates to",
+    ),
+  attachedParticle: z
+    .object({
+      text: z
+        .string()
+        .describe("The particle text (e.g., は, を, に, が, etc.)"),
+      reading: z
+        .string()
+        .nullable()
+        .describe("Hiragana reading of the particle (optional)"),
+      description: z
+        .string()
+        .describe(
+          "A brief explanation of what this particle does in this specific sentence context (1-2 sentences)",
+        ),
+    })
+    .nullable()
+    .describe(
+      "Particle attached to this word (if any). Do NOT create separate word entries for particles.",
+    ),
+  isTopic: z
+    .boolean()
+    .nullable()
+    .describe(
+      "True if this word is the sentence topic. Topics provide context but don't modify the main sentence.",
+    ),
+});
+
+const punctuationNodeSchema = z.object({
+  type: z.literal("punctuation"),
+  ...nodeBase,
+  text: z
+    .string()
+    .describe("The punctuation mark or symbol (。、？！「」…・〜♪)"),
+  description: z
+    .string()
+    .min(1)
+    .describe(
+      "Its function in this sentence in a few words (e.g. 'pause after the conditional clause', 'opens quoted speech')",
+    ),
+});
+
 // Define the Zod schema for structured output
 export const analysisSchema = z.object({
   directTranslation: z
@@ -7,68 +83,11 @@ export const analysisSchema = z.object({
     .describe(
       "A direct, literal English translation of the sentence that preserves the Japanese word order and structure as closely as possible, even if it sounds awkward in English",
     ),
-  words: z.array(
-    z.object({
-      id: z.string().describe("Unique identifier for this word/phrase"),
-      kind: z
-        .enum(["word", "punctuation"])
-        .describe(
-          '"punctuation" for a punctuation mark or symbol (。、？！「」…・〜♪), otherwise "word"',
-        ),
-      text: z
-        .string()
-        .describe(
-          "The actual text of the word/phrase in Japanese (NOT including particles - those go in attachedParticle)",
-        ),
-      translation: z
-        .string()
-        .min(1)
-        .describe(
-          "Concise English meaning of this word/phrase in this sentence, excluding its attached particle. For punctuation, its function in this sentence (e.g. 'pause after the conditional clause').",
-        ),
-      reading: z
-        .string()
-        .nullable()
-        .describe("Hiragana reading of the word (optional)"),
-      partOfSpeech: z
-        .string()
-        .describe(
-          "Part of speech (e.g., noun, verb, adjective, particle, etc.)",
-        ),
-      modifies: z
-        .array(z.string())
-        .nullable()
-        .describe(
-          "Array of IDs of words/phrases that this word modifies or relates to",
-        ),
-      position: z.number().describe("Position in the sentence (0-indexed)"),
-      attachedParticle: z
-        .object({
-          text: z
-            .string()
-            .describe("The particle text (e.g., は, を, に, が, etc.)"),
-          reading: z
-            .string()
-            .nullable()
-            .describe("Hiragana reading of the particle (optional)"),
-          description: z
-            .string()
-            .describe(
-              "A brief explanation of what this particle does in this specific sentence context (1-2 sentences)",
-            ),
-        })
-        .nullable()
-        .describe(
-          "Particle attached to this word (if any). Do NOT create separate word entries for particles.",
-        ),
-      isTopic: z
-        .boolean()
-        .nullable()
-        .describe(
-          "True if this word is the sentence topic. Topics provide context but don't modify the main sentence.",
-        ),
-    }),
-  ),
+  words: z
+    .array(
+      z.discriminatedUnion("type", [wordNodeSchema, punctuationNodeSchema]),
+    )
+    .describe("Every word and punctuation mark in sentence order"),
   explanation: z
     .string()
     .describe(
