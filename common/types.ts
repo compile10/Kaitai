@@ -27,7 +27,6 @@ export interface PunctuationNode extends BaseNode {
 
 export type SentenceNode = WordNode | PunctuationNode;
 
-/** Older API responses carry no `type`; treat those nodes as words. */
 export function isPunctuationNode(node: SentenceNode): node is PunctuationNode {
   return node.type === "punctuation";
 }
@@ -39,7 +38,7 @@ export interface GrammarPoint {
 
 export interface SentenceAnalysis {
   directTranslation: string;
-  words: SentenceNode[]; // Kept as "words" so older mobile builds still read it
+  nodes: SentenceNode[]; // Words and punctuation in sentence order
   explanation: string;
   isFragment: boolean; // True if this is a sentence fragment/incomplete sentence
   grammarPoints: GrammarPoint[];

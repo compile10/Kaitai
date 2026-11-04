@@ -45,7 +45,7 @@ const ARC_SCALE_FACTOR = 10;
 const CARD_GAP = 10;
 
 interface DependencyMapProps {
-  words: SentenceNode[];
+  nodes: SentenceNode[];
 }
 
 interface CardLayout {
@@ -53,10 +53,10 @@ interface CardLayout {
   height: number;
 }
 
-export function DependencyMap({ words }: DependencyMapProps) {
+export function DependencyMap({ nodes }: DependencyMapProps) {
   const sortedWords = useMemo(
-    () => [...words].sort((a, b) => a.position - b.position),
-    [words],
+    () => [...nodes].sort((a, b) => a.position - b.position),
+    [nodes],
   );
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -224,7 +224,7 @@ export function DependencyMap({ words }: DependencyMapProps) {
                 ) : (
                   <WordMapCard
                     word={word}
-                    allWords={words}
+                    allWords={nodes}
                     isSelected={selectedId === word.id}
                     isConnected={connectedIds.has(word.id)}
                     isAnySelected={selectedId !== null}

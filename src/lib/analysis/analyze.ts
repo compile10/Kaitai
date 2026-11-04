@@ -51,7 +51,7 @@ IMPORTANT RULES:
    - Nouns joined by の are separate words: "子供の頃" → "子供" (の) | "頃".
    - Each character of the sentence belongs to exactly one word, attached particle, or punctuation entry. A word's text never starts with the particle attached to the previous word (wrong: "マンション" (に) | "になっている").
 
-7. PUNCTUATION: Punctuation is part of the grammar. The "words" array holds two node types, in sentence order:
+7. PUNCTUATION: Punctuation is part of the grammar. The "nodes" array holds two node types, in sentence order:
    - Word nodes (type: "word") for everything except punctuation.
    - Punctuation nodes (type: "punctuation") for every punctuation mark or symbol (。、？！「」『』…・〜♪ etc.), one mark per node, with "description" giving its function in THIS sentence in a few words (e.g. "pause after the reason clause", "marks a question", "opens quoted speech").
    Words never modify punctuation nodes. A particle after a closing quote is its own word node ("「…」と言った" → "」" | "と" | "言った").
@@ -135,7 +135,7 @@ export async function analyzeSentence(
       allowedAttributes: {},
     }),
     grammarPoints: analysis.grammarPoints ?? [],
-    words: analysis.words.map((node) =>
+    nodes: analysis.nodes.map((node) =>
       isPunctuationNode(node)
         ? node
         : {

@@ -11,7 +11,7 @@ function normalize(text: string): string {
 
 /** Rebuilds the sentence from nodes in position order, including attached particles. */
 export function rebuildSentence(analysis: SentenceAnalysis): string {
-  return [...analysis.words]
+  return [...analysis.nodes]
     .sort((a, b) => a.position - b.position)
     .map((node) =>
       isPunctuationNode(node)
@@ -52,7 +52,7 @@ export function validateAnalysis(
 
   const ids = new Set<string>();
   const punctuationIds = new Set<string>();
-  for (const node of analysis.words) {
+  for (const node of analysis.nodes) {
     if (ids.has(node.id)) errors.push(`Duplicate node id "${node.id}".`);
     ids.add(node.id);
     if (isPunctuationNode(node)) {
@@ -68,7 +68,7 @@ export function validateAnalysis(
       );
     }
   }
-  for (const node of analysis.words) {
+  for (const node of analysis.nodes) {
     if (isPunctuationNode(node)) continue;
     for (const target of node.modifies ?? []) {
       if (target === node.id) {

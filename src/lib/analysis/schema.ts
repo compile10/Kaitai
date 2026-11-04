@@ -83,7 +83,7 @@ export const analysisSchema = z.object({
     .describe(
       "A direct, literal English translation of the sentence that preserves the Japanese word order and structure as closely as possible, even if it sounds awkward in English",
     ),
-  words: z
+  nodes: z
     .array(
       z.discriminatedUnion("type", [wordNodeSchema, punctuationNodeSchema]),
     )

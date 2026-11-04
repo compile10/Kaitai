@@ -37,7 +37,7 @@ When testing, run the web app through the dockerfile with docker compose.
 | --- | --- |
 | `monitoring.ts` | Shared client error labels, error preparation, and reporting |
 | `redaction.ts` | Shared diagnostic text redaction, sensitive attribute detection, and message/stack sanitization |
-| `types.ts` | `SentenceAnalysis`, `WordNode`, `UserSettings`, history/invite shapes |
+| `types.ts` | `SentenceAnalysis`, word/punctuation `SentenceNode` union, `UserSettings`, history/invite shapes |
 | `api.ts` | `analyzeSentence`, `analyzeImage`, `createInviteCode`; `MAX_SENTENCE_LENGTH` |
 | `image.ts` | 20MB cap and allowed MIME types for image upload |
 | `tailwind.config.js` | Shared light/dark color tokens (web + NativeWind) |
@@ -100,7 +100,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `user-utils.ts` | `SessionUser` type |
 | `utils.ts` | `cn()` (clsx + tailwind-merge), shared `NextJSError` type for web error boundaries |
 | `analysis/analyze.ts` | Prompt + structured-output call with validation repair rounds |
-| `analysis/validate.ts` | Checks word nodes rebuild the sentence and form a valid graph |
+| `analysis/validate.ts` | Checks nodes rebuild the sentence and form a valid graph |
 | `analysis/client.ts` | Server-side AI client configuration for text and images |
 | `analysis/schema.ts` | Zod schema for structured analysis |
 | `analysis/cache.ts` | In-process 1h response cache |

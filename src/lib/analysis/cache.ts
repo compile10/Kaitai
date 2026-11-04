@@ -29,7 +29,7 @@ export function getCachedResponse(cacheKey: string): SentenceAnalysis | null {
   const cached = responseCache.get(cacheKey);
   if (cached) {
     const now = Date.now();
-    const hasWordTranslations = cached.data.words.every(
+    const hasWordTranslations = cached.data.nodes.every(
       (node) =>
         isPunctuationNode(node) ||
         (typeof node.translation === "string" &&

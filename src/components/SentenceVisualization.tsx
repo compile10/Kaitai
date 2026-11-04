@@ -260,7 +260,7 @@ export default function SentenceVisualization({
     const edges: Edge[] = [];
 
     // Create nodes for every word, topics included, in sentence order
-    const sortedWords = [...analysis.words].sort(
+    const sortedWords = [...analysis.nodes].sort(
       (a, b) => a.position - b.position,
     );
     const spacingOf = (node: SentenceNode) =>
@@ -329,7 +329,7 @@ export default function SentenceVisualization({
     }
 
     return { initialNodes: nodes, initialEdges: edges };
-  }, [analysis.words, handleParticleClick]);
+  }, [analysis.nodes, handleParticleClick]);
 
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
