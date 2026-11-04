@@ -95,6 +95,25 @@ function WordNodeComponent({ data }: { data: WordNodeData }) {
   );
 }
 
+// Punctuation marks sit in sentence order but never take part in edges
+function PunctuationNodeComponent({ data }: { data: WordNodeData }) {
+  const { word } = data;
+  return (
+    <div
+      className="flex flex-col items-center gap-1"
+      style={{ width: `${PUNCTUATION_WIDTH}px` }}
+      title={word.translation}
+    >
+      <span className="flex h-11 min-w-11 items-center justify-center rounded-full border-2 border-dashed border-border bg-muted px-2 text-xl font-bold text-muted-foreground">
+        {word.text}
+      </span>
+      <span className="text-center text-[11px] leading-tight text-muted-foreground">
+        {word.translation}
+      </span>
+    </div>
+  );
+}
+
 // Custom edge component with intelligent routing
 function CustomEdge({
   id,
@@ -146,7 +165,13 @@ function CustomEdge({
 
 const nodeTypes = {
   wordNode: WordNodeComponent,
+  punctuationNode: PunctuationNodeComponent,
 };
+
+// Horizontal space reserved for each node kind
+const WORD_SPACING = 220;
+const PUNCTUATION_WIDTH = 90;
+const PUNCTUATION_SPACING = PUNCTUATION_WIDTH + 20;
 
 const edgeTypes = {
   custom: CustomEdge,
@@ -228,19 +253,24 @@ export default function SentenceVisualization({
     const sortedWords = [...analysis.words].sort(
       (a, b) => a.position - b.position,
     );
-    const spacing = 220; // Horizontal spacing between nodes
-    const startX = -((sortedWords.length - 1) * spacing) / 2; // Center the nodes
+    const spacingOf = (word: WordNode) =>
+      word.kind === "punctuation" ? PUNCTUATION_SPACING : WORD_SPACING;
+    const totalWidth = sortedWords.reduce((sum, w) => sum + spacingOf(w), 0);
+    let x = -totalWidth / 2; // Center the nodes
 
-    for (let i = 0; i < sortedWords.length; i++) {
-      const word = sortedWords[i];
+    for (const word of sortedWords) {
+      const isPunctuation = word.kind === "punctuation";
       nodes.push({
         id: word.id,
-        type: "wordNode",
-        position: { x: startX + i * spacing, y: 100 },
+        type: isPunctuation ? "punctuationNode" : "wordNode",
+        // Drop punctuation slightly so it lines up with the word text baseline
+        position: { x, y: isPunctuation ? 108 : 100 },
         data: { word, onParticleClick: handleParticleClick },
         sourcePosition: Position.Right,
         targetPosition: Position.Left,
+        connectable: false,
       });
+      x += spacingOf(word);
     }
 
     // Create edges for modifications
@@ -366,6 +396,10 @@ export default function SentenceVisualization({
                 <span className="text-orange-600 dark:text-orange-400 font-semibold">
                   Click to learn what they do!
                 </span>
+              </p>
+              <p className="mt-1">
+                <strong>Dashed circles:</strong> Punctuation (、。？「」) and
+                what it does in this sentence
               </p>
               <p className="mt-1">
                 <strong>Tip:</strong> Click a blurred translation to reveal it.

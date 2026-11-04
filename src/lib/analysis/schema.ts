@@ -10,6 +10,11 @@ export const analysisSchema = z.object({
   words: z.array(
     z.object({
       id: z.string().describe("Unique identifier for this word/phrase"),
+      kind: z
+        .enum(["word", "punctuation"])
+        .describe(
+          '"punctuation" for a punctuation mark or symbol (。、？！「」…・〜♪), otherwise "word"',
+        ),
       text: z
         .string()
         .describe(
@@ -19,7 +24,7 @@ export const analysisSchema = z.object({
         .string()
         .min(1)
         .describe(
-          "Concise English meaning of this word/phrase in this sentence, excluding its attached particle",
+          "Concise English meaning of this word/phrase in this sentence, excluding its attached particle. For punctuation, its function in this sentence (e.g. 'pause after the conditional clause').",
         ),
       reading: z
         .string()

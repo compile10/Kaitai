@@ -42,14 +42,21 @@ IMPORTANT RULES:
    - Topics (は) do NOT modify anything - they provide context only
    - Subjects (が) modify the verb or an adjective they are attached to
 
-5. Copy each word's "text" exactly as it is written in the sentence. Do NOT convert kana to kanji or kanji to kana, and do not include punctuation (。、？！) in any word.
+5. Copy each word's "text" exactly as it is written in the sentence. Do NOT convert kana to kanji or kanji to kana, and never include punctuation in a word.
 
 6. WORD BOUNDARIES: Each word entry is ONE content word (noun, verb, adjective, adverb) plus its own conjugation and auxiliary verbs. Do NOT merge separate words into one entry.
    - Keep together: verb/adjective stems with their endings and auxiliaries (聞いています, 掃除させた, 忘れてしまった, 叱られた, 甘くなかった, 見てみたい).
    - Split off as attachedParticle: particles that link clauses (から, ので, のに, ながら, けど, たら's ら, と, て is NOT split). Example: "読みながら" → { text: "読み", attachedParticle: { text: "ながら", ... } }; "降ったら" → { text: "降った", attachedParticle: { text: "ら", ... } }.
    - Split off as their own word: copulas and sentence-ending auxiliaries (だ, です, でしょう, らしい). Examples: "中止になるでしょう" → "中止" (に) | "なる" | "でしょう"; "マンションになっている" → "マンション" (に) | "なっている".
    - Nouns joined by の are separate words: "子供の頃" → "子供" (の) | "頃".
-   - Each character of the sentence belongs to exactly one word or attached particle. A word's text never starts with the particle attached to the previous word (wrong: "マンション" (に) | "になっている").
+   - Each character of the sentence belongs to exactly one word, attached particle, or punctuation entry. A word's text never starts with the particle attached to the previous word (wrong: "マンション" (に) | "になっている").
+
+7. PUNCTUATION: Punctuation is part of the grammar. Give every punctuation mark or symbol (。、？！「」『』…・〜♪ etc.) its own entry, in sentence order, with:
+   kind: "punctuation", text: the mark, reading: null, partOfSpeech: "punctuation", attachedParticle: null, modifies: [], isTopic: false,
+   translation: its function in THIS sentence in a few words (e.g. "pause after the reason clause", "marks a question", "opens quoted speech").
+   All other entries use kind: "word". Words never modify punctuation entries. Punctuation entries never carry an attachedParticle: a particle after a closing quote is its own word ("「…」と言った" → "」" | "と" | "言った").
+   Exception: the ・ inside a single foreign name stays part of that word ("トム・クルーズ" is one word).
+   Example: "雨なので、" → { text: "雨", kind: "word", attachedParticle: { text: "なので", ... } } | { text: "、", kind: "punctuation", translation: "pause after the reason clause" }
 
 TRANSLATION GUIDANCE:
 Represent particles by their grammatical function in parentheses in the sentence translation.
@@ -58,6 +65,7 @@ Example: "彼女は新しい本を読んでいる。" → "She (topic) new book 
 Do not include SOV (subject-object-verb) word order in the grammar points.
 
 EXPLANATION FORMATTING:
+- Explain the Japanese, not this output format: never mention entries, nodes, ids, "kind", "attachedParticle", or the rules above in the explanation or grammar points
 - Do not include a translation in the explanation
 - Structure the explanation with clear sections
 - Highlight important grammatical terms with <strong>

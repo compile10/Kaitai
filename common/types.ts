@@ -1,5 +1,7 @@
 export interface WordNode {
   id: string;
+  /** "punctuation" nodes hold a single mark (。、？「」…♪) and never modify or carry particles. */
+  kind: "word" | "punctuation";
   text: string;
   translation: string;
   reading: string | null;

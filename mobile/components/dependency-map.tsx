@@ -283,6 +283,10 @@ export function DependencyMap({ words }: DependencyMapProps) {
           <ThemedText className="text-xs opacity-60">Particle</ThemedText>
         </View>
         <View className="flex-row items-center gap-1">
+          <View className="w-3 h-3 rounded-full border border-dashed border-border bg-muted" />
+          <ThemedText className="text-xs opacity-60">Punctuation</ThemedText>
+        </View>
+        <View className="flex-row items-center gap-1">
           <View
             className="w-4 h-0.5 rounded"
             style={{ backgroundColor: ARC_COLORS[0] }}
@@ -316,6 +320,25 @@ function WordMapCard({
   const { data: settings } = useSettingsQuery();
   const showTranslation = settings?.showWordTranslations ?? false;
   const isTopic = word.isTopic === true;
+
+  if (word.kind === "punctuation") {
+    return (
+      <View
+        className="flex-row items-center gap-2 px-3"
+        style={{ opacity: isAnySelected ? 0.4 : 1 }}
+        accessibilityLabel={`${word.text}: ${word.translation}`}
+      >
+        <View className="min-w-8 h-8 px-1.5 items-center justify-center rounded-full border border-dashed border-border bg-muted">
+          <ThemedText className="text-base font-bold opacity-70">
+            {word.text}
+          </ThemedText>
+        </View>
+        <ThemedText className="flex-1 text-xs opacity-50">
+          {word.translation}
+        </ThemedText>
+      </View>
+    );
+  }
 
   // Determine border and background
   let borderClass = "border-border";
