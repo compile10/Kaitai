@@ -13,6 +13,10 @@ import { validateAnalysis } from "./validate";
 /** Correction rounds after the first answer fails validation. */
 const MAX_REPAIR_ATTEMPTS = 2;
 
+/** Tags allowed in particle and punctuation descriptions. */
+const INLINE_TAGS = ["strong", "em", "br"];
+const INLINE_TAG_LIST = INLINE_TAGS.map((tag) => `<${tag}>`).join(", ");
+
 const ANALYSIS_PROMPT = `Analyze the following Japanese sentence and break it down into its constituent words and phrases. For each word/phrase, identify what it modifies or relates to in the sentence. This will be used to create a visual diagram showing the grammatical relationships.
 
 Sentence: {{SENTENCE}}
@@ -26,7 +30,7 @@ IMPORTANT RULES:
 1. Particles (は, を, に, が, の, etc.) should be ATTACHED to their corresponding words using the "attachedParticle" field. Do NOT create separate word entries for particles.
    Example: "私は" → { text: "私", attachedParticle: { text: "は", description: "Marks '私' as the topic of the sentence" } }
 
-2. For EACH particle, provide a brief description (1-2 sentences) explaining its function in THIS specific sentence. Be contextual and practical.
+2. For EACH particle, provide a brief description (1-2 sentences) explaining its function in THIS specific sentence. Be contextual and practical. You may use HTML in the description, limited to ${INLINE_TAG_LIST}.
    Examples:
    - は: "Marks the topic - what the sentence is about"
    - を: "Marks the direct object of the verb"
@@ -53,7 +57,7 @@ IMPORTANT RULES:
 
 7. PUNCTUATION: Punctuation is part of the grammar. The "nodes" array holds two node types, in sentence order:
    - Word nodes (type: "word") for everything except punctuation.
-   - Punctuation nodes (type: "punctuation") for every punctuation mark or symbol (。、？！「」『』…・〜♪ etc.), one mark per node, with "description" giving its function in THIS sentence in a few words (e.g. "pause after the reason clause", "marks a question", "opens quoted speech").
+   - Punctuation nodes (type: "punctuation") for every punctuation mark or symbol (。、？！「」『』…・〜♪ etc.), one mark per node, with "description" giving its function in THIS sentence in a few words (e.g. "pause after the reason clause", "marks a question", "opens quoted speech"). You may use HTML in the description, limited to ${INLINE_TAG_LIST}.
    Words never modify punctuation nodes. A particle after a closing quote is its own word node ("「…」と言った" → "」" | "と" | "言った").
    Exception: the ・ inside a single foreign name stays part of that word ("トム・クルーズ" is one word).
    Example: "雨なので、" → { type: "word", text: "雨", attachedParticle: { text: "なので", ... } } | { type: "punctuation", text: "、", description: "pause after the reason clause" }
@@ -75,7 +79,7 @@ Example: "<p>This sentence follows the <strong>SOV pattern</strong>. The topic <
 /** Sanitizes short node descriptions (particles, punctuation) to inline formatting only. */
 function sanitizeInlineHtml(html: string): string {
   return sanitizeHtml(html, {
-    allowedTags: ["strong", "em", "br"],
+    allowedTags: INLINE_TAGS,
     allowedAttributes: {},
   });
 }
