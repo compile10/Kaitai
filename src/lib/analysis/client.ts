@@ -2,7 +2,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { AIMonitoringHandler, type AIStage } from "@/lib/monitoring/ai";
 
 export const ANALYSIS_PROVIDER = "openrouter";
-export const ANALYSIS_MODEL = "anthropic/claude-haiku-5.5";
+export const ANALYSIS_MODEL = "google/gemini-3.8-flash";
 
 export function getOpenRouterApiKey(): string {
   const apiKey = process.env.OPENROUTER_API_KEY?.trim();
@@ -20,6 +20,9 @@ export function createChatModel(stage: AIStage = "analysis") {
     configuration: {
       baseURL: "https://openrouter.ai/api/v1",
     },
+    // Low effort keeps hiragana-only segmentation accurate at ~2x Haiku's speed;
+    // "minimal" rewrites kana input as kanji.
+    modelKwargs: { reasoning: { effort: "low" } },
     callbacks: [new AIMonitoringHandler(stage)],
     maxTokens: 4096,
     timeout: 60_000,

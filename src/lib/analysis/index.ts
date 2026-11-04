@@ -1,5 +1,5 @@
 // Barrel exports for the analysis module
-export { analyzeSentence } from "./analyze";
+export { AnalysisValidationError, analyzeSentence } from "./analyze";
 export {
   CACHE_DURATION_MS,
   type CacheEntry,

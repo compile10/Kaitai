@@ -1,5 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
-import type { WordNode } from "@common/types";
+import RenderHTML from "@native-html/render";
+import {
+  isPunctuationNode,
+  type PunctuationNode,
+  type SentenceNode,
+  type WordNode,
+} from "@common/types";
 import { useCallback, useId, useMemo, useRef, useState } from "react";
 import {
   type LayoutChangeEvent,
@@ -40,7 +46,7 @@ const ARC_SCALE_FACTOR = 10;
 const CARD_GAP = 10;
 
 interface DependencyMapProps {
-  words: WordNode[];
+  nodes: SentenceNode[];
 }
 
 interface CardLayout {
@@ -48,10 +54,10 @@ interface CardLayout {
   height: number;
 }
 
-export function DependencyMap({ words }: DependencyMapProps) {
+export function DependencyMap({ nodes }: DependencyMapProps) {
   const sortedWords = useMemo(
-    () => [...words].sort((a, b) => a.position - b.position),
-    [words],
+    () => [...nodes].sort((a, b) => a.position - b.position),
+    [nodes],
   );
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -97,6 +103,7 @@ export function DependencyMap({ words }: DependencyMapProps) {
     const wordIndexMap = new Map(sortedWords.map((w, i) => [w.id, i]));
 
     for (const word of sortedWords) {
+      if (isPunctuationNode(word)) continue;
       if (!word.modifies || word.modifies.length === 0) continue;
 
       for (const targetId of word.modifies) {
@@ -210,14 +217,21 @@ export function DependencyMap({ words }: DependencyMapProps) {
                 onLayout={(e) => handleCardLayout(word.id, e)}
                 style={{ marginBottom: CARD_GAP }}
               >
-                <WordMapCard
-                  word={word}
-                  allWords={words}
-                  isSelected={selectedId === word.id}
-                  isConnected={connectedIds.has(word.id)}
-                  isAnySelected={selectedId !== null}
-                  onPress={handleCardPress}
-                />
+                {isPunctuationNode(word) ? (
+                  <PunctuationCard
+                    punctuation={word}
+                    isAnySelected={selectedId !== null}
+                  />
+                ) : (
+                  <WordMapCard
+                    word={word}
+                    allWords={nodes}
+                    isSelected={selectedId === word.id}
+                    isConnected={connectedIds.has(word.id)}
+                    isAnySelected={selectedId !== null}
+                    onPress={handleCardPress}
+                  />
+                )}
               </View>
             ))}
           </View>
@@ -283,6 +297,10 @@ export function DependencyMap({ words }: DependencyMapProps) {
           <ThemedText className="text-xs opacity-60">Particle</ThemedText>
         </View>
         <View className="flex-row items-center gap-1">
+          <View className="w-3 h-3 rounded-sm border border-dashed border-punctuation-border bg-punctuation-bg" />
+          <ThemedText className="text-xs opacity-60">Punctuation</ThemedText>
+        </View>
+        <View className="flex-row items-center gap-1">
           <View
             className="w-4 h-0.5 rounded"
             style={{ backgroundColor: ARC_COLORS[0] }}
@@ -294,11 +312,58 @@ export function DependencyMap({ words }: DependencyMapProps) {
   );
 }
 
+// --- Punctuation card: word-card shape, dashed punctuation colors, never connected ---
+
+function PunctuationCard({
+  punctuation,
+  isAnySelected,
+}: {
+  punctuation: PunctuationNode;
+  isAnySelected: boolean;
+}) {
+  return (
+    <View
+      className="px-3 py-2 rounded-xl border-2 border-dashed border-punctuation-border bg-punctuation-bg"
+      style={{ opacity: isAnySelected ? 0.4 : 1 }}
+    >
+      <View className="flex-row items-center flex-wrap gap-x-1.5 gap-y-0.5">
+        <ThemedText className="text-lg font-bold">{punctuation.text}</ThemedText>
+        <ThemedText className="text-xs font-semibold text-punctuation-text">
+          punctuation
+        </ThemedText>
+      </View>
+      <View className="mt-1">
+        <InlineHtml html={punctuation.description} />
+      </View>
+    </View>
+  );
+}
+
+/** Renders server-sanitized inline HTML (strong, em, br) in node descriptions. */
+function InlineHtml({ html, opacity = 1 }: { html: string; opacity?: number }) {
+  const { width } = useWindowDimensions();
+  const textColor = useRawCSSTheme("foreground");
+  return (
+    <RenderHTML
+      contentWidth={width}
+      source={{ html }}
+      baseStyle={{
+        color: textColor,
+        opacity,
+        fontSize: 14,
+        lineHeight: 20,
+        fontFamily: geist.regular,
+      }}
+      tagsStyles={{ strong: { fontWeight: "700" } }}
+    />
+  );
+}
+
 // --- Word card used inside the dependency map ---
 
 interface WordMapCardProps {
   word: WordNode;
-  allWords: WordNode[];
+  allWords: SentenceNode[];
   isSelected: boolean;
   isConnected: boolean;
   isAnySelected: boolean;
@@ -402,9 +467,7 @@ function WordMapCard({
             <ThemedText className="font-semibold text-sm mb-1">
               Particle 「{word.attachedParticle.text}」
             </ThemedText>
-            <ThemedText className="text-sm opacity-80 leading-5">
-              {word.attachedParticle.description}
-            </ThemedText>
+            <InlineHtml html={word.attachedParticle.description} opacity={0.8} />
           </View>
         )}
       </View>

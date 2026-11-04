@@ -37,7 +37,7 @@ When testing, run the web app through the dockerfile with docker compose.
 | --- | --- |
 | `monitoring.ts` | Shared client error labels, error preparation, and reporting |
 | `redaction.ts` | Shared diagnostic text redaction, sensitive attribute detection, and message/stack sanitization |
-| `types.ts` | `SentenceAnalysis`, `WordNode`, `UserSettings`, history/invite shapes |
+| `types.ts` | `SentenceAnalysis`, word/punctuation `SentenceNode` union, `UserSettings`, history/invite shapes |
 | `api.ts` | `analyzeSentence`, `analyzeImage`, `createInviteCode`; `MAX_SENTENCE_LENGTH` |
 | `image.ts` | 20MB cap and allowed MIME types for image upload |
 | `tailwind.config.js` | Shared light/dark color tokens (web + NativeWind) |
@@ -99,7 +99,8 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `dev-seed.ts` | Seeds `admin@localhost.dev` in development only |
 | `user-utils.ts` | `SessionUser` type |
 | `utils.ts` | `cn()` (clsx + tailwind-merge), shared `NextJSError` type for web error boundaries |
-| `analysis/analyze.ts` | Prompt + structured-output call |
+| `analysis/analyze.ts` | Prompt + structured-output call with validation repair rounds |
+| `analysis/validate.ts` | Checks nodes rebuild the sentence and form a valid graph |
 | `analysis/client.ts` | Server-side AI client configuration for text and images |
 | `analysis/schema.ts` | Zod schema for structured analysis |
 | `analysis/cache.ts` | In-process 1h response cache |
@@ -114,7 +115,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `components/HomeContent.tsx` | Home interactive area |
 | `components/SentenceInput.tsx` | Sentence field + submit |
 | `components/SentenceVisualization.tsx` | React Flow dependency graph |
-| `components/WordCell.tsx` | Word cell for the sentence graph |
+| `components/WordCell.tsx` | Word and punctuation cells for the sentence graph |
 | `components/ImageUploadModal.tsx` | Photo → `/api/analyze-image` |
 | `components/HistoryModal.tsx` | Paginated history |
 | `components/SettingsModal.tsx` | Settings shell: account preferences + admin invites |

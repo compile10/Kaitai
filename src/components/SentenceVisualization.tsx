@@ -1,6 +1,12 @@
 "use client";
 
-import type { SentenceAnalysis, WordNode } from "@common/types";
+import {
+  isPunctuationNode,
+  type PunctuationNode,
+  type SentenceAnalysis,
+  type SentenceNode,
+  type WordNode,
+} from "@common/types";
 import {
   Background,
   Controls,
@@ -17,7 +23,7 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import ParticleModal from "./ParticleModal";
-import WordCell from "./WordCell";
+import WordCell, { PunctuationCell } from "./WordCell";
 
 interface SentenceVisualizationProps {
   analysis: SentenceAnalysis;
@@ -26,6 +32,10 @@ interface SentenceVisualizationProps {
 interface WordNodeData extends Record<string, unknown> {
   word: WordNode;
   onParticleClick: (particle: string, description: string) => void;
+}
+
+interface PunctuationNodeData extends Record<string, unknown> {
+  punctuation: PunctuationNode;
 }
 
 // Custom node component for word boxes
@@ -95,6 +105,11 @@ function WordNodeComponent({ data }: { data: WordNodeData }) {
   );
 }
 
+// Punctuation marks sit in sentence order but never take part in edges
+function PunctuationNodeComponent({ data }: { data: PunctuationNodeData }) {
+  return <PunctuationCell punctuation={data.punctuation} />;
+}
+
 // Custom edge component with intelligent routing
 function CustomEdge({
   id,
@@ -146,7 +161,12 @@ function CustomEdge({
 
 const nodeTypes = {
   wordNode: WordNodeComponent,
+  punctuationNode: PunctuationNodeComponent,
 };
+
+// Horizontal space reserved for each node kind (words leave room for a particle chip)
+const WORD_SPACING = 220;
+const PUNCTUATION_SPACING = 180;
 
 const edgeTypes = {
   custom: CustomEdge,
@@ -221,30 +241,46 @@ export default function SentenceVisualization({
 
   // Create nodes and edges for React Flow
   const { initialNodes, initialEdges } = useMemo(() => {
-    const nodes: Node<WordNodeData>[] = [];
+    const nodes: Node<WordNodeData | PunctuationNodeData>[] = [];
     const edges: Edge[] = [];
 
     // Create nodes for every word, topics included, in sentence order
-    const sortedWords = [...analysis.words].sort(
+    const sortedWords = [...analysis.nodes].sort(
       (a, b) => a.position - b.position,
     );
-    const spacing = 220; // Horizontal spacing between nodes
-    const startX = -((sortedWords.length - 1) * spacing) / 2; // Center the nodes
+    const spacingOf = (node: SentenceNode) =>
+      isPunctuationNode(node) ? PUNCTUATION_SPACING : WORD_SPACING;
+    const totalWidth = sortedWords.reduce((sum, w) => sum + spacingOf(w), 0);
+    let x = -totalWidth / 2; // Center the nodes
 
-    for (let i = 0; i < sortedWords.length; i++) {
-      const word = sortedWords[i];
-      nodes.push({
-        id: word.id,
-        type: "wordNode",
-        position: { x: startX + i * spacing, y: 100 },
-        data: { word, onParticleClick: handleParticleClick },
+    for (const node of sortedWords) {
+      const shared = {
+        id: node.id,
         sourcePosition: Position.Right,
         targetPosition: Position.Left,
-      });
+        connectable: false,
+      };
+      nodes.push(
+        isPunctuationNode(node)
+          ? {
+              ...shared,
+              type: "punctuationNode",
+              position: { x, y: 100 },
+              data: { punctuation: node },
+            }
+          : {
+              ...shared,
+              type: "wordNode",
+              position: { x, y: 100 },
+              data: { word: node, onParticleClick: handleParticleClick },
+            },
+      );
+      x += spacingOf(node);
     }
 
     // Create edges for modifications
     for (const word of sortedWords) {
+      if (isPunctuationNode(word)) continue;
       if (word.modifies && word.modifies.length > 0) {
         for (const targetId of word.modifies) {
           // Calculate how many nodes are between source and target
@@ -277,7 +313,7 @@ export default function SentenceVisualization({
     }
 
     return { initialNodes: nodes, initialEdges: edges };
-  }, [analysis.words, handleParticleClick]);
+  }, [analysis.nodes, handleParticleClick]);
 
   const [nodes, , onNodesChange] = useNodesState(initialNodes);
   const [edges, , onEdgesChange] = useEdgesState(initialEdges);
@@ -366,6 +402,10 @@ export default function SentenceVisualization({
                 <span className="text-orange-600 dark:text-orange-400 font-semibold">
                   Click to learn what they do!
                 </span>
+              </p>
+              <p className="mt-1">
+                <strong>Dashed teal boxes:</strong> Punctuation (、。？「」) and
+                what it does in this sentence
               </p>
               <p className="mt-1">
                 <strong>Tip:</strong> Click a blurred translation to reveal it.

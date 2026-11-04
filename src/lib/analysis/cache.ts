@@ -1,4 +1,4 @@
-import type { SentenceAnalysis } from "@common/types";
+import { isPunctuationNode, type SentenceAnalysis } from "@common/types";
 
 // Cache for memoizing API responses
 export interface CacheEntry {
@@ -29,10 +29,11 @@ export function getCachedResponse(cacheKey: string): SentenceAnalysis | null {
   const cached = responseCache.get(cacheKey);
   if (cached) {
     const now = Date.now();
-    const hasWordTranslations = cached.data.words.every(
-      (word) =>
-        typeof word.translation === "string" &&
-        word.translation.trim().length > 0,
+    const hasWordTranslations = cached.data.nodes.every(
+      (node) =>
+        isPunctuationNode(node) ||
+        (typeof node.translation === "string" &&
+          node.translation.trim().length > 0),
     );
     if (now - cached.timestamp <= CACHE_DURATION_MS && hasWordTranslations) {
       return cached.data;
