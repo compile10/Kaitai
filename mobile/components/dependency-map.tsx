@@ -325,7 +325,6 @@ function PunctuationCard({
     <View
       className="px-3 py-2 rounded-xl border-2 border-dashed border-punctuation-border bg-punctuation-bg"
       style={{ opacity: isAnySelected ? 0.4 : 1 }}
-      accessibilityLabel={`${punctuation.text}: ${stripTags(punctuation.description)}`}
     >
       <View className="flex-row items-center flex-wrap gap-x-1.5 gap-y-0.5">
         <ThemedText className="text-lg font-bold">{punctuation.text}</ThemedText>
@@ -338,10 +337,6 @@ function PunctuationCard({
       </View>
     </View>
   );
-}
-
-function stripTags(html: string): string {
-  return html.replace(/<[^>]*>/g, "");
 }
 
 /** Renders server-sanitized inline HTML (strong, em, br) in node descriptions. */
