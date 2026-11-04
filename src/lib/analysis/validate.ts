@@ -1,8 +1,8 @@
 import { isPunctuationNode, type SentenceAnalysis } from "@common/types";
 
+const PUNCTUATION = /[\p{P}\p{S}]/u;
 // ・ may join a single foreign name (トム・クルーズ), so it is allowed inside words.
-const PUNCTUATION = /[^\P{P}・]|\p{S}/u;
-const ONLY_PUNCTUATION = /^[\p{P}\p{S}]+$/u;
+const NAME_SEPARATOR = /・/gu;
 // Number expressions keep their symbols and separators (¥500, 1,000, 10:30,
 // 50%, 25°C, −5°C, 10〜20), checked after NFKC normalization.
 const NUMBER = String.raw`[-+−]?\p{Sc}?\d+(?:[.,:]\d+)*[%°]?`;
@@ -61,13 +61,18 @@ export function validateAnalysis(
     ids.add(node.id);
     if (isPunctuationNode(node)) {
       punctuationIds.add(node.id);
-      if (!ONLY_PUNCTUATION.test(normalize(node.text))) {
+      const text = normalize(node.text);
+      if (!text || ![...text].every((char) => PUNCTUATION.test(char))) {
         errors.push(
           `Punctuation node "${node.id}" (${node.text}) contains non-punctuation characters. Use a word node instead.`,
         );
       }
     } else if (
-      PUNCTUATION.test(normalize(node.text).replace(NUMBER_EXPRESSION, ""))
+      PUNCTUATION.test(
+        normalize(node.text)
+          .replace(NUMBER_EXPRESSION, "")
+          .replace(NAME_SEPARATOR, ""),
+      )
     ) {
       errors.push(
         `Word "${node.id}" (${node.text}) contains punctuation. Split each mark into its own punctuation node.`,
