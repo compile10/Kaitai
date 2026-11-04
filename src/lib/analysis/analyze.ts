@@ -98,10 +98,12 @@ export async function analyzeSentence(
   // rebuild the sentence or the repair budget runs out.
   const messages: BaseMessage[] = [new HumanMessage(prompt)];
   let analysis = (await structuredModel.invoke(messages)) as SentenceAnalysis;
-  for (let attempt = 1; ; attempt++) {
-    const errors = validateAnalysis(sentence, analysis);
-    if (errors.length === 0) break;
-    if (attempt > MAX_REPAIR_ATTEMPTS) throw new AnalysisValidationError();
+  let errors = validateAnalysis(sentence, analysis);
+  for (
+    let attempt = 1;
+    errors.length > 0 && attempt <= MAX_REPAIR_ATTEMPTS;
+    attempt++
+  ) {
     log("info", "analysis.validation", {
       operation: "analysis.validate",
       event: `repair_${attempt}`,
@@ -113,7 +115,9 @@ export async function analyzeSentence(
       ),
     );
     analysis = (await structuredModel.invoke(messages)) as SentenceAnalysis;
+    errors = validateAnalysis(sentence, analysis);
   }
+  if (errors.length > 0) throw new AnalysisValidationError();
 
   // Sanitize HTML content to prevent XSS attacks
   const sanitizedAnalysis: SentenceAnalysis = {
