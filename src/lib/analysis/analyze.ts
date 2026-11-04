@@ -64,16 +64,26 @@ EXPLANATION FORMATTING:
 - Use lists for multiple points
 Example: "<p>This sentence follows the <strong>SOV pattern</strong>. The topic <strong>私</strong> is marked with は.</p>"`;
 
-export interface AnalysisResult {
-  analysis: SentenceAnalysis;
-  /** False when validation errors remained after every repair round. */
-  valid: boolean;
+/**
+ * Thrown when the analysis still fails validation after every repair round.
+ * The message never includes sentence text, so it is safe to log.
+ */
+export class AnalysisValidationError extends Error {
+  constructor() {
+    super(
+      `Analysis failed validation after ${MAX_REPAIR_ATTEMPTS} repair rounds`,
+    );
+    this.name = "AnalysisValidationError";
+  }
 }
 
-/** Analyzes a Japanese sentence through OpenRouter. */
+/**
+ * Analyzes a Japanese sentence through OpenRouter.
+ * @throws AnalysisValidationError when the result cannot be repaired.
+ */
 export async function analyzeSentence(
   sentence: string,
-): Promise<AnalysisResult> {
+): Promise<SentenceAnalysis> {
   const chatModel = createChatModel();
 
   // Wrap with structured output
@@ -88,18 +98,10 @@ export async function analyzeSentence(
   // rebuild the sentence or the repair budget runs out.
   const messages: BaseMessage[] = [new HumanMessage(prompt)];
   let analysis = (await structuredModel.invoke(messages)) as SentenceAnalysis;
-  let valid = true;
   for (let attempt = 1; ; attempt++) {
     const errors = validateAnalysis(sentence, analysis);
     if (errors.length === 0) break;
-    if (attempt > MAX_REPAIR_ATTEMPTS) {
-      valid = false;
-      log("warn", "analysis.validation", {
-        operation: "analysis.validate",
-        event: "unresolved",
-      });
-      break;
-    }
+    if (attempt > MAX_REPAIR_ATTEMPTS) throw new AnalysisValidationError();
     log("info", "analysis.validation", {
       operation: "analysis.validate",
       event: `repair_${attempt}`,
@@ -135,5 +137,5 @@ export async function analyzeSentence(
     })),
   };
 
-  return { analysis: sanitizedAnalysis, valid };
+  return sanitizedAnalysis;
 }

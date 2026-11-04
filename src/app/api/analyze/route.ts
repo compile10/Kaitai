@@ -48,12 +48,12 @@ export const POST = withAuth(
     const cacheKey = `${ANALYSIS_PROVIDER}:${ANALYSIS_MODEL}:${sanitizedSentence}`;
     const cachedResponse = getCachedResponse(cacheKey);
 
-    let analysis = cachedResponse;
-    if (!analysis) {
-      const result = await analyzeSentence(sanitizedSentence);
-      analysis = result.analysis;
-      // Unrepaired results are returned but not cached, so the next request retries.
-      if (result.valid) setCachedResponse(cacheKey, analysis);
+    // Throws (→ 500, nothing cached or saved) if the result can't be repaired.
+    const analysis =
+      cachedResponse ?? (await analyzeSentence(sanitizedSentence));
+
+    if (!cachedResponse) {
+      setCachedResponse(cacheKey, analysis);
     }
 
     try {

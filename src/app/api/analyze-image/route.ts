@@ -110,7 +110,8 @@ export const POST = withAuth(
       );
     }
 
-    const { analysis } = await analyzeSentence(sentence);
+    // Throws (→ 500, nothing saved) if the result can't be repaired.
+    const analysis = await analyzeSentence(sentence);
 
     try {
       await saveToHistory(
