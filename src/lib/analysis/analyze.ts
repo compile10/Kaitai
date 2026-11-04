@@ -72,6 +72,14 @@ EXPLANATION FORMATTING:
 - Use lists for multiple points
 Example: "<p>This sentence follows the <strong>SOV pattern</strong>. The topic <strong>私</strong> is marked with は.</p>"`;
 
+/** Sanitizes short node descriptions (particles, punctuation) to inline formatting only. */
+function sanitizeInlineHtml(html: string): string {
+  return sanitizeHtml(html, {
+    allowedTags: ["strong", "em", "br"],
+    allowedAttributes: {},
+  });
+}
+
 /**
  * Thrown when the analysis still fails validation after every repair round.
  * The message never includes sentence text, so it is safe to log.
@@ -137,16 +145,15 @@ export async function analyzeSentence(
     grammarPoints: analysis.grammarPoints ?? [],
     nodes: analysis.nodes.map((node) =>
       isPunctuationNode(node)
-        ? node
+        ? { ...node, description: sanitizeInlineHtml(node.description) }
         : {
             ...node,
             attachedParticle: node.attachedParticle
               ? {
                   ...node.attachedParticle,
-                  description: sanitizeHtml(node.attachedParticle.description, {
-                    allowedTags: ["strong", "em", "br"],
-                    allowedAttributes: {},
-                  }),
+                  description: sanitizeInlineHtml(
+                    node.attachedParticle.description,
+                  ),
                 }
               : null,
           },

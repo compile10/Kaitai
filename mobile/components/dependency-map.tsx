@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import RenderHTML from "@native-html/render";
 import {
   isPunctuationNode,
   type PunctuationNode,
@@ -324,7 +325,7 @@ function PunctuationCard({
     <View
       className="px-3 py-2 rounded-xl border-2 border-dashed border-punctuation-border bg-punctuation-bg"
       style={{ opacity: isAnySelected ? 0.4 : 1 }}
-      accessibilityLabel={`${punctuation.text}: ${punctuation.description}`}
+      accessibilityLabel={`${punctuation.text}: ${stripTags(punctuation.description)}`}
     >
       <View className="flex-row items-center flex-wrap gap-x-1.5 gap-y-0.5">
         <ThemedText className="text-lg font-bold">{punctuation.text}</ThemedText>
@@ -332,8 +333,34 @@ function PunctuationCard({
           punctuation
         </ThemedText>
       </View>
-      <ThemedText className="text-sm mt-1">{punctuation.description}</ThemedText>
+      <View className="mt-1">
+        <InlineHtml html={punctuation.description} />
+      </View>
     </View>
+  );
+}
+
+function stripTags(html: string): string {
+  return html.replace(/<[^>]*>/g, "");
+}
+
+/** Renders server-sanitized inline HTML (strong, em, br) in node descriptions. */
+function InlineHtml({ html, opacity = 1 }: { html: string; opacity?: number }) {
+  const { width } = useWindowDimensions();
+  const textColor = useRawCSSTheme("foreground");
+  return (
+    <RenderHTML
+      contentWidth={width}
+      source={{ html }}
+      baseStyle={{
+        color: textColor,
+        opacity,
+        fontSize: 14,
+        lineHeight: 20,
+        fontFamily: geist.regular,
+      }}
+      tagsStyles={{ strong: { fontWeight: "700" } }}
+    />
   );
 }
 
@@ -445,9 +472,7 @@ function WordMapCard({
             <ThemedText className="font-semibold text-sm mb-1">
               Particle 「{word.attachedParticle.text}」
             </ThemedText>
-            <ThemedText className="text-sm opacity-80 leading-5">
-              {word.attachedParticle.description}
-            </ThemedText>
+            <InlineHtml html={word.attachedParticle.description} opacity={0.8} />
           </View>
         )}
       </View>

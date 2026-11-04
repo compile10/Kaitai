@@ -59,9 +59,11 @@ export function PunctuationCell({
       <span className="block text-xs text-punctuation-text font-medium leading-snug text-center">
         punctuation
       </span>
-      <span className="mt-1 block w-full py-1 text-sm leading-snug text-foreground text-center break-words">
-        {punctuation.description}
-      </span>
+      <span
+        className="mt-1 block w-full py-1 text-sm leading-snug text-foreground text-center break-words"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized to inline tags in analyzeSentence
+        dangerouslySetInnerHTML={{ __html: punctuation.description }}
+      />
     </div>
   );
 }
