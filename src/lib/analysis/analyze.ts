@@ -59,7 +59,9 @@ IMPORTANT RULES:
    - Word nodes (type: "word") for everything except punctuation.
    - Punctuation nodes (type: "punctuation") for every punctuation mark or symbol (。、？！「」『』…・〜♪ etc.), one mark per node, with "description" giving its function in THIS sentence in a few words (e.g. "pause after the reason clause", "marks a question", "opens quoted speech"). You may use HTML in the description, limited to ${INLINE_TAG_LIST}.
    Words never modify punctuation nodes. A particle after a closing quote is its own word node ("「…」と言った" → "」" | "と" | "言った").
-   Exception: the ・ inside a single foreign name stays part of that word ("トム・クルーズ" is one word).
+   Exceptions:
+   - The ・ inside a single foreign name stays part of that word ("トム・クルーズ" is one word).
+   - Numbers stay one word with their symbols and separators: prices, decimals, times, percentages, and units ("￥500", "1,000円", "3.5キロ", "10:30", "50％", "25℃"). Punctuation nodes are only for marks that do grammatical work.
    Example: "雨なので、" → { type: "word", text: "雨", attachedParticle: { text: "なので", ... } } | { type: "punctuation", text: "、", description: "pause after the reason clause" }
 
 TRANSLATION GUIDANCE:

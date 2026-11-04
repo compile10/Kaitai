@@ -3,6 +3,8 @@ import { isPunctuationNode, type SentenceAnalysis } from "@common/types";
 // ・ may join a single foreign name (トム・クルーズ), so it is allowed inside words.
 const PUNCTUATION = /[^\P{P}・]|\p{S}/u;
 const ONLY_PUNCTUATION = /^[\p{P}\p{S}]+$/u;
+// Number expressions keep their symbols and separators (¥500, 1,000, 10:30, 50%, 25°C).
+const NUMBER_EXPRESSION = /\p{Sc}?\d+(?:[.,:]\d+)*[%°]?/gu;
 
 /** Ignore spacing and width differences (e.g. OCR full-width spaces, ？ vs ?). */
 function normalize(text: string): string {
@@ -62,7 +64,9 @@ export function validateAnalysis(
           `Punctuation node "${node.id}" (${node.text}) contains non-punctuation characters. Use a word node instead.`,
         );
       }
-    } else if (PUNCTUATION.test(node.text)) {
+    } else if (
+      PUNCTUATION.test(normalize(node.text).replace(NUMBER_EXPRESSION, ""))
+    ) {
       errors.push(
         `Word "${node.id}" (${node.text}) contains punctuation. Split each mark into its own punctuation node.`,
       );
