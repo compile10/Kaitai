@@ -61,7 +61,7 @@ IMPORTANT RULES:
    Words never modify punctuation nodes. A particle after a closing quote is its own word node ("「…」と言った" → "」" | "と" | "言った").
    Exceptions:
    - The ・ inside a single foreign name stays part of that word ("トム・クルーズ" is one word).
-   - Numbers stay one word with their symbols and separators: prices, decimals, times, percentages, and units ("￥500", "1,000円", "3.5キロ", "10:30", "50％", "25℃"). Punctuation nodes are only for marks that do grammatical work.
+   - Numbers stay one word with their symbols and separators: prices, decimals, times, percentages, units, signs, and ranges ("￥500", "1,000円", "3.5キロ", "10:30", "50％", "25℃", "−5℃", "10〜20人"). Punctuation nodes are only for marks that do grammatical work.
    Example: "雨なので、" → { type: "word", text: "雨", attachedParticle: { text: "なので", ... } } | { type: "punctuation", text: "、", description: "pause after the reason clause" }
 
 TRANSLATION GUIDANCE:

@@ -3,8 +3,10 @@ import { isPunctuationNode, type SentenceAnalysis } from "@common/types";
 // ・ may join a single foreign name (トム・クルーズ), so it is allowed inside words.
 const PUNCTUATION = /[^\P{P}・]|\p{S}/u;
 const ONLY_PUNCTUATION = /^[\p{P}\p{S}]+$/u;
-// Number expressions keep their symbols and separators (¥500, 1,000, 10:30, 50%, 25°C).
-const NUMBER_EXPRESSION = /\p{Sc}?\d+(?:[.,:]\d+)*[%°]?/gu;
+// Number expressions keep their symbols and separators (¥500, 1,000, 10:30,
+// 50%, 25°C, −5°C, 10〜20), checked after NFKC normalization.
+const NUMBER = String.raw`[-+−]?\p{Sc}?\d+(?:[.,:]\d+)*[%°]?`;
+const NUMBER_EXPRESSION = new RegExp(`${NUMBER}(?:[〜~–—-]${NUMBER})*`, "gu");
 
 /** Ignore spacing and width differences (e.g. OCR full-width spaces, ？ vs ?). */
 function normalize(text: string): string {
