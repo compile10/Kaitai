@@ -47,6 +47,9 @@ const colors = {
     "warning-border": "#fef08a", // yellow-200
     "topic-bg": "#fff1f2", // rose-50
     "topic-border": "#fda4af", // rose-300
+    "punctuation-bg": "#f0fdfa", // teal-50
+    "punctuation-border": "#2dd4bf", // teal-400
+    "punctuation-text": "#0f766e", // teal-700
     "graph-selected-bg": "#dbeafe", // blue-100
     "graph-selected-border": "#2563eb", // blue-600
     "graph-connected-border": "#93c5fd", // blue-300
@@ -97,6 +100,9 @@ const colors = {
     "warning-border": "#854d0e", // amber-800
     "topic-bg": "#4c0519", // rose-950
     "topic-border": "#e11d48", // rose-600
+    "punctuation-bg": "#042f2e", // teal-950
+    "punctuation-border": "#14b8a6", // teal-500
+    "punctuation-text": "#5eead4", // teal-300
     "graph-selected-bg": "#172554", // blue-950
     "graph-selected-border": "#60a5fa", // blue-400
     "graph-connected-border": "#93c5fd", // blue-300

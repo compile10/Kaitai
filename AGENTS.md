@@ -115,7 +115,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `components/HomeContent.tsx` | Home interactive area |
 | `components/SentenceInput.tsx` | Sentence field + submit |
 | `components/SentenceVisualization.tsx` | React Flow dependency graph |
-| `components/WordCell.tsx` | Word cell for the sentence graph |
+| `components/WordCell.tsx` | Word and punctuation cells for the sentence graph |
 | `components/ImageUploadModal.tsx` | Photo → `/api/analyze-image` |
 | `components/HistoryModal.tsx` | Paginated history |
 | `components/SettingsModal.tsx` | Settings shell: account preferences + admin invites |

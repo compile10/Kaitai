@@ -217,7 +217,7 @@ export function DependencyMap({ nodes }: DependencyMapProps) {
                 style={{ marginBottom: CARD_GAP }}
               >
                 {isPunctuationNode(word) ? (
-                  <PunctuationRow
+                  <PunctuationCard
                     punctuation={word}
                     isAnySelected={selectedId !== null}
                   />
@@ -296,7 +296,7 @@ export function DependencyMap({ nodes }: DependencyMapProps) {
           <ThemedText className="text-xs opacity-60">Particle</ThemedText>
         </View>
         <View className="flex-row items-center gap-1">
-          <View className="w-3 h-3 rounded-full border border-dashed border-border bg-muted" />
+          <View className="w-3 h-3 rounded-sm border border-dashed border-punctuation-border bg-punctuation-bg" />
           <ThemedText className="text-xs opacity-60">Punctuation</ThemedText>
         </View>
         <View className="flex-row items-center gap-1">
@@ -311,9 +311,9 @@ export function DependencyMap({ nodes }: DependencyMapProps) {
   );
 }
 
-// --- Punctuation row: compact, never selectable or connected ---
+// --- Punctuation card: word-card shape, dashed punctuation colors, never connected ---
 
-function PunctuationRow({
+function PunctuationCard({
   punctuation,
   isAnySelected,
 }: {
@@ -322,18 +322,17 @@ function PunctuationRow({
 }) {
   return (
     <View
-      className="flex-row items-center gap-2 px-3"
+      className="px-3 py-2 rounded-xl border-2 border-dashed border-punctuation-border bg-punctuation-bg"
       style={{ opacity: isAnySelected ? 0.4 : 1 }}
       accessibilityLabel={`${punctuation.text}: ${punctuation.description}`}
     >
-      <View className="min-w-8 h-8 px-1.5 items-center justify-center rounded-full border border-dashed border-border bg-muted">
-        <ThemedText className="text-base font-bold opacity-70">
-          {punctuation.text}
+      <View className="flex-row items-center flex-wrap gap-x-1.5 gap-y-0.5">
+        <ThemedText className="text-lg font-bold">{punctuation.text}</ThemedText>
+        <ThemedText className="text-xs font-semibold text-punctuation-text">
+          punctuation
         </ThemedText>
       </View>
-      <ThemedText className="flex-1 text-xs opacity-50">
-        {punctuation.description}
-      </ThemedText>
+      <ThemedText className="text-sm mt-1">{punctuation.description}</ThemedText>
     </View>
   );
 }

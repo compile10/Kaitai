@@ -46,6 +46,9 @@
   --color-warning-border: var(--warning-border);
   --color-topic-bg: var(--topic-bg);
   --color-topic-border: var(--topic-border);
+  --color-punctuation-bg: var(--punctuation-bg);
+  --color-punctuation-border: var(--punctuation-border);
+  --color-punctuation-text: var(--punctuation-text);
 
   /* fonts */
   --font-sans: var(--font-geist-sans);

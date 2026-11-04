@@ -23,7 +23,7 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import ParticleModal from "./ParticleModal";
-import WordCell from "./WordCell";
+import WordCell, { PunctuationCell } from "./WordCell";
 
 interface SentenceVisualizationProps {
   analysis: SentenceAnalysis;
@@ -107,21 +107,7 @@ function WordNodeComponent({ data }: { data: WordNodeData }) {
 
 // Punctuation marks sit in sentence order but never take part in edges
 function PunctuationNodeComponent({ data }: { data: PunctuationNodeData }) {
-  const { punctuation } = data;
-  return (
-    <div
-      className="flex flex-col items-center gap-1"
-      style={{ width: `${PUNCTUATION_WIDTH}px` }}
-      title={punctuation.description}
-    >
-      <span className="flex h-11 min-w-11 items-center justify-center rounded-full border-2 border-dashed border-border bg-muted px-2 text-xl font-bold text-muted-foreground">
-        {punctuation.text}
-      </span>
-      <span className="text-center text-[11px] leading-tight text-muted-foreground">
-        {punctuation.description}
-      </span>
-    </div>
-  );
+  return <PunctuationCell punctuation={data.punctuation} />;
 }
 
 // Custom edge component with intelligent routing
@@ -178,10 +164,9 @@ const nodeTypes = {
   punctuationNode: PunctuationNodeComponent,
 };
 
-// Horizontal space reserved for each node kind
+// Horizontal space reserved for each node kind (words leave room for a particle chip)
 const WORD_SPACING = 220;
-const PUNCTUATION_WIDTH = 90;
-const PUNCTUATION_SPACING = PUNCTUATION_WIDTH + 20;
+const PUNCTUATION_SPACING = 180;
 
 const edgeTypes = {
   custom: CustomEdge,
@@ -280,8 +265,7 @@ export default function SentenceVisualization({
           ? {
               ...shared,
               type: "punctuationNode",
-              // Drop punctuation slightly so it lines up with the word text baseline
-              position: { x, y: 108 },
+              position: { x, y: 100 },
               data: { punctuation: node },
             }
           : {
@@ -420,7 +404,7 @@ export default function SentenceVisualization({
                 </span>
               </p>
               <p className="mt-1">
-                <strong>Dashed circles:</strong> Punctuation (、。？「」) and
+                <strong>Dashed teal boxes:</strong> Punctuation (、。？「」) and
                 what it does in this sentence
               </p>
               <p className="mt-1">
