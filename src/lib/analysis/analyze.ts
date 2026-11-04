@@ -1,4 +1,4 @@
-import type { SentenceAnalysis } from "@common/types";
+import { isPunctuationNode, type SentenceAnalysis } from "@common/types";
 import {
   AIMessage,
   type BaseMessage,
@@ -13,6 +13,10 @@ import { validateAnalysis } from "./validate";
 /** Correction rounds after the first answer fails validation. */
 const MAX_REPAIR_ATTEMPTS = 2;
 
+/** Tags allowed in particle and punctuation descriptions. */
+const INLINE_TAGS = ["strong", "em", "br"];
+const INLINE_TAG_LIST = INLINE_TAGS.map((tag) => `<${tag}>`).join(", ");
+
 const ANALYSIS_PROMPT = `Analyze the following Japanese sentence and break it down into its constituent words and phrases. For each word/phrase, identify what it modifies or relates to in the sentence. This will be used to create a visual diagram showing the grammatical relationships.
 
 Sentence: {{SENTENCE}}
@@ -26,7 +30,7 @@ IMPORTANT RULES:
 1. Particles (は, を, に, が, の, etc.) should be ATTACHED to their corresponding words using the "attachedParticle" field. Do NOT create separate word entries for particles.
    Example: "私は" → { text: "私", attachedParticle: { text: "は", description: "Marks '私' as the topic of the sentence" } }
 
-2. For EACH particle, provide a brief description (1-2 sentences) explaining its function in THIS specific sentence. Be contextual and practical.
+2. For EACH particle, provide a brief description (1-2 sentences) explaining its function in THIS specific sentence. Be contextual and practical. You may use HTML in the description, limited to ${INLINE_TAG_LIST}.
    Examples:
    - は: "Marks the topic - what the sentence is about"
    - を: "Marks the direct object of the verb"
@@ -42,14 +46,23 @@ IMPORTANT RULES:
    - Topics (は) do NOT modify anything - they provide context only
    - Subjects (が) modify the verb or an adjective they are attached to
 
-5. Copy each word's "text" exactly as it is written in the sentence. Do NOT convert kana to kanji or kanji to kana, and do not include punctuation (。、？！) in any word.
+5. Copy each word's "text" exactly as it is written in the sentence. Do NOT convert kana to kanji or kanji to kana, and never include punctuation in a word.
 
 6. WORD BOUNDARIES: Each word entry is ONE content word (noun, verb, adjective, adverb) plus its own conjugation and auxiliary verbs. Do NOT merge separate words into one entry.
    - Keep together: verb/adjective stems with their endings and auxiliaries (聞いています, 掃除させた, 忘れてしまった, 叱られた, 甘くなかった, 見てみたい).
    - Split off as attachedParticle: particles that link clauses (から, ので, のに, ながら, けど, たら's ら, と, て is NOT split). Example: "読みながら" → { text: "読み", attachedParticle: { text: "ながら", ... } }; "降ったら" → { text: "降った", attachedParticle: { text: "ら", ... } }.
    - Split off as their own word: copulas and sentence-ending auxiliaries (だ, です, でしょう, らしい). Examples: "中止になるでしょう" → "中止" (に) | "なる" | "でしょう"; "マンションになっている" → "マンション" (に) | "なっている".
    - Nouns joined by の are separate words: "子供の頃" → "子供" (の) | "頃".
-   - Each character of the sentence belongs to exactly one word or attached particle. A word's text never starts with the particle attached to the previous word (wrong: "マンション" (に) | "になっている").
+   - Each character of the sentence belongs to exactly one word, attached particle, or punctuation entry. A word's text never starts with the particle attached to the previous word (wrong: "マンション" (に) | "になっている").
+
+7. PUNCTUATION: Punctuation is part of the grammar. The "nodes" array holds two node types, in sentence order:
+   - Word nodes (type: "word") for everything except punctuation.
+   - Punctuation nodes (type: "punctuation") for every punctuation mark or symbol (。、？！「」『』…・〜♪ etc.), one mark per node, with "description" giving its function in THIS sentence in a few words (e.g. "pause after the reason clause", "marks a question", "opens quoted speech"). You may use HTML in the description, limited to ${INLINE_TAG_LIST}.
+   Words never modify punctuation nodes. A particle after a closing quote is its own word node ("「…」と言った" → "」" | "と" | "言った").
+   Exceptions:
+   - The ・ inside a single foreign name stays part of that word ("トム・クルーズ" is one word).
+   - Numbers stay one word with their symbols and separators: prices, decimals, times, percentages, units, signs, and ranges ("￥500", "1,000円", "3.5キロ", "10:30", "50％", "25℃", "−5℃", "10〜20人"). Punctuation nodes are only for marks that do grammatical work.
+   Example: "雨なので、" → { type: "word", text: "雨", attachedParticle: { text: "なので", ... } } | { type: "punctuation", text: "、", description: "pause after the reason clause" }
 
 TRANSLATION GUIDANCE:
 Represent particles by their grammatical function in parentheses in the sentence translation.
@@ -58,11 +71,20 @@ Example: "彼女は新しい本を読んでいる。" → "She (topic) new book 
 Do not include SOV (subject-object-verb) word order in the grammar points.
 
 EXPLANATION FORMATTING:
+- Explain the Japanese, not this output format: never mention entries, nodes, ids, node types, "attachedParticle", or the rules above in the explanation or grammar points
 - Do not include a translation in the explanation
 - Structure the explanation with clear sections
 - Highlight important grammatical terms with <strong>
 - Use lists for multiple points
 Example: "<p>This sentence follows the <strong>SOV pattern</strong>. The topic <strong>私</strong> is marked with は.</p>"`;
+
+/** Sanitizes short node descriptions (particles, punctuation) to inline formatting only. */
+function sanitizeInlineHtml(html: string): string {
+  return sanitizeHtml(html, {
+    allowedTags: INLINE_TAGS,
+    allowedAttributes: {},
+  });
+}
 
 /**
  * Thrown when the analysis still fails validation after every repair round.
@@ -127,18 +149,21 @@ export async function analyzeSentence(
       allowedAttributes: {},
     }),
     grammarPoints: analysis.grammarPoints ?? [],
-    words: analysis.words.map((word) => ({
-      ...word,
-      attachedParticle: word.attachedParticle
-        ? {
-            ...word.attachedParticle,
-            description: sanitizeHtml(word.attachedParticle.description, {
-              allowedTags: ["strong", "em", "br"],
-              allowedAttributes: {},
-            }),
-          }
-        : null,
-    })),
+    nodes: analysis.nodes.map((node) =>
+      isPunctuationNode(node)
+        ? { ...node, description: sanitizeInlineHtml(node.description) }
+        : {
+            ...node,
+            attachedParticle: node.attachedParticle
+              ? {
+                  ...node.attachedParticle,
+                  description: sanitizeInlineHtml(
+                    node.attachedParticle.description,
+                  ),
+                }
+              : null,
+          },
+    ),
   };
 
   return sanitizedAnalysis;

@@ -223,7 +223,7 @@ function ResultsContent({ sentence, imageId }: ResultsParams) {
           <ThemedText type="subtitle" className="mb-3">
             Sentence Structure
           </ThemedText>
-          <DependencyMap words={analysis.words} />
+          <DependencyMap nodes={analysis.nodes} />
         </View>
 
         <View className="mb-6 p-4 rounded-xl border bg-muted border-border">

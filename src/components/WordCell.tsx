@@ -1,6 +1,6 @@
 "use client";
 
-import type { WordNode } from "@common/types";
+import type { PunctuationNode, WordNode } from "@common/types";
 import { useState } from "react";
 import { useSettingsQuery } from "@/hooks/use-settings-query";
 
@@ -38,6 +38,32 @@ export default function WordCell({ word }: { word: WordNode }) {
           showTranslation={showTranslation}
         />
       )}
+    </div>
+  );
+}
+
+/** Same card shape as a word, in the punctuation colors with a dashed outline. */
+export function PunctuationCell({
+  punctuation,
+}: {
+  punctuation: PunctuationNode;
+}) {
+  return (
+    <div
+      className="relative border-2 border-dashed border-punctuation-border bg-punctuation-bg rounded-lg px-3 py-2 shadow-md hover:shadow-lg transition-shadow"
+      style={{ minWidth: "120px", maxWidth: "150px" }}
+    >
+      <span className="block text-xl font-bold text-foreground mb-0.5 leading-snug text-center">
+        {punctuation.text}
+      </span>
+      <span className="block text-xs text-punctuation-text font-medium leading-snug text-center">
+        punctuation
+      </span>
+      <span
+        className="mt-1 block w-full py-1 text-sm leading-snug text-foreground text-center break-words"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized to inline tags in analyzeSentence
+        dangerouslySetInnerHTML={{ __html: punctuation.description }}
+      />
     </div>
   );
 }
