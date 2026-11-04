@@ -110,7 +110,6 @@ export const POST = withAuth(
       );
     }
 
-    // Throws (→ 500, nothing saved) if the result can't be repaired.
     const analysis = await analyzeSentence(sentence);
 
     try {

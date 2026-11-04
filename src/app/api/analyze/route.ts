@@ -48,7 +48,6 @@ export const POST = withAuth(
     const cacheKey = `${ANALYSIS_PROVIDER}:${ANALYSIS_MODEL}:${sanitizedSentence}`;
     const cachedResponse = getCachedResponse(cacheKey);
 
-    // Throws (→ 500, nothing cached or saved) if the result can't be repaired.
     const analysis =
       cachedResponse ?? (await analyzeSentence(sanitizedSentence));
 
