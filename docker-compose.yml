@@ -22,40 +22,46 @@ services:
     env_file:
       - .env.local
     environment:
-      - MONGODB_URI=mongodb://mongo:27017/kaitai?replicaSet=rs0&directConnection=true
+      - DATABASE_URL=postgres://kaitai:kaitai@postgres:5432/kaitai
       - BETTER_AUTH_URL=http://localhost:3000
       - WATCHPACK_POLLING=true
     depends_on:
-      mongo:
+      migrate:
+        condition: service_completed_successfully
+
+  # ── Schema migrations; runs once per `docker compose up` ──
+  migrate:
+    build:
+      context: .
+      target: dev
+    volumes:
+      - ./postgres/migrations:/app/postgres/migrations
+      - ./scripts:/app/scripts
+    environment:
+      - DATABASE_URL=postgres://kaitai:kaitai@postgres:5432/kaitai
+    command: ["npm", "run", "--silent", "db:migrate"]
+    depends_on:
+      postgres:
         condition: service_healthy
 
-  # ── MongoDB (single-node replica set for transaction support) ──
-  mongo:
-    image: mongo:7
-    command:
-      [
-        "mongod",
-        "--replSet",
-        "rs0",
-        "--bind_ip_all",
-        "--quiet",
-        "--setParameter",
-        "logComponentVerbosity={network:{verbosity:-1}}",
-      ]
+  # ── PostgreSQL ──
+  postgres:
+    build:
+      context: ./postgres
+    environment:
+      - POSTGRES_USER=kaitai
+      - POSTGRES_PASSWORD=kaitai
+      - POSTGRES_DB=kaitai
     ports:
-      - "127.0.0.1:27017:27017"
+      - "127.0.0.1:5432:5432"
     volumes:
-      - mongo-data:/data/db
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: >
-        mongosh --quiet --eval "
-          try { rs.status().ok }
-          catch(e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] }); }
-        "
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U kaitai -d kaitai"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
       start_period: 10s
 
 volumes:
-  mongo-data:
+  postgres-data:

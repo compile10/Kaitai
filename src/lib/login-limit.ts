@@ -1,39 +1,31 @@
 import { createHmac } from "node:crypto";
 import { APIError } from "better-auth/api";
-import mongoClient, { onceIndexes } from "@/lib/db";
+import { db } from "@/lib/db";
 
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 20;
 
-const ensureLoginLimitIndexes = onceIndexes("Login rate-limit", () =>
-  mongoClient
-    .db()
-    .collection("accountLoginLimits")
-    .createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
-);
-
 /** Bound distributed guesses without storing submitted email addresses. */
 export async function enforceAccountLoginLimit(email: string, secret: string) {
-  await ensureLoginLimitIndexes();
   const now = Date.now();
   const key = createHmac("sha256", secret)
     .update(email.trim().toLowerCase())
     .digest("hex");
-  const counters = mongoClient
-    .db()
-    .collection<{ _id: string; count: number; expiresAt: Date }>(
-      "accountLoginLimits",
-    );
-  const filter = { _id: `login:${key}:${Math.floor(now / WINDOW_MS)}` };
-  // Matching the unique _id lets concurrent upserts increment the same counter.
-  const counter = await counters.findOneAndUpdate(
-    filter,
-    {
-      $inc: { count: 1 },
-      $setOnInsert: { expiresAt: new Date(now + WINDOW_MS) },
-    },
-    { upsert: true, returnDocument: "after" },
-  );
+  // Conflicting on the primary key lets concurrent attempts increment one counter.
+  const counter = await db
+    .insertInto("account_login_limits")
+    .values({
+      id: `login:${key}:${Math.floor(now / WINDOW_MS)}`,
+      count: 1,
+      expires_at: new Date(now + WINDOW_MS),
+    })
+    .onConflict((oc) =>
+      oc.column("id").doUpdateSet((eb) => ({
+        count: eb("account_login_limits.count", "+", 1),
+      })),
+    )
+    .returning("count")
+    .executeTakeFirst();
   if (!counter || counter.count > MAX_ATTEMPTS) {
     throw new APIError(
       "TOO_MANY_REQUESTS",

@@ -1,13 +1,13 @@
+import { randomUUID } from "node:crypto";
 import { getCurrentAdapter } from "@better-auth/core/context";
 import { expo } from "@better-auth/expo";
-import { mongodbAdapter } from "better-auth/adapters/mongodb";
+import { kyselyAdapter } from "@better-auth/kysely-adapter";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { betterAuth } from "better-auth/minimal";
 import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins";
-import { ObjectId } from "mongodb";
 import { ac, adminRole, userRole } from "@/lib/auth-permissions";
-import mongoClient from "@/lib/db";
+import { db } from "@/lib/db";
 import { findValidInviteCode } from "@/lib/invites";
 import { enforceAccountLoginLimit } from "@/lib/login-limit";
 
@@ -55,7 +55,7 @@ if (!/^[a-z0-9-]+$/.test(clientIpHeader)) {
 }
 
 export const auth = betterAuth({
-  database: mongodbAdapter(mongoClient.db(), { client: mongoClient }),
+  database: kyselyAdapter(db, { type: "postgres", transaction: true }),
   emailAndPassword: {
     enabled: true,
   },
@@ -106,34 +106,19 @@ export const auth = betterAuth({
           const inviteCode = inviteCodeFromBody(ctx.body);
           if (!inviteCode)
             throw new APIError("BAD_REQUEST", { message: INVITE_CODE_ERROR });
-          const userId = new ObjectId().toHexString();
+          const userId = randomUUID();
           // The current adapter shares the signup transaction, including rollback.
+          // A concurrent claim waits on the row lock, then matches no row.
           const adapter = await getCurrentAdapter(ctx.context.adapter);
-          let claimed: unknown;
-          try {
-            claimed = await adapter.update({
-              model: "inviteCodes",
-              where: [
-                { field: "code", value: inviteCode },
-                { field: "usedAt", value: null },
-                { field: "expiresAt", operator: "gt", value: new Date() },
-              ],
-              update: { usedAt: new Date(), usedByUserId: userId },
-            });
-          } catch (error) {
-            // Two transactions claiming one invite can conflict before commit.
-            if (
-              error &&
-              typeof error === "object" &&
-              "code" in error &&
-              error.code === 112
-            ) {
-              throw new APIError("BAD_REQUEST", {
-                message: INVITE_CODE_ERROR,
-              });
-            }
-            throw error;
-          }
+          const claimed = await adapter.update({
+            model: "inviteCodes",
+            where: [
+              { field: "code", value: inviteCode },
+              { field: "usedAt", value: null },
+              { field: "expiresAt", operator: "gt", value: new Date() },
+            ],
+            update: { usedAt: new Date(), usedByUserId: userId },
+          });
           if (!claimed)
             throw new APIError("BAD_REQUEST", { message: INVITE_CODE_ERROR });
           return { data: { ..._user, id: userId } };
@@ -147,7 +132,13 @@ export const auth = betterAuth({
       schema: {
         inviteCodes: {
           fields: {
-            code: { type: "string", required: true },
+            code: { type: "string", required: true, unique: true },
+            createdByUserId: {
+              type: "string",
+              required: true,
+              references: { model: "user", field: "id", onDelete: "cascade" },
+            },
+            createdAt: { type: "date", required: true },
             expiresAt: { type: "date", required: true },
             usedAt: { type: "date", required: false },
             usedByUserId: { type: "string", required: false },

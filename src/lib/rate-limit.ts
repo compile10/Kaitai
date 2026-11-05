@@ -1,14 +1,14 @@
 import { createHmac } from "node:crypto";
 import { getIP } from "better-auth/api";
 import type { NextRequest } from "next/server";
-import { RateLimiterMongo, RateLimiterRes } from "rate-limiter-flexible";
+import { RateLimiterPostgres, RateLimiterRes } from "rate-limiter-flexible";
 import { auth } from "@/lib/auth";
-import mongoClient, { onceIndexes } from "@/lib/db";
+import { pool } from "@/lib/db";
 
 export interface RateLimitPolicy {
   message: string;
-  user: RateLimiterMongo;
-  ip: RateLimiterMongo;
+  user: RateLimiterPostgres;
+  ip: RateLimiterPostgres;
 }
 
 interface PolicyOptions {
@@ -27,15 +27,16 @@ function createPolicy({
   windowSeconds,
 }: PolicyOptions): RateLimitPolicy {
   const createLimiter = (dimension: "user" | "ip", points: number) =>
-    new RateLimiterMongo({
-      storeClient: mongoClient,
-      dbName: mongoClient.db().databaseName,
-      tableName: "apiRateLimits",
+    new RateLimiterPostgres({
+      storeClient: pool,
+      storeType: "pool",
+      tableName: "api_rate_limits",
+      // The migrations create the table and schedule pruning with pg_cron.
+      tableCreated: true,
+      clearExpiredByTimeout: false,
       keyPrefix: `${name}:${dimension}`,
       points,
       duration: windowSeconds,
-      // Index creation is awaited before consuming counters.
-      disableIndexesCreation: true,
     });
 
   return {
@@ -90,12 +91,6 @@ export const RATE_LIMIT_POLICIES = {
   }),
 };
 
-// Every limiter shares the apiRateLimits collection, so any one of them can
-// create the library's indexes for all of them.
-const ensureRateLimitIndexes = onceIndexes("API rate-limit", () =>
-  RATE_LIMIT_POLICIES.telemetry.user.createIndexes(),
-);
-
 export type RateLimitDecision =
   | { allowed: true }
   | {
@@ -124,7 +119,7 @@ function getClientIp(request: NextRequest): string {
 }
 
 async function consume(
-  limiter: RateLimiterMongo,
+  limiter: RateLimiterPostgres,
   secret: string,
   dimension: "user" | "ip",
   identifier: string,
@@ -152,7 +147,6 @@ export async function checkRateLimit(
   userId: string | undefined,
   policy: RateLimitPolicy,
 ): Promise<RateLimitDecision> {
-  await ensureRateLimitIndexes();
   const { secret } = await auth.$context;
 
   if (userId) {

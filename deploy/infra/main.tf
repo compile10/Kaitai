@@ -21,7 +21,7 @@ resource "aws_lightsail_instance" "web" {
   }
 
   lifecycle {
-    # The mongo-data volume lives on this disk; replacing the instance wipes it.
+    # The postgres-data volume lives on this disk; replacing the instance wipes it.
     prevent_destroy = true
     ignore_changes  = [user_data, key_pair_name]
   }

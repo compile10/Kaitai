@@ -8,13 +8,13 @@ export async function register() {
   ) {
     try {
       const { auth } = await import("@/lib/auth");
-      const { default: mongoClient } = await import("@/lib/db");
+      const { pool } = await import("@/lib/db");
       // Validate runtime configuration and connect before serving traffic.
       if (process.env.NODE_ENV === "production") {
         const { getOpenRouterApiKey } = await import("@/lib/analysis/client");
         getOpenRouterApiKey();
       }
-      await mongoClient.connect();
+      await pool.query("SELECT 1");
       await auth.$context;
       const { startMonitoring } = await import("@/lib/monitoring/server");
       startMonitoring();

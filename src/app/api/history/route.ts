@@ -1,7 +1,7 @@
 import type { HistoryEntry, PaginatedHistory } from "@common/types";
 import { withAuth } from "@/lib/api-auth";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
-import { historyCollection } from "@/lib/history";
+import { listHistory } from "@/lib/history";
 import { RATE_LIMIT_POLICIES } from "@/lib/rate-limit";
 
 // Handle CORS preflight requests
@@ -29,26 +29,16 @@ export const GET = withAuth(
     ) {
       return jsonResponse({ error: "Invalid pagination parameters" }, 400);
     }
-    const skip = (page - 1) * limit;
+    const { total, rows } = await listHistory(
+      session.user.id,
+      limit,
+      (page - 1) * limit,
+    );
 
-    // Run count and paginated query in parallel
-    const [total, docs] = await Promise.all([
-      historyCollection.countDocuments({ userId: session.user.id }),
-      historyCollection
-        .find(
-          { userId: session.user.id },
-          { projection: { _id: 1, sentence: 1, createdAt: 1 } },
-        )
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .toArray(),
-    ]);
-
-    const items: HistoryEntry[] = docs.map((doc) => ({
-      id: doc._id.toHexString(),
-      sentence: doc.sentence,
-      createdAt: doc.createdAt.toISOString(),
+    const items: HistoryEntry[] = rows.map((row) => ({
+      id: row.id,
+      sentence: row.sentence,
+      createdAt: row.created_at.toISOString(),
     }));
 
     const result: PaginatedHistory = {

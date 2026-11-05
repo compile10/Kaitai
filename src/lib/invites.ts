@@ -1,44 +1,19 @@
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import type { InviteCode } from "@common/types";
-import type { Document } from "mongodb";
-import { ObjectId } from "mongodb";
-import mongoClient, { onceIndexes } from "@/lib/db";
+import type { Selectable } from "kysely";
+import { type Database, db } from "@/lib/db";
 
 const INVITE_CODE_TTL_MS = 24 * 60 * 60 * 1000;
 
-export interface InviteCodeDocument {
-  _id: ObjectId;
-  code: string;
-  createdByUserId: string;
-  createdAt: Date;
-  expiresAt: Date;
-  usedAt?: Date | null;
-  usedByUserId?: string | null;
-}
-
-export const inviteCodesCollection = mongoClient
-  .db()
-  .collection<InviteCodeDocument & Document>("inviteCodes");
-
-const ensureInviteIndexes = onceIndexes("Invite", () =>
-  Promise.all([
-    inviteCodesCollection.createIndex({ code: 1 }, { unique: true }),
-    inviteCodesCollection.createIndex(
-      { expiresAt: 1 },
-      { expireAfterSeconds: 0 },
-    ),
-  ]),
-);
+export type InviteCodeRow = Selectable<Database["inviteCodes"]>;
 
 function generateInviteCode() {
   return randomBytes(18).toString("base64url");
 }
 
-export function serializeInviteCode(
-  inviteCode: InviteCodeDocument,
-): InviteCode {
+export function serializeInviteCode(inviteCode: InviteCodeRow): InviteCode {
   return {
-    id: inviteCode._id.toHexString(),
+    id: inviteCode.id,
     code: inviteCode.code,
     createdAt: inviteCode.createdAt.toISOString(),
     expiresAt: inviteCode.expiresAt.toISOString(),
@@ -47,29 +22,32 @@ export function serializeInviteCode(
 
 export async function findValidInviteCode(
   code: string,
-): Promise<InviteCodeDocument | null> {
-  return inviteCodesCollection.findOne({
-    code,
-    usedAt: null,
-    expiresAt: { $gt: new Date() },
-  });
+): Promise<InviteCodeRow | null> {
+  const row = await db
+    .selectFrom("inviteCodes")
+    .selectAll()
+    .where("code", "=", code)
+    .where("usedAt", "is", null)
+    .where("expiresAt", ">", new Date())
+    .executeTakeFirst();
+  return row ?? null;
 }
 
 export async function createInviteCode(
   createdByUserId: string,
-): Promise<InviteCodeDocument> {
-  await ensureInviteIndexes();
+): Promise<InviteCodeRow> {
   const now = new Date();
-  const inviteCode: InviteCodeDocument = {
-    _id: new ObjectId(),
-    code: generateInviteCode(),
-    createdByUserId,
-    createdAt: now,
-    expiresAt: new Date(now.getTime() + INVITE_CODE_TTL_MS),
-    usedAt: null,
-    usedByUserId: null,
-  };
-
-  await inviteCodesCollection.insertOne(inviteCode);
-  return inviteCode;
+  return db
+    .insertInto("inviteCodes")
+    .values({
+      id: randomUUID(),
+      code: generateInviteCode(),
+      createdByUserId,
+      createdAt: now,
+      expiresAt: new Date(now.getTime() + INVITE_CODE_TTL_MS),
+      usedAt: null,
+      usedByUserId: null,
+    })
+    .returningAll()
+    .executeTakeFirstOrThrow();
 }

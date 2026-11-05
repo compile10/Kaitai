@@ -9,7 +9,7 @@ npm ci
 npm start
 ```
 
-Run the web API and MongoDB with `docker compose up --build` from the repository root. Development builds discover the API host from Expo's `hostUri` on port 3000, with Android emulator and localhost fallbacks. A physical device must be able to reach the development machine over the network.
+Run the web API and Postgres with `docker compose up --build` from the repository root. Development builds discover the API host from Expo's `hostUri` on port 3000, with Android emulator and localhost fallbacks. A physical device must be able to reach the development machine over the network.
 
 ## Basic error monitoring
 

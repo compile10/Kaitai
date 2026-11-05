@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import mongoClient from "@/lib/db";
+import { db } from "@/lib/db";
 
 /** Default credentials for local developer testing only. Override via env. */
 export const DEV_ADMIN_DEFAULTS = {
@@ -23,10 +23,11 @@ export async function seedDevAdmin(): Promise<void> {
   const name = process.env.DEV_ADMIN_NAME ?? DEV_ADMIN_DEFAULTS.name;
 
   try {
-    const existing = await mongoClient
-      .db()
-      .collection("user")
-      .findOne({ email });
+    const existing = await db
+      .selectFrom("user")
+      .select("id")
+      .where("email", "=", email)
+      .executeTakeFirst();
     if (existing) {
       return;
     }
