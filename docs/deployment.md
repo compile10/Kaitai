@@ -148,33 +148,3 @@ Redeploys restart `web` and briefly interrupt requests. Container logs rotate at
 Lightsail's daily snapshots back it up. Rehearse a restore by creating an
 instance from a snapshot. For a logical backup:
 `docker compose -f deploy/compose.yml exec -T postgres pg_dump -U kaitai -Fc kaitai > kaitai.dump`
-
-## MongoDB → PostgreSQL cutover
-
-One-time move of the existing MongoDB data. It takes a few minutes of downtime.
-User, account, and session IDs keep their Mongo ObjectId hex values, so signed-in
-web and mobile sessions stay valid.
-
-1. Snapshot the instance in Lightsail.
-2. Create `deploy/.env` from `deploy/.env.example`, then pull the new code.
-3. Stop the old app, keeping its data volume:
-   `docker compose -f deploy/compose.yml stop web cloudflared`
-4. Copy the data. This starts Postgres and Mongo, applies migrations, and copies
-   every table in one transaction. It prints per-table counts; `skipped` rows
-   referenced deleted users. A failed copy rolls back completely and can be run
-   again. The copy refuses to run once Postgres has users.
-   `docker compose -f deploy/compose.yml -f deploy/compose.mongo-cutover.yml run --rm --build copy-from-mongo`
-5. Start the new stack. This removes the `mongo` container:
-   `docker compose -f deploy/compose.yml up -d --build --remove-orphans`
-6. Check `/api/health`, sign in with an existing account, confirm a signed-in
-   mobile session still works, and check history, settings, and invite creation.
-   If something is wrong, check out the previous release and run step 5 again;
-   the copy leaves the Mongo data untouched. Before retrying the cutover, delete
-   the partial Postgres data with `docker volume rm deploy_postgres-data` so the
-   copy starts from current Mongo data.
-7. Delete the Mongo data: `docker volume rm deploy_mongo-data`. From here, the
-   step 1 snapshot is the only way back.
-
-Then remove the cutover tooling from the repo: `deploy/compose.mongo-cutover.yml`,
-`scripts/migrate-mongo-to-postgres.mjs`, the `db:copy-from-mongo` script, the
-`mongodb` dev dependency, and this section.

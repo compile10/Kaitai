@@ -18,10 +18,9 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── postgres/migrations/            Forward-only SQL schema migrations (Better Auth + app tables, pg_cron expiry jobs)
 ├── scripts/migrate.mjs              Applies pending migrations (Kysely Migrator)
 ├── scripts/seed-admin.mjs           Explicit production admin bootstrap with transactional credentials
-├── scripts/migrate-mongo-to-postgres.mjs  One-off MongoDB → Postgres data copy for the cutover
 ├── docs/monitoring.md               Grafana Cloud integration, deployment settings, and operational verification
 ├── docs/deployment.md               Provisioning and single-host production deploy through Cloudflare Tunnel
-├── deploy/                         Production Compose stack (web, Postgres, migrate, cloudflared), env examples, one-off Mongo cutover overlay
+├── deploy/                         Production Compose stack (web, Postgres, migrate, cloudflared) and env examples
 ├── deploy/infra/                   OpenTofu: Lightsail host, Cloudflare Tunnel/DNS/zone settings, budget alert
 ├── Dockerfile                      Dependencies, dev server, production build, and standalone runner
 ├── docker-compose.yml              Local web + Postgres 17 (pg_cron) + migrations (not for production)
