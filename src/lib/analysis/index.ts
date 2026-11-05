@@ -10,7 +10,6 @@ export {
 } from "./cache";
 export {
   ANALYSIS_MODEL,
-  ANALYSIS_PROVIDER,
   createChatModel,
 } from "./client";
 export { analysisSchema } from "./schema";

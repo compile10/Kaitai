@@ -9,7 +9,7 @@ import { admin } from "better-auth/plugins";
 import { ac, adminRole, userRole } from "@/lib/auth-permissions";
 import { db } from "@/lib/db";
 import { findValidInviteCode } from "@/lib/invites";
-import { enforceAccountLoginLimit } from "@/lib/login-limit";
+import { enforceAccountLoginLimit } from "@/lib/rate-limit";
 
 const INVITE_CODE_ERROR = "A valid invite code is required to sign up.";
 

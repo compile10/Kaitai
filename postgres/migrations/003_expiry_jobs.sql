@@ -8,17 +8,11 @@ SELECT cron.schedule(
   $$DELETE FROM "inviteCodes" WHERE "expiresAt" < now()$$
 );
 
-SELECT cron.schedule(
-  'expire-account-login-limits',
-  '*/15 * * * *',
-  $$DELETE FROM account_login_limits WHERE expires_at < now()$$
-);
-
 -- expire is epoch milliseconds.
 SELECT cron.schedule(
-  'expire-api-rate-limits',
+  'expire-rate-limits',
   '*/15 * * * *',
-  $$DELETE FROM api_rate_limits WHERE expire < (extract(epoch FROM now()) * 1000)::bigint$$
+  $$DELETE FROM rate_limits WHERE expire < (extract(epoch FROM now()) * 1000)::bigint$$
 );
 
 -- pg_cron records every run; keep a week of history.

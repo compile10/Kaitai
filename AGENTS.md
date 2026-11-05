@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Kaitai is an invite-only beta for AI-powered Japanese sentence analysis. The repo is a Next.js 16 web app (the product and the API) plus a separate Expo/React Native app in `mobile/` that talks to those same routes. Shared types and fetch helpers live in `common/`. Auth is Better Auth (email/password) on PostgreSQL; signup is gated by admin-issued invite codes, and `src/proxy.ts` sends signed-out web visitors to `/beta`. Sentence analysis and image text extraction run on the server through LangChain. History documents include provider and model metadata for debugging. OpenTelemetry exports server traces, operational logs, and relayed web/mobile JavaScript errors to Grafana Cloud.
+Kaitai is an invite-only beta for AI-powered Japanese sentence analysis. The repo is a Next.js 16 web app (the product and the API) plus a separate Expo/React Native app in `mobile/` that talks to those same routes. Shared types and fetch helpers live in `common/`. Auth is Better Auth (email/password) on PostgreSQL; signup is gated by admin-issued invite codes, and `src/proxy.ts` sends signed-out web visitors to `/beta`. Sentence analysis and image text extraction run on the server through LangChain. History entries record the analysis model for debugging. OpenTelemetry exports server traces, operational logs, and relayed web/mobile JavaScript errors to Grafana Cloud.
 
 This file is a map of the tree, not a design doc. Keep entries focused on broad file responsibilities; omit individual settings, UI interactions, and feature-level implementation details. When you add, remove, rename, or repurpose a path, update the matching line here in the same change. Stale entries are worse than missing ones. Also keep the description above up-to-date as the project evolves. This does not represent every file in the project, just the important ones.
 
@@ -91,12 +91,11 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `auth.ts` | Server Better Auth initialization: Postgres (Kysely) adapter, Expo plugin, admin roles, invite hooks |
 | `auth-client.ts` | Browser Better Auth client |
 | `auth-permissions.ts` | Access control: `adminPanel`, `invite` |
-| `api-auth.ts` | Route-configured auth, permission, and rate-limit wrappers |
-| `login-limit.ts` | Shared, privacy-preserving per-account sign-in attempt limits |
+| `api-auth.ts` | Route-configured auth, permission, and rate-limit wrappers; trusted proxy IP extraction |
 | `db.ts` | Single server-side Postgres pool + typed Kysely instance (dev: pool reused on `globalThis`) |
-| `rate-limit.ts` | Postgres per-user/per-IP application route limits and trusted proxy IP extraction |
+| `rate-limit.ts` | Postgres-backed per-user/per-IP route limits and per-account sign-in limits, keyed by HMAC |
 | `settings.ts` | Account preference helpers + authenticated settings resolver |
-| `history.ts` | `history` table; upsert on `(user_id, sentence)` and paginated listing; stores provider/model metadata for debugging |
+| `history.ts` | `history` table; upsert on `(user_id, sentence)` and paginated listing; stores the analysis model for debugging |
 | `invites.ts` | `inviteCodes` table: creation, validation, serialization, and expiry; auth claims use the signup transaction |
 | `cors.ts` | JSON + preflight helpers, error trace IDs, and same-origin browser CORS policy |
 | `validation.ts` | `sanitizeForLLM` |
@@ -179,7 +178,7 @@ Separate Expo 58 app (file routing). Dev API host is inferred from Expo `hostUri
 ## Conventions
 
 - Web lint/format: `npm run lint` / `npm run format` (Biome). Mobile: `cd mobile && npm run lint`.
-- Provider/model metadata is stored in history documents for debugging and excluded from client responses.
+- The analysis model is stored on history entries for debugging and excluded from client responses.
 - Image text extraction and sentence analysis share the server AI client configuration.
 - Schema changes go in a new numbered file in `postgres/migrations/`; never edit an applied migration. Better Auth checks its tables against the config at startup, so auth or plugin schema changes need a matching migration.
 - `docker-compose.yml` is local-only. Do not treat it as a deploy config.

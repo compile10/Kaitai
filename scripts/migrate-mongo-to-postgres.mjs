@@ -118,7 +118,6 @@ const TABLES = [
       id: id(doc._id),
       user_id: id(doc.userId),
       sentence: doc.sentence,
-      provider: doc.provider ?? "unknown",
       model: doc.model ?? "unknown",
       created_at: doc.createdAt ?? now,
     }),

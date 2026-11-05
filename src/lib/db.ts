@@ -11,7 +11,6 @@ export interface Database {
     id: string;
     user_id: string;
     sentence: string;
-    provider: string;
     model: string;
     created_at: Date;
   };
@@ -20,17 +19,6 @@ export interface Database {
     // jsonb: written as serialized JSON, read back as a parsed object.
     preferences: ColumnType<Record<string, unknown>, string, string>;
     updated_at: Date;
-  };
-  account_login_limits: {
-    id: string;
-    count: number;
-    expires_at: Date;
-  };
-  api_rate_limits: {
-    key: string;
-    points: number;
-    // bigint epoch milliseconds.
-    expire: number | null;
   };
   inviteCodes: {
     id: string;

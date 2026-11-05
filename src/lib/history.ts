@@ -13,7 +13,6 @@ import { db } from "@/lib/db";
 export async function saveToHistory(
   userId: string,
   sentence: string,
-  provider: string,
   model: string,
 ): Promise<void> {
   const createdAt = new Date();
@@ -23,14 +22,13 @@ export async function saveToHistory(
       id: randomUUID(),
       user_id: userId,
       sentence,
-      provider,
       model,
       created_at: createdAt,
     })
     .onConflict((oc) =>
       oc
         .columns(["user_id", "sentence"])
-        .doUpdateSet({ provider, model, created_at: createdAt }),
+        .doUpdateSet({ model, created_at: createdAt }),
     )
     .execute();
 }

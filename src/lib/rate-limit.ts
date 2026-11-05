@@ -1,8 +1,6 @@
 import { createHmac } from "node:crypto";
-import { getIP } from "better-auth/api";
-import type { NextRequest } from "next/server";
+import { APIError } from "better-auth/api";
 import { RateLimiterPostgres, RateLimiterRes } from "rate-limiter-flexible";
-import { auth } from "@/lib/auth";
 import { pool } from "@/lib/db";
 
 export interface RateLimitPolicy {
@@ -19,6 +17,24 @@ interface PolicyOptions {
   windowSeconds: number;
 }
 
+function createLimiter(
+  keyPrefix: string,
+  points: number,
+  windowSeconds: number,
+): RateLimiterPostgres {
+  return new RateLimiterPostgres({
+    storeClient: pool,
+    storeType: "pool",
+    tableName: "rate_limits",
+    // The migrations create the table and schedule pruning with pg_cron.
+    tableCreated: true,
+    clearExpiredByTimeout: false,
+    keyPrefix,
+    points,
+    duration: windowSeconds,
+  });
+}
+
 function createPolicy({
   name,
   message,
@@ -26,23 +42,10 @@ function createPolicy({
   ipLimit,
   windowSeconds,
 }: PolicyOptions): RateLimitPolicy {
-  const createLimiter = (dimension: "user" | "ip", points: number) =>
-    new RateLimiterPostgres({
-      storeClient: pool,
-      storeType: "pool",
-      tableName: "api_rate_limits",
-      // The migrations create the table and schedule pruning with pg_cron.
-      tableCreated: true,
-      clearExpiredByTimeout: false,
-      keyPrefix: `${name}:${dimension}`,
-      points,
-      duration: windowSeconds,
-    });
-
   return {
     message,
-    user: createLimiter("user", userLimit),
-    ip: createLimiter("ip", ipLimit),
+    user: createLimiter(`${name}:user`, userLimit, windowSeconds),
+    ip: createLimiter(`${name}:ip`, ipLimit, windowSeconds),
   };
 }
 
@@ -91,6 +94,10 @@ export const RATE_LIMIT_POLICIES = {
   }),
 };
 
+const accountLoginLimiter = createLimiter("login:account", 20, 15 * 60);
+
+type Dimension = "user" | "ip" | "account";
+
 export type RateLimitDecision =
   | { allowed: true }
   | {
@@ -103,7 +110,7 @@ export type RateLimitDecision =
 
 function identifierKey(
   secret: string,
-  dimension: "user" | "ip",
+  dimension: Dimension,
   identifier: string,
 ): string {
   return createHmac("sha256", secret)
@@ -111,17 +118,10 @@ function identifierKey(
     .digest("base64url");
 }
 
-function getClientIp(request: NextRequest): string {
-  const ip = getIP(request, auth.options);
-  if (ip) return ip;
-
-  throw new Error("Trusted client IP header is missing or invalid");
-}
-
 async function consume(
   limiter: RateLimiterPostgres,
   secret: string,
-  dimension: "user" | "ip",
+  dimension: Dimension,
   identifier: string,
   message: string,
 ): Promise<RateLimitDecision> {
@@ -142,13 +142,17 @@ async function consume(
   }
 }
 
+export interface RateLimitCaller {
+  /** Keys are HMACs under this secret, so no raw identifier is stored. */
+  secret: string;
+  ip: string;
+  userId?: string;
+}
+
 export async function checkRateLimit(
-  request: NextRequest,
-  userId: string | undefined,
+  { secret, ip, userId }: RateLimitCaller,
   policy: RateLimitPolicy,
 ): Promise<RateLimitDecision> {
-  const { secret } = await auth.$context;
-
   if (userId) {
     const userDecision = await consume(
       policy.user,
@@ -160,5 +164,26 @@ export async function checkRateLimit(
     if (!userDecision.allowed) return userDecision;
   }
 
-  return consume(policy.ip, secret, "ip", getClientIp(request), policy.message);
+  return consume(policy.ip, secret, "ip", ip, policy.message);
+}
+
+/** Bound distributed guesses at one account without storing submitted email addresses. */
+export async function enforceAccountLoginLimit(
+  email: string,
+  secret: string,
+): Promise<void> {
+  const decision = await consume(
+    accountLoginLimiter,
+    secret,
+    "account",
+    email.trim().toLowerCase(),
+    "Too many sign-in attempts.",
+  );
+  if (decision.allowed) return;
+
+  throw new APIError(
+    "TOO_MANY_REQUESTS",
+    { message: decision.message },
+    { "Retry-After": String(decision.retryAfter) },
+  );
 }
