@@ -2,23 +2,13 @@
 
 import { analyzeSentence } from "@common/api";
 import type { SentenceAnalysis } from "@common/types";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import SentenceVisualization from "@/components/SentenceVisualization";
 
 export default function AnalysisContent({ sentence }: { sentence: string }) {
-  const router = useRouter();
   const [analysis, setAnalysis] = useState<SentenceAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showBackButton, setShowBackButton] = useState(false);
-
-  useEffect(() => {
-    if (sessionStorage.getItem("kaitai-internal-nav")) {
-      setShowBackButton(true);
-      sessionStorage.removeItem("kaitai-internal-nav");
-    }
-  }, []);
 
   // TODO: Replace the `cancelled` flag with an AbortController threaded
   // through analyzeSentence so stale requests are actually aborted instead of
@@ -49,17 +39,6 @@ export default function AnalysisContent({ sentence }: { sentence: string }) {
 
   return (
     <>
-      {/* Back link */}
-      {showBackButton && (
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          &larr; Go back
-        </button>
-      )}
-
       {/* Sentence heading */}
       <h1 className="text-2xl font-bold text-foreground" lang="ja">
         {sentence}

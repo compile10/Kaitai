@@ -13,7 +13,6 @@ export default function HomeContent() {
   const [isImageLoading, setIsImageLoading] = useState(false);
 
   const handleAnalyze = (sentence: string) => {
-    sessionStorage.setItem("kaitai-internal-nav", "1");
     router.push(`/analyze/${encodeURIComponent(sentence)}`);
   };
 
@@ -24,7 +23,6 @@ export default function HomeContent() {
     try {
       const data = await analyzeImage("/api/analyze-image", file);
       setIsImageModalOpen(false);
-      sessionStorage.setItem("kaitai-internal-nav", "1");
       router.push(`/analyze/${encodeURIComponent(data.sentence)}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to analyze image");
