@@ -1,0 +1,52 @@
+# Temporary overlay for the one-time MongoDB → PostgreSQL data copy.
+# Reattaches the existing mongo-data volume and adds a one-off copy service.
+# Delete this file, the copy script, and the mongo-data volume after cutover.
+#
+#   docker compose -f deploy/compose.yml -f deploy/compose.mongo-cutover.yml run --rm copy-from-mongo
+
+services:
+  mongo:
+    image: mongo:7
+    command:
+      [
+        "mongod",
+        "--replSet",
+        "rs0",
+        "--bind_ip_all",
+        "--quiet",
+        "--wiredTigerCacheSizeGB",
+        "0.25",
+        "--setParameter",
+        "logComponentVerbosity={network:{verbosity:-1}}",
+      ]
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: >
+        mongosh --quiet --eval "
+          try { rs.status().ok }
+          catch(e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] }); }
+        "
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  copy-from-mongo:
+    profiles: ["cutover"]
+    build:
+      context: ..
+      target: builder
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo:27017/kaitai?replicaSet=rs0&directConnection=true
+      - DATABASE_URL=postgres://kaitai:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in deploy/.env}@postgres:5432/kaitai
+    command: ["npm", "run", "--silent", "db:copy-from-mongo"]
+    depends_on:
+      mongo:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  mongo-data:

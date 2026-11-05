@@ -1,12 +1,14 @@
-# Production stack for a single host: Next.js, MongoDB, and a Cloudflare Tunnel.
+# Production stack for a single host: Next.js, PostgreSQL, and a Cloudflare Tunnel.
 # No ports are published; all public traffic arrives through the tunnel.
-# See docs/deployment.md.
+# POSTGRES_PASSWORD comes from deploy/.env. See docs/deployment.md.
 
 x-logging: &logging
   driver: json-file
   options:
     max-size: "10m"
     max-file: "3"
+
+x-database-url: &database-url DATABASE_URL=postgres://kaitai:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in deploy/.env}@postgres:5432/kaitai
 
 services:
   web:
@@ -15,37 +17,40 @@ services:
       target: runner
     env_file: .env.production
     environment:
-      - MONGODB_URI=mongodb://mongo:27017/kaitai?replicaSet=rs0&directConnection=true
+      - *database-url
     depends_on:
-      mongo:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
     logging: *logging
 
-  mongo:
-    image: mongo:7
-    command:
-      [
-        "mongod",
-        "--replSet",
-        "rs0",
-        "--bind_ip_all",
-        "--quiet",
-        "--wiredTigerCacheSizeGB",
-        "0.25",
-        "--setParameter",
-        "logComponentVerbosity={network:{verbosity:-1}}",
-      ]
+  # Applies pending schema migrations before web starts.
+  migrate:
+    build:
+      context: ..
+      target: builder
+    environment:
+      - NODE_ENV=production
+      - *database-url
+    command: ["npm", "run", "--silent", "db:migrate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *logging
+
+  postgres:
+    build:
+      context: ../postgres
+    environment:
+      - POSTGRES_USER=kaitai
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in deploy/.env}
+      - POSTGRES_DB=kaitai
     volumes:
-      - mongo-data:/data/db
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: >
-        mongosh --quiet --eval "
-          try { rs.status().ok }
-          catch(e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] }); }
-        "
-      interval: 30s
-      timeout: 10s
+      test: ["CMD-SHELL", "pg_isready -U kaitai -d kaitai"]
+      interval: 10s
+      timeout: 5s
       retries: 5
       start_period: 10s
     restart: unless-stopped
@@ -70,14 +75,14 @@ services:
       target: builder
     environment:
       - NODE_ENV=production
-      - MONGODB_URI=mongodb://mongo:27017/kaitai?replicaSet=rs0&directConnection=true
+      - *database-url
       - ADMIN_EMAIL
       - ADMIN_NAME
       - ADMIN_PASSWORD
     command: ["npm", "run", "--silent", "seed:admin"]
     depends_on:
-      mongo:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
 volumes:
-  mongo-data:
+  postgres-data:

@@ -1,3 +1,4 @@
+import { getIP } from "better-auth/api";
 import type { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import type { Permissions } from "@/lib/auth-permissions";
@@ -51,6 +52,13 @@ async function isCrossSite(request: NextRequest): Promise<boolean> {
   return !context.isTrustedOrigin(origin, { allowRelativePaths: false });
 }
 
+function getClientIp(request: NextRequest): string {
+  const ip = getIP(request, auth.options);
+  if (ip) return ip;
+
+  throw new Error("Trusted client IP header is missing or invalid");
+}
+
 async function enforceRateLimit(
   request: NextRequest,
   session: Session | null,
@@ -58,7 +66,11 @@ async function enforceRateLimit(
 ): Promise<Response | null> {
   if (!policy) return null;
 
-  const decision = await checkRateLimit(request, session?.user.id, policy);
+  const { secret } = await auth.$context;
+  const decision = await checkRateLimit(
+    { secret, ip: getClientIp(request), userId: session?.user.id },
+    policy,
+  );
   if (decision.allowed) return null;
 
   return jsonResponse(

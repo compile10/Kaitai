@@ -9,7 +9,7 @@ import { type NextRequest, NextResponse } from "next/server";
  * checks that a session cookie is present — it cannot validate it, because the
  * proxy has no database access. Real enforcement lives in the route wrappers
  * (`withAuth` / `withPermission` in @/lib/api-auth), which verify the session
- * against Mongo on every protected endpoint. A forged cookie gets past the
+ * against the database on every protected endpoint. A forged cookie gets past the
  * redirect below and still gets a 401 from every API route.
  */
 

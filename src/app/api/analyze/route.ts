@@ -1,7 +1,6 @@
 import { MAX_SENTENCE_LENGTH } from "@common/api";
 import {
   ANALYSIS_MODEL,
-  ANALYSIS_PROVIDER,
   analyzeSentence,
   getCachedResponse,
   setCachedResponse,
@@ -45,7 +44,7 @@ export const POST = withAuth(
       return jsonResponse({ error: "Invalid sentence provided" }, 400);
     }
 
-    const cacheKey = `${ANALYSIS_PROVIDER}:${ANALYSIS_MODEL}:${sanitizedSentence}`;
+    const cacheKey = `${ANALYSIS_MODEL}:${sanitizedSentence}`;
     const cachedResponse = getCachedResponse(cacheKey);
 
     const analysis =
@@ -56,12 +55,7 @@ export const POST = withAuth(
     }
 
     try {
-      await saveToHistory(
-        session.user.id,
-        sanitizedSentence,
-        ANALYSIS_PROVIDER,
-        ANALYSIS_MODEL,
-      );
+      await saveToHistory(session.user.id, sanitizedSentence, ANALYSIS_MODEL);
     } catch (e) {
       reportError(e, "history.save");
     }

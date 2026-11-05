@@ -1,7 +1,6 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { AIMonitoringHandler, type AIStage } from "@/lib/monitoring/ai";
 
-export const ANALYSIS_PROVIDER = "openrouter";
 export const ANALYSIS_MODEL = "google/gemini-3.8-flash";
 
 export function getOpenRouterApiKey(): string {

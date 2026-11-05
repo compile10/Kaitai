@@ -3,7 +3,6 @@ import { ALLOWED_MIME_TYPES, MAX_IMAGE_SIZE } from "@common/image";
 import { HumanMessage } from "@langchain/core/messages";
 import {
   ANALYSIS_MODEL,
-  ANALYSIS_PROVIDER,
   analyzeSentence,
   createChatModel,
 } from "@/lib/analysis";
@@ -110,15 +109,12 @@ export const POST = withAuth(
       );
     }
 
+    // TODO: Combine with /api/analyze so the extracted sentence goes through the
+    // same cached analysis and history path instead of always calling the model.
     const analysis = await analyzeSentence(sentence);
 
     try {
-      await saveToHistory(
-        session.user.id,
-        sentence,
-        ANALYSIS_PROVIDER,
-        ANALYSIS_MODEL,
-      );
+      await saveToHistory(session.user.id, sentence, ANALYSIS_MODEL);
     } catch (e) {
       reportError(e, "history.save");
     }

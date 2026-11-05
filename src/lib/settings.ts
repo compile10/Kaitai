@@ -1,38 +1,36 @@
 import { DEFAULT_USER_SETTINGS, type UserSettings } from "@common/types";
-import mongoClient, { onceIndexes } from "@/lib/db";
-
-export interface SettingsDocument {
-  userId: string;
-  preferences?: Partial<UserSettings>;
-  updatedAt: Date;
-}
-
-const settingsCollection = mongoClient
-  .db()
-  .collection<SettingsDocument>("user_settings");
-
-const ensureSettingsIndexes = onceIndexes("Settings", () =>
-  settingsCollection.createIndex({ userId: 1 }, { unique: true }),
-);
+import { db } from "@/lib/db";
 
 export async function getUserSettings(
   userId: string,
 ): Promise<UserSettings | null> {
-  const doc = await settingsCollection.findOne({ userId });
-  if (!doc) return null;
-  return { ...DEFAULT_USER_SETTINGS, ...doc.preferences };
+  const row = await db
+    .selectFrom("user_settings")
+    .select("preferences")
+    .where("user_id", "=", userId)
+    .executeTakeFirst();
+  if (!row) return null;
+  return {
+    ...DEFAULT_USER_SETTINGS,
+    ...(row.preferences as Partial<UserSettings>),
+  };
 }
 
 export async function upsertUserSettings(
   userId: string,
   preferences: UserSettings,
 ): Promise<UserSettings> {
-  await ensureSettingsIndexes();
-  await settingsCollection.updateOne(
-    { userId },
-    { $set: { preferences, updatedAt: new Date() } },
-    { upsert: true },
-  );
+  const updatedAt = new Date();
+  const json = JSON.stringify(preferences);
+  await db
+    .insertInto("user_settings")
+    .values({ user_id: userId, preferences: json, updated_at: updatedAt })
+    .onConflict((oc) =>
+      oc
+        .column("user_id")
+        .doUpdateSet({ preferences: json, updated_at: updatedAt }),
+    )
+    .execute();
   return preferences;
 }
 

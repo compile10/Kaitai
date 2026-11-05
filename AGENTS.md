@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Kaitai is an invite-only beta for AI-powered Japanese sentence analysis. The repo is a Next.js 16 web app (the product and the API) plus a separate Expo/React Native app in `mobile/` that talks to those same routes. Shared types and fetch helpers live in `common/`. Auth is Better Auth (email/password) on MongoDB; signup is gated by admin-issued invite codes, and `src/proxy.ts` sends signed-out web visitors to `/beta`. Sentence analysis and image text extraction run on the server through LangChain. History documents include provider and model metadata for debugging. OpenTelemetry exports server traces, operational logs, and relayed web/mobile JavaScript errors to Grafana Cloud.
+Kaitai is an invite-only beta for AI-powered Japanese sentence analysis. The repo is a Next.js 16 web app (the product and the API) plus a separate Expo/React Native app in `mobile/` that talks to those same routes. Shared types and fetch helpers live in `common/`. Auth is Better Auth (email/password) on PostgreSQL; signup is gated by admin-issued invite codes, and `src/proxy.ts` sends signed-out web visitors to `/beta`. Sentence analysis and image text extraction run on the server through LangChain. History entries record the analysis model for debugging. OpenTelemetry exports server traces, operational logs, and relayed web/mobile JavaScript errors to Grafana Cloud.
 
 This file is a map of the tree, not a design doc. Keep entries focused on broad file responsibilities; omit individual settings, UI interactions, and feature-level implementation details. When you add, remove, rename, or repurpose a path, update the matching line here in the same change. Stale entries are worse than missing ones. Also keep the description above up-to-date as the project evolves. This does not represent every file in the project, just the important ones.
 
@@ -14,13 +14,17 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── src/                            Next.js web app + API (imported as @/*)
 ├── mobile/                         Expo app; own package.json, talks to the web API
 ├── public/                         Static assets served by Next
+├── postgres/Dockerfile             Official Postgres 17 image plus pg_cron
+├── postgres/migrations/            Forward-only SQL schema migrations (Better Auth + app tables, pg_cron expiry jobs)
+├── scripts/migrate.mjs              Applies pending migrations (Kysely Migrator)
 ├── scripts/seed-admin.mjs           Explicit production admin bootstrap with transactional credentials
+├── scripts/migrate-mongo-to-postgres.mjs  One-off MongoDB → Postgres data copy for the cutover
 ├── docs/monitoring.md               Grafana Cloud integration, deployment settings, and operational verification
 ├── docs/deployment.md               Provisioning and single-host production deploy through Cloudflare Tunnel
-├── deploy/                         Production Compose stack (web, Mongo, cloudflared) and env example
+├── deploy/                         Production Compose stack (web, Postgres, migrate, cloudflared), env examples, one-off Mongo cutover overlay
 ├── deploy/infra/                   OpenTofu: Lightsail host, Cloudflare Tunnel/DNS/zone settings, budget alert
 ├── Dockerfile                      Dependencies, dev server, production build, and standalone runner
-├── docker-compose.yml              Local web + Mongo 7 replica set (not for production)
+├── docker-compose.yml              Local web + Postgres 17 (pg_cron) + migrations (not for production)
 ├── package.json                    Web scripts: next (turbopack), biome lint/format
 ├── next.config.ts                  standalone output
 ├── tsconfig.json                   @/* → src/*, @common/* → common/*; excludes mobile
@@ -71,7 +75,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | Path | Role |
 | --- | --- |
 | `app/api/telemetry/route.ts` | Bounded, rate-limited web/mobile JavaScript error ingestion |
-| `app/api/health/route.ts` | Public process status and coalesced, briefly cached Mongo connectivity probe |
+| `app/api/health/route.ts` | Public process status and coalesced, briefly cached database connectivity probe |
 | `app/api/analyze/route.ts` | POST sentence → LLM analysis; cache + history write |
 | `app/api/analyze-image/route.ts` | POST image → OCR, then same analysis pipeline |
 | `app/api/history/route.ts` | GET paginated history for the signed-in user; excludes diagnostic metadata |
@@ -84,16 +88,15 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | File | Role |
 | --- | --- |
 | `monitoring/` | OpenTelemetry initialization, sanitized traces/events, LangChain monitoring callbacks, structured logging, and error reporting |
-| `auth.ts` | Server Better Auth initialization: Mongo adapter, Expo plugin, admin roles, invite hooks |
+| `auth.ts` | Server Better Auth initialization: Postgres (Kysely) adapter, Expo plugin, admin roles, invite hooks |
 | `auth-client.ts` | Browser Better Auth client |
 | `auth-permissions.ts` | Access control: `adminPanel`, `invite` |
-| `api-auth.ts` | Route-configured auth, permission, and rate-limit wrappers |
-| `login-limit.ts` | Shared, privacy-preserving per-account sign-in attempt limits |
-| `db.ts` | Single server-side Mongo client (dev: reused on `globalThis`) and once-per-process index setup |
-| `rate-limit.ts` | Mongo per-user/per-IP application route limits and trusted proxy IP extraction |
-| `settings.ts` | Mongo account preference helpers + authenticated settings resolver |
-| `history.ts` | `history` collection; upsert on `{ userId, sentence }`; stores provider/model metadata for debugging |
-| `invites.ts` | `inviteCodes` collection: creation, validation, and serialization; auth claims use the signup transaction |
+| `api-auth.ts` | Route-configured auth, permission, and rate-limit wrappers; trusted proxy IP extraction |
+| `db.ts` | Single server-side Postgres pool + typed Kysely instance (dev: pool reused on `globalThis`) |
+| `rate-limit.ts` | Postgres-backed per-user/per-IP route limits and per-account sign-in limits, keyed by HMAC |
+| `settings.ts` | Account preference helpers + authenticated settings resolver |
+| `history.ts` | `history` table; upsert on `(user_id, sentence)` and paginated listing; stores the analysis model for debugging |
+| `invites.ts` | `inviteCodes` table: creation, validation, serialization, and expiry; auth claims use the signup transaction |
 | `cors.ts` | JSON + preflight helpers, error trace IDs, and same-origin browser CORS policy |
 | `validation.ts` | `sanitizeForLLM` |
 | `dev-seed.ts` | Seeds `admin@localhost.dev` in development only |
@@ -175,11 +178,11 @@ Separate Expo 58 app (file routing). Dev API host is inferred from Expo `hostUri
 ## Conventions
 
 - Web lint/format: `npm run lint` / `npm run format` (Biome). Mobile: `cd mobile && npm run lint`.
-- Provider/model metadata is stored in history documents for debugging and excluded from client responses.
+- The analysis model is stored on history entries for debugging and excluded from client responses.
 - Image text extraction and sentence analysis share the server AI client configuration.
-- Mongo must be a replica set (Better Auth transactions). Docker Compose does this; a lone `mongod` will fail.
+- Schema changes go in a new numbered file in `postgres/migrations/`; never edit an applied migration. Better Auth checks its tables against the config at startup, so auth or plugin schema changes need a matching migration.
 - `docker-compose.yml` is local-only. Do not treat it as a deploy config.
 - Dev admin is seeded only when `NODE_ENV=development`. Never rely on those credentials in production.
 - Signup invite hooks cover `/sign-up/email` only. Any new public signup path must be gated the same way.
-- `src/proxy.ts` is a routing gate. Real auth is `withAuth` / `withPermission` against Mongo.
-- Production ingress must overwrite `RATE_LIMIT_IP_HEADER` (default `x-forwarded-for`; `cf-connecting-ip` behind Cloudflare Tunnel); API and Better Auth limits use Mongo-backed counters.
+- `src/proxy.ts` is a routing gate. Real auth is `withAuth` / `withPermission` against the database.
+- Production ingress must overwrite `RATE_LIMIT_IP_HEADER` (default `x-forwarded-for`; `cf-connecting-ip` behind Cloudflare Tunnel); API and Better Auth limits use Postgres-backed counters.

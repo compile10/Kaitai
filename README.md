@@ -16,7 +16,7 @@ AI-powered Japanese sentence breakdown and visualization. Available as a **Next.
 
 ```bash
 cp .env.local.example .env.local   # add OPENROUTER_API_KEY
-docker compose up                   # starts Next.js + MongoDB replica set
+docker compose up                   # starts Postgres, applies migrations, then Next.js
 ```
 
 ### Application monitoring — Grafana Cloud
@@ -31,9 +31,14 @@ for coverage, privacy, alert configuration, retention, and verification.
 
 ```bash
 npm install
-cp .env.local.example .env.local   # add OPENROUTER_API_KEY + MONGODB_URI (replica set required)
+cp .env.local.example .env.local   # add OPENROUTER_API_KEY + DATABASE_URL
+docker compose up -d postgres      # or your own Postgres 17 with pg_cron (see postgres/Dockerfile)
+npm run db:migrate
 npm run dev
 ```
+
+The migrations need the pg_cron extension, with `shared_preload_libraries=pg_cron`
+and `cron.database_name` set to the app database.
 
 ### Mobile
 
@@ -52,11 +57,11 @@ Tunnel. See [deployment](docs/deployment.md).
 
 ## Environment Variables
 
-Copy `.env.local.example` — set `MONGODB_URI` and `OPENROUTER_API_KEY`:
+Copy `.env.local.example` — set `DATABASE_URL` and `OPENROUTER_API_KEY`:
 
 | Variable | Notes |
 |----------|-------|
-| `MONGODB_URI` | Auto-set in Docker; must be a replica set |
+| `DATABASE_URL` | Postgres connection URL; auto-set in Docker |
 | `BETTER_AUTH_URL` | Required HTTPS origin in production; Docker dev uses `http://localhost:3000` |
 | `BETTER_AUTH_SECRET` | Required in production; generate a random secret of at least 32 characters |
 | `RATE_LIMIT_IP_HEADER` | Trusted proxy client-IP header; defaults to `x-forwarded-for` |
@@ -66,7 +71,7 @@ Copy `.env.local.example` — set `MONGODB_URI` and `OPENROUTER_API_KEY`:
 
 Production traffic must reach the app through a trusted reverse proxy that
 overwrites `RATE_LIMIT_IP_HEADER`; do not forward a client-supplied value. API
-and Better Auth rate-limit counters are stored in MongoDB so they are shared by
+and Better Auth rate-limit counters are stored in Postgres so they are shared by
 all app instances and survive deployments.
 
 Account preferences are managed through the settings screens and `/api/settings`.

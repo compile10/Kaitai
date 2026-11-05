@@ -35,6 +35,7 @@ yarn-error.log*
 .env*
 !.env.local.example
 !deploy/.env.production.example
+!deploy/.env.example
 
 # opentofu
 /deploy/infra/.terraform/

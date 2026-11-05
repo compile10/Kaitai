@@ -1,50 +1,60 @@
-import type { Document } from "mongodb";
-import { ObjectId } from "mongodb";
-import mongoClient, { onceIndexes } from "@/lib/db";
-
-/** Shape of a document in the `history` collection. */
-export interface HistoryDocument {
-  _id: ObjectId;
-  userId: string;
-  sentence: string;
-  provider: string;
-  model: string;
-  createdAt: Date;
-}
-
-export const historyCollection = mongoClient
-  .db()
-  .collection<HistoryDocument & Document>("history");
-
-const ensureHistoryIndexes = onceIndexes("History", () =>
-  Promise.all([
-    historyCollection.createIndex({ userId: 1, createdAt: -1 }),
-    historyCollection.createIndex({ userId: 1, sentence: 1 }, { unique: true }),
-  ]),
-);
+import { randomUUID } from "node:crypto";
+import { db } from "@/lib/db";
 
 /**
  * Save a sentence to the user's history.
  *
- * Uses upsert on { userId, sentence } so re-analyzing the same sentence
- * updates the existing entry (with fresh timestamp) instead of creating
- * a duplicate. This brings it to the top of the history list.
+ * Upserts on (user_id, sentence) so re-analyzing the same sentence refreshes
+ * the existing entry's timestamp instead of creating a duplicate, bringing it
+ * to the top of the history list.
  *
  * Called by both `/api/analyze` and `/api/analyze-image`.
  */
 export async function saveToHistory(
   userId: string,
   sentence: string,
-  provider: string,
   model: string,
 ): Promise<void> {
-  await ensureHistoryIndexes();
-  await historyCollection.updateOne(
-    { userId, sentence },
-    {
-      $set: { provider, model, createdAt: new Date() },
-      $setOnInsert: { _id: new ObjectId(), userId, sentence },
-    },
-    { upsert: true },
-  );
+  const createdAt = new Date();
+  await db
+    .insertInto("history")
+    .values({
+      id: randomUUID(),
+      user_id: userId,
+      sentence,
+      model,
+      created_at: createdAt,
+    })
+    .onConflict((oc) =>
+      oc
+        .columns(["user_id", "sentence"])
+        .doUpdateSet({ model, created_at: createdAt }),
+    )
+    .execute();
+}
+
+/** One page of the user's history, newest first, without diagnostic metadata. */
+export async function listHistory(
+  userId: string,
+  limit: number,
+  offset: number,
+) {
+  const [count, rows] = await Promise.all([
+    db
+      .selectFrom("history")
+      .select((eb) => eb.fn.countAll<number>().as("total"))
+      .where("user_id", "=", userId)
+      .executeTakeFirstOrThrow(),
+    db
+      .selectFrom("history")
+      .select(["id", "sentence", "created_at"])
+      .where("user_id", "=", userId)
+      .orderBy("created_at", "desc")
+      // Tie-break so equal timestamps cannot shift between pages.
+      .orderBy("id", "desc")
+      .limit(limit)
+      .offset(offset)
+      .execute(),
+  ]);
+  return { total: count.total, rows };
 }
