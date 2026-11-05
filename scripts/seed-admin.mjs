@@ -77,12 +77,17 @@ async function seedInTransaction(client, { email, name, password }) {
       `SELECT "password" FROM "account" WHERE "userId" = $1 AND "providerId" = 'credential'`,
       [existing.id],
     );
-    if (existing.banned || !credential?.password) {
+    if (existing.banned) {
       throw new SeedAdminError(
-        "The admin exists but is banned or has no password credential; repair it through account administration.",
+        'This admin account is banned, so it cannot sign in. This script will not unban it; use another admin\'s unban-user action, or set "banned" = false on the user row.',
       );
     }
-    return "Admin already exists; credentials unchanged.";
+    if (!credential?.password) {
+      throw new SeedAdminError(
+        "This admin account has no password, so it cannot sign in with email and password. This script will not set passwords on existing accounts.",
+      );
+    }
+    return "Nothing to do: an admin with this email already exists. This script does not change passwords of existing accounts, so ADMIN_PASSWORD was ignored.";
   }
 
   const { rowCount: adminCount } = await client.query(

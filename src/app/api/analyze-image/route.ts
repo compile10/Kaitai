@@ -109,6 +109,8 @@ export const POST = withAuth(
       );
     }
 
+    // TODO: Combine with /api/analyze so the extracted sentence goes through the
+    // same cached analysis and history path instead of always calling the model.
     const analysis = await analyzeSentence(sentence);
 
     try {

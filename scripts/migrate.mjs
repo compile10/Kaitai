@@ -1,9 +1,10 @@
 import { readdir, readFile } from "node:fs/promises";
+import path from "node:path";
 import { Kysely, PostgresDialect, sql } from "kysely";
 import { Migrator } from "kysely/migration";
 import pg from "pg";
 
-const MIGRATIONS_DIR = new URL("../postgres/migrations/", import.meta.url);
+const MIGRATIONS_DIR = path.join(import.meta.dirname, "../postgres/migrations");
 
 /** Each `postgres/migrations/NNN_name.sql` file is one forward-only migration. */
 const provider = {
@@ -11,15 +12,16 @@ const provider = {
     const files = (await readdir(MIGRATIONS_DIR))
       .filter((file) => file.endsWith(".sql"))
       .sort();
-    const migrations = {};
-    for (const file of files) {
-      const text = await readFile(new URL(file, MIGRATIONS_DIR), "utf8");
-      migrations[file.replace(/\.sql$/, "")] = {
-        // No parameters, so pg sends it as one multi-statement simple query.
-        up: (db) => sql.raw(text).execute(db),
-      };
-    }
-    return migrations;
+    return Object.fromEntries(
+      await Promise.all(
+        files.map(async (file) => {
+          const text = await readFile(path.join(MIGRATIONS_DIR, file), "utf8");
+          // No parameters, so pg sends it as one multi-statement simple query.
+          const up = (db) => sql.raw(text).execute(db);
+          return [file.replace(/\.sql$/, ""), { up }];
+        }),
+      ),
+    );
   },
 };
 

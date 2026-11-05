@@ -14,6 +14,8 @@ export async function register() {
         const { getOpenRouterApiKey } = await import("@/lib/analysis/client");
         getOpenRouterApiKey();
       }
+      // The pool connects lazily; query once so an unreachable or misconfigured
+      // database fails startup instead of the first request.
       await pool.query("SELECT 1");
       await auth.$context;
       const { startMonitoring } = await import("@/lib/monitoring/server");
