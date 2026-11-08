@@ -106,3 +106,50 @@ function WordTranslation({
     </button>
   );
 }
+
+/** Orange particle tag that hangs off the right edge of its word; static without `onClick`. */
+export function ParticleChip({
+  particle,
+  onClick,
+}: {
+  particle: NonNullable<WordNode["attachedParticle"]>;
+  onClick?: () => void;
+}) {
+  const content = (
+    <>
+      <div className="text-sm font-bold text-white text-center">
+        {particle.text}
+      </div>
+      {particle.reading && particle.reading !== particle.text && (
+        <div className="text-xs text-orange-100 text-center">
+          {particle.reading}
+        </div>
+      )}
+    </>
+  );
+  const className =
+    "bg-orange-500 dark:bg-orange-600 border-2 border-orange-600 dark:border-orange-700 rounded-md px-2 py-1 shadow-md -ml-2 mt-1";
+  const style = {
+    maxWidth: "60px",
+    fontSize: "0.75rem",
+    transform: "translateY(10px)",
+  };
+  if (!onClick) {
+    return (
+      <div className={className} style={style}>
+        {content}
+      </div>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`${className} hover:bg-orange-600 dark:hover:bg-orange-700 hover:shadow-lg transition-all cursor-pointer`}
+      style={style}
+      title="Click to learn about this particle"
+    >
+      {content}
+    </button>
+  );
+}

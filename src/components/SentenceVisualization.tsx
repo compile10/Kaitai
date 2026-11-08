@@ -23,7 +23,8 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import ParticleModal from "./ParticleModal";
-import WordCell, { PunctuationCell } from "./WordCell";
+import StructureGuideDialog from "./StructureGuideDialog";
+import WordCell, { ParticleChip, PunctuationCell } from "./WordCell";
 
 interface SentenceVisualizationProps {
   analysis: SentenceAnalysis;
@@ -74,32 +75,15 @@ function WordNodeComponent({ data }: { data: WordNodeData }) {
 
       {/* Attached particle (if any) */}
       {word.attachedParticle && (
-        <button
-          type="button"
+        <ParticleChip
+          particle={word.attachedParticle}
           onClick={() =>
             onParticleClick(
               word.attachedParticle!.text,
               word.attachedParticle!.description,
             )
           }
-          className="bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 border-2 border-orange-600 dark:border-orange-700 rounded-md px-2 py-1 shadow-md hover:shadow-lg -ml-2 mt-1 transition-all cursor-pointer transform hover:scale-110"
-          style={{
-            maxWidth: "60px",
-            fontSize: "0.75rem",
-            transform: "translateY(10px)",
-          }}
-          title="Click to learn about this particle"
-        >
-          <div className="text-sm font-bold text-white text-center">
-            {word.attachedParticle.text}
-          </div>
-          {word.attachedParticle.reading &&
-            word.attachedParticle.reading !== word.attachedParticle.text && (
-              <div className="text-xs text-orange-100 text-center">
-                {word.attachedParticle.reading}
-              </div>
-            )}
-        </button>
+        />
       )}
     </div>
   );
@@ -335,9 +319,12 @@ export default function SentenceVisualization({
         {/* Left column — visualization (3/5 on lg+) */}
         <div className="lg:col-span-3 space-y-6">
           <div className="bg-card rounded-lg p-6 shadow-lg">
-            <h3 className="text-lg font-semibold mb-4 text-foreground">
-              Sentence Structure
-            </h3>
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h3 className="text-lg font-semibold text-foreground">
+                Sentence Structure
+              </h3>
+              <StructureGuideDialog />
+            </div>
 
             {/* Fragment Warning */}
             {analysis.isFragment && (
@@ -388,31 +375,6 @@ export default function SentenceVisualization({
               </ReactFlow>
             </div>
 
-            <div className="mt-4 text-sm text-muted-foreground">
-              <p>
-                <strong>Dashed rose boxes marked TOPIC:</strong> The sentence
-                topic - provides context but doesn&apos;t modify other words
-              </p>
-              <p className="mt-1">
-                <strong>Arrows:</strong> Show which words modify or relate to
-                other words
-              </p>
-              <p className="mt-1">
-                <strong>Orange boxes:</strong> Particles (は, を, に, etc.) -{" "}
-                <span className="text-orange-600 dark:text-orange-400 font-semibold">
-                  Click to learn what they do!
-                </span>
-              </p>
-              <p className="mt-1">
-                <strong>Dashed teal boxes:</strong> Punctuation (、。？「」) and
-                what it does in this sentence
-              </p>
-              <p className="mt-1">
-                <strong>Tip:</strong> Click a blurred translation to reveal it.
-                You can drag nodes to rearrange them, zoom with the mouse wheel,
-                and pan by dragging the background.
-              </p>
-            </div>
           </div>
         </div>
 

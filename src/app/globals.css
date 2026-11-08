@@ -49,6 +49,7 @@
   --color-punctuation-bg: var(--punctuation-bg);
   --color-punctuation-border: var(--punctuation-border);
   --color-punctuation-text: var(--punctuation-text);
+  --color-rf-edge: var(--rf-edge);
 
   /* fonts */
   --font-sans: var(--font-geist-sans);
