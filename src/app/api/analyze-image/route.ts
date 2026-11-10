@@ -1,17 +1,10 @@
-import { MAX_SENTENCE_LENGTH } from "@common/api";
 import { ALLOWED_MIME_TYPES, MAX_IMAGE_SIZE } from "@common/image";
 import { HumanMessage } from "@langchain/core/messages";
-import {
-  ANALYSIS_MODEL,
-  analyzeSentence,
-  createChatModel,
-} from "@/lib/analysis";
+import { analyzeForUser, createChatModel } from "@/lib/analysis";
 import { withAuth } from "@/lib/api-auth";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
-import { saveToHistory } from "@/lib/history";
 import { reportError } from "@/lib/monitoring/logger";
 import { RATE_LIMIT_POLICIES } from "@/lib/rate-limit";
-import { sanitizeForLLM } from "@/lib/validation";
 
 export async function OPTIONS() {
   return corsPreflightResponse();
@@ -81,11 +74,9 @@ export const POST = withAuth(
 
     const base64Data = await fileToBase64(imageFile);
 
-    let sentence: string;
+    let extracted: string;
     try {
-      sentence = sanitizeForLLM(
-        await extractSentenceFromImage(base64Data, imageFile.type),
-      );
+      extracted = await extractSentenceFromImage(base64Data, imageFile.type);
     } catch (error) {
       reportError(error, "image.extract");
       return jsonResponse(
@@ -96,29 +87,6 @@ export const POST = withAuth(
       );
     }
 
-    if (!sentence) {
-      return jsonResponse({ error: "Invalid sentence provided" }, 400);
-    }
-
-    if (sentence.length > MAX_SENTENCE_LENGTH) {
-      return jsonResponse(
-        {
-          error: `Sentence exceeds maximum length of ${MAX_SENTENCE_LENGTH} characters`,
-        },
-        400,
-      );
-    }
-
-    // TODO: Combine with /api/analyze so the extracted sentence goes through the
-    // same cached analysis and history path instead of always calling the model.
-    const analysis = await analyzeSentence(sentence);
-
-    try {
-      await saveToHistory(session.user.id, sentence, ANALYSIS_MODEL);
-    } catch (e) {
-      reportError(e, "history.save");
-    }
-
-    return jsonResponse({ sentence, analysis });
+    return jsonResponse(await analyzeForUser(session.user.id, extracted));
   },
 );

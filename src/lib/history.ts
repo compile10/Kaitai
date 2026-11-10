@@ -8,7 +8,7 @@ import { db } from "@/lib/db";
  * the existing entry's timestamp instead of creating a duplicate, bringing it
  * to the top of the history list.
  *
- * Called by both `/api/analyze` and `/api/analyze-image`.
+ * Called by `analyzeForUser`, which backs `/api/analyze` and `/api/analyze-image`.
  */
 export async function saveToHistory(
   userId: string,

@@ -1,16 +1,7 @@
-import { MAX_SENTENCE_LENGTH } from "@common/api";
-import {
-  ANALYSIS_MODEL,
-  analyzeSentence,
-  getCachedResponse,
-  setCachedResponse,
-} from "@/lib/analysis";
+import { analyzeForUser } from "@/lib/analysis";
 import { withAuth } from "@/lib/api-auth";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
-import { saveToHistory } from "@/lib/history";
-import { reportError } from "@/lib/monitoring/logger";
 import { RATE_LIMIT_POLICIES } from "@/lib/rate-limit";
-import { sanitizeForLLM } from "@/lib/validation";
 
 export async function OPTIONS() {
   return corsPreflightResponse();
@@ -23,43 +14,7 @@ export const POST = withAuth(
   },
   async (request, session) => {
     const body = await request.json().catch(() => null);
-    const sentence = body?.sentence;
-
-    if (!sentence || typeof sentence !== "string") {
-      return jsonResponse({ error: "Invalid sentence provided" }, 400);
-    }
-
-    if (sentence.length > MAX_SENTENCE_LENGTH) {
-      return jsonResponse(
-        {
-          error: `Sentence exceeds maximum length of ${MAX_SENTENCE_LENGTH} characters`,
-        },
-        400,
-      );
-    }
-
-    const sanitizedSentence = sanitizeForLLM(sentence);
-
-    if (!sanitizedSentence) {
-      return jsonResponse({ error: "Invalid sentence provided" }, 400);
-    }
-
-    const cacheKey = `${ANALYSIS_MODEL}:${sanitizedSentence}`;
-    const cachedResponse = getCachedResponse(cacheKey);
-
-    const analysis =
-      cachedResponse ?? (await analyzeSentence(sanitizedSentence));
-
-    if (!cachedResponse) {
-      setCachedResponse(cacheKey, analysis);
-    }
-
-    try {
-      await saveToHistory(session.user.id, sanitizedSentence, ANALYSIS_MODEL);
-    } catch (e) {
-      reportError(e, "history.save");
-    }
-
+    const { analysis } = await analyzeForUser(session.user.id, body?.sentence);
     return jsonResponse(analysis);
   },
 );

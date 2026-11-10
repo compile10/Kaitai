@@ -13,6 +13,21 @@ const corsHeaders: Record<string, string> = {
     "Retry-After, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset",
 };
 
+/**
+ * An expected failure to report to the caller, such as invalid input. Route
+ * wrappers turn it into a JSON error response with `status` instead of a 500.
+ * The message is sent to the client, so it must not contain internal details.
+ */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status = 400,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 /** JSON responses include CORS headers and the originating trace ID on errors. */
 export function jsonResponse(
   data: unknown,
