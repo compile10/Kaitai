@@ -75,8 +75,8 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | --- | --- |
 | `app/api/telemetry/route.ts` | Bounded, rate-limited web/mobile JavaScript error ingestion |
 | `app/api/health/route.ts` | Public process status and coalesced, briefly cached database connectivity probe |
-| `app/api/analyze/route.ts` | POST sentence → LLM analysis; cache + history write |
-| `app/api/analyze-image/route.ts` | POST image → OCR, then same analysis pipeline |
+| `app/api/analyze/route.ts` | POST sentence → shared analysis pipeline |
+| `app/api/analyze-image/route.ts` | POST image → OCR, then shared analysis pipeline |
 | `app/api/history/route.ts` | GET paginated history for the signed-in user; excludes diagnostic metadata |
 | `app/api/settings/route.ts` | GET/PUT account preferences |
 | `app/api/admin/invite-codes/route.ts` | POST a 24h invite code (admin) |
@@ -90,17 +90,18 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `auth.ts` | Server Better Auth initialization: Postgres (Kysely) adapter, Expo plugin, admin roles, invite hooks |
 | `auth-client.ts` | Browser Better Auth client |
 | `auth-permissions.ts` | Access control: `adminPanel`, `invite` |
-| `api-auth.ts` | Route-configured auth, permission, and rate-limit wrappers; trusted proxy IP extraction |
+| `api-auth.ts` | Route-configured auth, permission, and rate-limit wrappers; thrown-error responses; trusted proxy IP extraction |
 | `db.ts` | Single server-side Postgres pool + typed Kysely instance (dev: pool reused on `globalThis`) |
 | `rate-limit.ts` | Postgres-backed per-user/per-IP route limits and per-account sign-in limits, keyed by HMAC |
 | `settings.ts` | Account preference helpers + authenticated settings resolver |
 | `history.ts` | `history` table; upsert on `(user_id, sentence)` and paginated listing; stores the analysis model for debugging |
 | `invites.ts` | `inviteCodes` table: creation, validation, serialization, and expiry; auth claims use the signup transaction |
-| `cors.ts` | JSON + preflight helpers, error trace IDs, and same-origin browser CORS policy |
+| `cors.ts` | JSON + preflight helpers, `ApiError` for client-facing failures, error trace IDs, and same-origin browser CORS policy |
 | `validation.ts` | `sanitizeForLLM` |
 | `dev-seed.ts` | Seeds `admin@localhost.dev` in development only |
 | `user-utils.ts` | `SessionUser` type |
 | `utils.ts` | `cn()` (clsx + tailwind-merge), shared `NextJSError` type for web error boundaries |
+| `analysis/service.ts` | Shared route pipeline: sentence validation, cached analysis, history write |
 | `analysis/analyze.ts` | Prompt + structured-output call with validation repair rounds |
 | `analysis/validate.ts` | Checks nodes rebuild the sentence and form a valid graph |
 | `analysis/client.ts` | Server-side AI client configuration for text and images |

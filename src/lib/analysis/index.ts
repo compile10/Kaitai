@@ -13,3 +13,4 @@ export {
   createChatModel,
 } from "./client";
 export { analysisSchema } from "./schema";
+export { analyzeForUser } from "./service";

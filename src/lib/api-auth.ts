@@ -2,7 +2,7 @@ import { getIP } from "better-auth/api";
 import type { NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import type { Permissions } from "@/lib/auth-permissions";
-import { jsonResponse } from "@/lib/cors";
+import { ApiError, jsonResponse } from "@/lib/cors";
 import { observeRoute, reportError } from "@/lib/monitoring/logger";
 import { checkRateLimit, type RateLimitPolicy } from "@/lib/rate-limit";
 
@@ -87,10 +87,11 @@ async function enforceRateLimit(
 }
 
 /**
- * Run `handler`, turning anything it throws into a logged 500.
+ * Run `handler`, turning a thrown `ApiError` into its status and anything else
+ * it throws into a logged 500.
  *
- * Responses the handler *returns* pass through untouched, so routes keep
- * emitting their own 4xx/5xx (validation failures, upstream errors) directly.
+ * Responses the handler *returns* pass through untouched, so routes can still
+ * emit their own 4xx/5xx directly.
  */
 async function catchingErrors(
   label: string,
@@ -99,6 +100,9 @@ async function catchingErrors(
   try {
     return await handler();
   } catch (error) {
+    if (error instanceof ApiError) {
+      return jsonResponse({ error: error.message }, error.status);
+    }
     reportError(error, label);
     return jsonResponse({ error: `Failed to ${label}` }, 500);
   }
