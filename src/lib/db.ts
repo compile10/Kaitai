@@ -1,4 +1,5 @@
 import { safeMessage } from "@common/redaction";
+import type { DeckCard } from "@common/types";
 import { type ColumnType, Kysely, PostgresDialect } from "kysely";
 import { Pool, types } from "pg";
 
@@ -19,6 +20,18 @@ export interface Database {
     // jsonb: written as serialized JSON, read back as a parsed object.
     preferences: ColumnType<Record<string, unknown>, string, string>;
     updated_at: Date;
+  };
+  decks: {
+    id: string;
+    owner_id: string | null;
+    name: string;
+    description: ColumnType<string, string | undefined, string>;
+    // jsonb: written as serialized JSON, read back as a parsed array.
+    cards: ColumnType<DeckCard[], string | undefined, string>;
+    card_count: ColumnType<number, never, never>;
+    version: ColumnType<number, number | undefined, number>;
+    created_at: ColumnType<Date, Date | undefined, never>;
+    updated_at: ColumnType<Date, Date | undefined, Date>;
   };
   inviteCodes: {
     id: string;
