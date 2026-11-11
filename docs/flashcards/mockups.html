@@ -1,0 +1,557 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@500;700&family=Kaushan+Script&display=block" />
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1c1917; --primary: #dc2626; --secondary: #f5f5f4;
+    --muted-fg: #78716c; --border: #e7e5e4; --card: #4a0c0c; --card-fg: #fecaca;
+    --blue: #2563eb; --orange: #f97316; --purple: #7c3aed; --teal: #0f766e;
+    --jp: "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Geist, var(--jp); color: var(--fg); background: #d6d3d1; padding: 32px; display: flex; gap: 36px; align-items: flex-start; }
+  .wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .caption { font-weight: 600; font-size: 17px; color: #292524; }
+  .caption small { display: block; font-weight: 400; font-size: 13px; color: #57534e; text-align: center; margin-top: 2px; }
+  .phone { width: 390px; height: 844px; background: var(--bg); border-radius: 48px; overflow: hidden; position: relative;
+           box-shadow: 0 0 0 10px #111, 0 20px 50px rgba(0,0,0,.35); display: flex; flex-direction: column; }
+  .status { height: 54px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 6px 32px 0 40px; font-weight: 600; font-size: 16px; position: relative; }
+  .island { position: absolute; left: 50%; top: 11px; transform: translateX(-50%); width: 120px; height: 35px; background: #000; border-radius: 20px; }
+  .status .icons { display: flex; gap: 5px; align-items: center; font-size: 16px; }
+  .battery { width: 25px; height: 12px; border-radius: 3px; background: #34c759; }
+  .jp { font-family: var(--jp); }
+  ion-icon { display: inline-block; }
+  .content { flex: 1; overflow: hidden; padding: 0 20px; position: relative; }
+  .tabbar { height: 84px; flex: none; border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding-top: 10px; }
+  .tab { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; color: var(--muted-fg); width: 90px; }
+  .tab ion-icon { font-size: 25px; }
+  .tab.active { color: var(--primary); }
+  .navbar { height: 64px; flex: none; display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 1px solid var(--border); }
+  .back { position: absolute; left: 16px; display: flex; align-items: center; gap: 4px; padding: 9px 16px 9px 10px; border-radius: 999px; background: #fafaf9; border: 1px solid var(--border); box-shadow: 0 2px 6px rgba(0,0,0,.08); font-size: 17px; font-weight: 500; }
+  .navtitle { color: var(--primary); font-size: 17px; }
+  .h1 { font-size: 30px; font-weight: 600; letter-spacing: -.5px; }
+  .h2 { font-size: 20px; font-weight: 500; }
+  .label { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-fg); }
+  .muted { color: var(--muted-fg); }
+  .box { background: var(--secondary); border: 1px solid var(--border); border-radius: 14px; }
+  .row { display: flex; align-items: center; }
+  .chip { font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 999px; }
+  .chip.ready { background: #fee2e2; color: #b91c1c; }
+  .chip.new { background: #dbeafe; color: #1d4ed8; }
+  .chip.train { background: #ffedd5; color: #c2410c; }
+  .bar { height: 8px; border-radius: 99px; background: #e7e5e4; overflow: hidden; }
+  .bar > i { display: block; height: 100%; border-radius: 99px; background: var(--primary); }
+  .btn { border-radius: 14px; padding: 16px; text-align: center; font-weight: 600; font-size: 17px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn.primary { background: var(--primary); color: #fff; }
+  .btn.outline { border: 2px solid var(--primary); color: var(--primary); }
+  .btn.ghost { border: 1px solid var(--border); background: var(--secondary); color: var(--fg); }
+  .btn.black { background: #000; color: #fff; }
+  .iconbtn { width: 48px; height: 48px; border-radius: 8px; border: 1px solid var(--border); background: var(--secondary); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+  .play { width: 44px; height: 44px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; flex: none; }
+  .mono { font-family: "Geist Mono", monospace; font-variant-numeric: tabular-nums; }
+
+  /* Run HUD */
+  .hud { padding: 4px 20px 0; flex: none; }
+  .flash { border-radius: 28px; background: var(--card); color: var(--card-fg); position: relative; box-shadow: 0 18px 40px rgba(74,12,12,.35); }
+  .combo { display: flex; align-items: center; gap: 6px; font-weight: 800; color: var(--orange); }
+  .timer { height: 10px; border-radius: 99px; background: #f5f5f4; border: 1px solid var(--border); overflow: hidden; }
+  .timer > i { display: block; height: 100%; background: linear-gradient(90deg, #dc2626, #f97316); }
+  .rank { width: 120px; height: 120px; border-radius: 26px; background: var(--card); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 76px; font-weight: 800; box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--primary), 0 16px 34px rgba(220,38,38,.35); }
+  .seg { display: flex; background: var(--secondary); border: 1px solid var(--border); border-radius: 12px; padding: 4px; }
+  .seg div { flex: 1; text-align: center; padding: 9px 0; border-radius: 9px; font-weight: 500; font-size: 15px; color: var(--muted-fg); }
+  .seg .on { background: #fff; color: var(--fg); box-shadow: 0 1px 4px rgba(0,0,0,.12); font-weight: 600; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 26px 26px 0 0; padding: 10px 20px 34px; box-shadow: 0 -10px 30px rgba(0,0,0,.2); }
+  .grabber { width: 40px; height: 5px; border-radius: 9px; background: #d6d3d1; margin: 0 auto 16px; }
+  .field { border: 1px solid var(--border); background: var(--secondary); border-radius: 8px; padding: 13px 12px; font-size: 16px; }
+  .wordcell { border: 2px solid var(--border); background: var(--secondary); border-radius: 12px; padding: 12px 16px; }
+  .particle { background: var(--orange); color: #fff; border-radius: 6px; padding: 2px 7px; font-size: 16px; }
+
+  body { flex-wrap: wrap; justify-content: center; row-gap: 44px; width: 2200px; }
+  .flame { flex: none; vertical-align: -0.15em; }
+  .toggle { width: 51px; height: 31px; border-radius: 99px; background: #34c759; position: relative; flex: none; }
+  .toggle::after { content: ""; position: absolute; right: 2px; top: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+  .toggle.off { background: #e7e5e4; } .toggle.off::after { right: auto; left: 2px; }
+  .speaker { width: 44px; height: 44px; border-radius: 50%; background: rgba(254,202,202,.16); border: 1px solid rgba(254,202,202,.3); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 22px; flex: none; }
+
+  .mincho { font-family: "Hiragino Mincho ProN", "Yu Mincho", serif; font-weight: 700; }
+  .hanko { width: 128px; height: 128px; border: 6px solid #dc2626; border-radius: 16px; color: #dc2626; background: #fff;
+           font-family: "Hiragino Mincho ProN", serif; font-weight: 700; font-size: 84px; line-height: 1;
+           display: flex; align-items: center; justify-content: center; transform: rotate(-7deg);
+           box-shadow: inset 0 0 0 4px #fff, inset 0 0 0 7px #dc2626, 0 14px 30px rgba(220,38,38,.25); }
+  .ladder { display: flex; gap: 10px; align-items: flex-end; }
+  .ladder > div { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: #a8a29e; }
+  .ladder b { width: 36px; height: 36px; border: 2px solid #d6d3d1; border-radius: 7px; display: flex; align-items: center; justify-content: center;
+              font-family: Geist, sans-serif; font-weight: 800; font-size: 18px; color: #a8a29e; }
+  .ladder .on b { background: #dc2626; border-color: #dc2626; color: #fff; }
+  .ladder .on { color: #dc2626; font-weight: 700; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+ <defs>
+  <linearGradient id="flameGrad" x1="0" y1="32" x2="6" y2="0" gradientUnits="userSpaceOnUse">
+   <stop offset="0" stop-color="#991b1b"/><stop offset=".4" stop-color="#dc2626"/><stop offset=".75" stop-color="#f97316"/><stop offset="1" stop-color="#fbbf24"/>
+  </linearGradient>
+ </defs>
+  <linearGradient id="boltGrad" x1="0" y1="0" x2="0" y2="32" gradientUnits="userSpaceOnUse">
+   <stop offset="0" stop-color="#fde047"/><stop offset=".5" stop-color="#fb923c"/><stop offset="1" stop-color="#ea580c"/>
+  </linearGradient>
+ <symbol id="bolt" viewBox="0 0 32 32">
+  <path fill="url(#boltGrad)" stroke="url(#boltGrad)" stroke-width="2" stroke-linejoin="round" d="M19.5 1.5 L5.5 18.5 H14.5 L11.5 30.5 L26.5 12 H17.5 Z"/>
+  <path fill="#fef9c3" opacity=".75" d="M18 5.5 L9.5 16 H13 Z"/>
+ </symbol>
+ <symbol id="flame" viewBox="0 0 32 32">
+  <path fill="url(#flameGrad)" d="M16 1.5 C17.2 6.5 21.5 9 24.5 13.5 C27.5 18 27.5 23.2 24.6 26.8 C22.6 29.4 19.5 30.8 16 30.8 C12.5 30.8 9.4 29.4 7.4 26.8 C4.6 23.2 4.8 18.6 7 15 C7.6 17.6 9 19.2 10.8 19.8 C10 14 12.4 7.4 16 1.5 Z"/>
+  <path fill="#fde68a" d="M16 14 C17 17.5 20.6 19.6 20.6 23.6 A4.6 4.6 0 0 1 11.4 23.6 C11.4 21.4 12.4 19.8 13.6 18.6 C13.8 20 14.4 21 15.3 21.4 C14.9 18.8 15.2 16.4 16 14 Z"/>
+ </symbol>
+</svg>
+
+<!-- 1. DECKS TAB -->
+<div class="wrap" id="decks">
+<div class="phone">
+  <div class="status"><span>9:41</span><div class="island"></div><span class="icons"><ion-icon name="cellular"></ion-icon><ion-icon name="wifi"></ion-icon><span class="battery"></span></span></div>
+  <div class="content" style="padding-top:12px">
+    <div class="row" style="justify-content:space-between">
+      <div class="h1">Decks</div>
+      <div class="iconbtn"><ion-icon name="add"></ion-icon></div>
+    </div>
+
+    <div class="flash" style="margin-top:16px;padding:16px 18px;border-radius:18px">
+      <div class="row" style="justify-content:space-between">
+        <div class="row" style="gap:8px"><svg class="flame" style="width:32px;height:32px;"><use href="#flame"/></svg><div><div style="font-weight:700;font-size:20px;color:#fff">12 days</div><div style="font-size:12px;opacity:.8">streak</div></div></div>
+        <div style="text-align:right"><div style="font-weight:700;font-size:20px;color:#fff">Lv 7</div><div style="font-size:12px;opacity:.8">4,820 XP</div></div>
+      </div>
+      <div class="row" style="justify-content:space-between;margin-top:14px;font-size:13px"><span>Daily quest · Clear 40 cards</span><span class="mono" style="color:#fff">28/40</span></div>
+      <div class="bar" style="margin-top:6px;background:rgba(254,202,202,.2)"><i style="width:70%;background:#f97316"></i></div>
+    </div>
+
+    <div class="label" style="margin:24px 0 10px">Your decks</div>
+    <div class="box" style="padding:14px 14px 14px 16px">
+      <div class="row" style="gap:12px">
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:17px">From my sentences</div>
+          <div class="row" style="gap:6px;margin-top:8px"><span class="chip ready">18 Ready</span><span class="chip new">5 New</span></div>
+        </div>
+        <div class="play"><ion-icon name="play"></ion-icon></div>
+      </div>
+    </div>
+    <div class="box" style="padding:14px 14px 14px 16px;margin-top:10px">
+      <div class="row" style="gap:12px">
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:17px">Anime phrases</div>
+          <div class="row" style="gap:6px;margin-top:8px"><span class="chip" style="background:#f5f5f4;color:#78716c;border:1px solid #e7e5e4">All clear ✓</span><span class="muted" style="font-size:12px">next in 6h</span></div>
+        </div>
+        <div class="play" style="background:#e7e5e4;color:#a8a29e"><ion-icon name="play"></ion-icon></div>
+      </div>
+    </div>
+
+    <div class="label" style="margin:24px 0 10px">Starter decks</div>
+    <div class="box" style="padding:14px 14px 14px 16px">
+      <div class="row" style="gap:12px">
+        <div style="flex:1">
+          <div class="row" style="gap:8px"><span style="font-weight:600;font-size:17px">JLPT N5 Vocab</span><span class="muted" style="font-size:12px">680 cards</span></div>
+          <div class="row" style="gap:6px;margin-top:8px"><span class="chip ready">25 Ready</span><span class="chip new">10 New</span><span class="chip train">2 Training</span></div>
+          <div class="row" style="gap:8px;margin-top:10px"><div class="bar" style="flex:1;height:6px"><i style="width:31%"></i></div><span class="muted" style="font-size:12px">31% mastered</span></div>
+        </div>
+        <div class="play"><ion-icon name="play"></ion-icon></div>
+      </div>
+    </div>
+    <div class="box" style="padding:14px 14px 14px 16px;margin-top:10px">
+      <div class="row" style="gap:12px">
+        <div style="flex:1">
+          <div class="row" style="gap:8px"><span style="font-weight:600;font-size:17px">JLPT N4 Vocab</span><span class="muted" style="font-size:12px">640 cards</span></div>
+          <div class="muted" style="font-size:13px;margin-top:4px">Everyday verbs, adjectives &amp; kanji compounds</div>
+        </div>
+        <div style="border:1.5px solid var(--primary);color:var(--primary);border-radius:999px;padding:7px 14px;font-weight:600;font-size:14px">+ Add</div>
+      </div>
+    </div>
+  </div>
+  <div class="tabbar">
+    <div class="tab"><ion-icon name="home-outline"></ion-icon>Home</div>
+    <div class="tab active"><ion-icon name="albums"></ion-icon>Decks</div>
+    <div class="tab"><ion-icon name="person-outline"></ion-icon>Account</div>
+  </div>
+</div>
+<div class="caption">1 · Decks tab<small>New tab between Home and Account</small></div>
+</div>
+
+<!-- 2. LOBBY -->
+<div class="wrap" id="lobby">
+<div class="phone">
+  <div class="status"><span>9:41</span><div class="island"></div><span class="icons"><ion-icon name="cellular"></ion-icon><ion-icon name="wifi"></ion-icon><span class="battery"></span></span></div>
+  <div class="navbar"><div class="back"><ion-icon name="chevron-back" style="font-size:22px"></ion-icon>Decks</div><div class="navtitle">Deck</div></div>
+  <div class="content" style="padding-top:18px">
+    <div class="h1">JLPT N5 Vocab</div>
+    <div class="muted" style="margin-top:4px;font-size:15px">680 cards · Starter deck</div>
+
+    <div class="flash row" style="margin-top:18px;padding:18px;gap:16px;border-radius:18px">
+      <svg width="72" height="72" viewBox="0 0 120 120" style="overflow:visible;flex:none;margin:-4px">
+ <defs><linearGradient id="b1" x1="0" y1="0" x2="0.4" y2="1"><stop offset="0" stop-color="#fde68a"/><stop offset="1" stop-color="#d97706"/></linearGradient></defs>
+   
+  <g transform="rotate(-12 60 60)" font-family="Kaushan Script, cursive" font-size="118" text-anchor="middle">
+   <text x="60" y="98" fill="url(#b1)">S</text>
+  </g>
+</svg>
+      <div style="flex:1">
+        <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.8">Personal best</div>
+        <div class="mono" style="font-size:26px;font-weight:700;color:#fff">9,410</div>
+        <div style="font-size:13px">Best combo <b style="color:#fff;display:inline-flex;align-items:center;gap:2px"><svg class="flame" style="width:16px;height:16px;"><use href="#bolt"/></svg>34</b></div>
+      </div>
+    </div>
+
+    <div class="row" style="gap:10px;margin-top:14px">
+      <div class="box" style="flex:1;padding:12px;text-align:center"><div class="mono" style="font-size:24px;font-weight:700;color:#b91c1c">18</div><div class="muted" style="font-size:13px">Ready</div></div>
+      <div class="box" style="flex:1;padding:12px;text-align:center"><div class="mono" style="font-size:24px;font-weight:700;color:#1d4ed8">5</div><div class="muted" style="font-size:13px">New</div></div>
+      <div class="box" style="flex:1;padding:12px;text-align:center"><div class="mono" style="font-size:24px;font-weight:700;color:#c2410c">2</div><div class="muted" style="font-size:13px">Training</div></div>
+    </div>
+    <div class="row" style="justify-content:space-between;margin-top:16px;font-size:14px"><span>Mastered</span><span class="mono muted">212 / 680</span></div>
+    <div class="bar" style="margin-top:6px"><i style="width:31%"></i></div>
+
+    <div class="row" style="gap:10px;margin-top:26px">
+      <div class="btn primary" style="flex:1;font-size:18px"><ion-icon name="play"></ion-icon>Start run · 25 cards</div>
+      <div class="iconbtn" style="width:58px;height:58px;border-radius:14px"><ion-icon name="options-outline"></ion-icon></div>
+    </div>
+
+    <div style="margin-top:18px">
+      <div class="row" style="padding:14px 0;border-bottom:1px solid var(--border)"><ion-icon name="layers-outline" style="font-size:22px;color:var(--muted-fg)"></ion-icon><span style="flex:1;margin-left:12px">Cards</span><span class="muted">680</span><ion-icon name="chevron-forward" style="color:var(--muted-fg);margin-left:6px"></ion-icon></div>
+      <div class="row" style="padding:14px 0"><ion-icon name="skull-outline" style="font-size:22px;color:var(--primary)"></ion-icon><span style="flex:1;margin-left:12px">Nemeses</span><span class="muted">3</span><ion-icon name="chevron-forward" style="color:var(--muted-fg);margin-left:6px"></ion-icon></div>
+    </div>
+  </div>
+</div>
+<div class="caption">2 · Deck lobby<small>Records, progress, and one big Start button</small></div>
+</div>
+
+<!-- 2b. PLAY SETTINGS -->
+<div class="wrap" id="settings">
+<div class="phone">
+  <div class="status"><span>9:41</span><div class="island"></div><span class="icons"><ion-icon name="cellular"></ion-icon><ion-icon name="wifi"></ion-icon><span class="battery"></span></span></div>
+  <div class="navbar"><div class="back"><ion-icon name="chevron-back" style="font-size:22px"></ion-icon>Decks</div><div class="navtitle">Deck</div></div>
+  <div class="content" style="padding-top:18px">
+    <div class="h1">JLPT N5 Vocab</div>
+    <div class="muted" style="margin-top:4px;font-size:15px">680 cards · Starter deck</div>
+
+    <div class="flash row" style="margin-top:18px;padding:18px;gap:16px;border-radius:18px">
+      <svg width="72" height="72" viewBox="0 0 120 120" style="overflow:visible;flex:none;margin:-4px">
+ <defs><linearGradient id="b2" x1="0" y1="0" x2="0.4" y2="1"><stop offset="0" stop-color="#fde68a"/><stop offset="1" stop-color="#d97706"/></linearGradient></defs>
+   
+  <g transform="rotate(-12 60 60)" font-family="Kaushan Script, cursive" font-size="118" text-anchor="middle">
+   <text x="60" y="98" fill="url(#b2)">S</text>
+  </g>
+</svg>
+      <div style="flex:1">
+        <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.8">Personal best</div>
+        <div class="mono" style="font-size:26px;font-weight:700;color:#fff">9,410</div>
+        <div style="font-size:13px">Best combo <b style="color:#fff;display:inline-flex;align-items:center;gap:2px"><svg class="flame" style="width:16px;height:16px;"><use href="#bolt"/></svg>34</b></div>
+      </div>
+    </div>
+
+    <div class="row" style="gap:10px;margin-top:14px">
+      <div class="box" style="flex:1;padding:12px;text-align:center"><div class="mono" style="font-size:24px;font-weight:700;color:#b91c1c">18</div><div class="muted" style="font-size:13px">Ready</div></div>
+      <div class="box" style="flex:1;padding:12px;text-align:center"><div class="mono" style="font-size:24px;font-weight:700;color:#1d4ed8">5</div><div class="muted" style="font-size:13px">New</div></div>
+      <div class="box" style="flex:1;padding:12px;text-align:center"><div class="mono" style="font-size:24px;font-weight:700;color:#c2410c">2</div><div class="muted" style="font-size:13px">Training</div></div>
+    </div>
+    <div class="row" style="justify-content:space-between;margin-top:16px;font-size:14px"><span>Mastered</span><span class="mono muted">212 / 680</span></div>
+    <div class="bar" style="margin-top:6px"><i style="width:31%"></i></div>
+
+    <div class="row" style="gap:10px;margin-top:26px">
+      <div class="btn primary" style="flex:1;font-size:18px"><ion-icon name="play"></ion-icon>Start run · 25 cards</div>
+      <div class="iconbtn" style="width:58px;height:58px;border-radius:14px"><ion-icon name="options-outline"></ion-icon></div>
+    </div>
+
+    <div style="margin-top:18px">
+      <div class="row" style="padding:14px 0;border-bottom:1px solid var(--border)"><ion-icon name="layers-outline" style="font-size:22px;color:var(--muted-fg)"></ion-icon><span style="flex:1;margin-left:12px">Cards</span><span class="muted">680</span><ion-icon name="chevron-forward" style="color:var(--muted-fg);margin-left:6px"></ion-icon></div>
+      <div class="row" style="padding:14px 0"><ion-icon name="skull-outline" style="font-size:22px;color:var(--primary)"></ion-icon><span style="flex:1;margin-left:12px">Nemeses</span><span class="muted">3</span><ion-icon name="chevron-forward" style="color:var(--muted-fg);margin-left:6px"></ion-icon></div>
+    </div>
+  </div>
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.35)"></div>
+  <div class="sheet">
+    <div class="grabber"></div>
+    <div class="row" style="justify-content:space-between"><div style="font-size:22px;font-weight:600">Play settings</div><ion-icon name="close" style="font-size:26px;color:var(--muted-fg)"></ion-icon></div>
+
+    <div class="label" style="margin:18px 0 8px">Time per card</div>
+    <div class="seg"><div>5s</div><div class="on">10s</div><div>15s</div><div>Zen</div></div>
+    <div class="muted" style="font-size:12px;margin-top:6px">Zen: no timer and no score, but reviews still count.</div>
+
+    <div class="label" style="margin:18px 0 8px">Card front</div>
+    <div class="seg"><div class="on jp">日本語</div><div>English</div><div class="row" style="justify-content:center;gap:4px"><ion-icon name="volume-high"></ion-icon>Listen</div></div>
+
+    <div style="margin-top:10px">
+      <div class="row" style="padding:12px 0;border-bottom:1px solid var(--border)"><span style="flex:1">New cards per run</span><div class="row" style="gap:12px;border:1px solid var(--border);border-radius:10px;padding:4px 10px"><span class="muted">−</span><span class="mono" style="font-weight:700">10</span><span class="muted">+</span></div></div>
+      <div class="row" style="padding:12px 0;border-bottom:1px solid var(--border)"><span style="flex:1">Play audio on reveal</span><div class="toggle"></div></div>
+      <div class="row" style="padding:12px 0;border-bottom:1px solid var(--border)"><span style="flex:1">Sound effects</span><div class="toggle"></div></div>
+      <div class="row" style="padding:12px 0"><span style="flex:1">Haptics</span><div class="toggle off"></div></div>
+    </div>
+  </div>
+</div>
+<div class="caption">3 · Play settings<small>Opened from the sliders button in the lobby</small></div>
+</div>
+
+<!-- 3. DECK EDITOR -->
+<div class="wrap" id="editor">
+<div class="phone">
+  <div class="status"><span>9:41</span><div class="island"></div><span class="icons"><ion-icon name="cellular"></ion-icon><ion-icon name="wifi"></ion-icon><span class="battery"></span></span></div>
+  <div class="navbar"><div class="back"><ion-icon name="chevron-back" style="font-size:22px"></ion-icon>Deck</div><div class="navtitle">Edit deck</div></div>
+  <div class="content" style="padding-top:18px">
+    <div class="label" style="margin-bottom:6px">Deck name</div>
+    <div class="field" style="font-weight:500">From my sentences</div>
+
+    <div class="row" style="gap:10px;margin-top:14px">
+      <div class="btn ghost" style="flex:1;font-size:15px;padding:12px"><ion-icon name="time-outline"></ion-icon>From history</div>
+      <div class="btn ghost" style="flex:1;font-size:15px;padding:12px"><ion-icon name="camera-outline"></ion-icon>From photo</div>
+    </div>
+
+    <div class="row" style="justify-content:space-between;margin:22px 0 8px"><span class="label">23 cards</span><span class="muted" style="font-size:13px">Sort: Level ▾</span></div>
+    <div style="border:1px solid var(--border);border-radius:14px;overflow:hidden">
+      <div class="row" style="padding:12px 14px;border-bottom:1px solid var(--border);gap:12px"><div style="flex:1"><div class="row" style="gap:8px"><span class="jp" style="font-size:20px">食べる</span><span class="jp muted" style="font-size:13px">たべる</span></div><div style="font-size:14px;margin-top:2px">to eat</div></div><span class="chip" style="background:#f5f5f4;border:1px solid #e7e5e4">Lv 4</span></div>
+      <div class="row" style="padding:12px 14px;border-bottom:1px solid var(--border);gap:12px"><div style="flex:1"><div class="row" style="gap:8px"><span class="jp" style="font-size:20px">静か</span><span class="jp muted" style="font-size:13px">しずか</span></div><div style="font-size:14px;margin-top:2px">quiet</div></div><span class="chip" style="background:#f5f5f4;border:1px solid #e7e5e4">Lv 2</span></div>
+      <div class="row" style="padding:12px 14px;border-bottom:1px solid var(--border);gap:12px;background:#fff1f2"><div style="flex:1"><div class="row" style="gap:8px"><span class="jp" style="font-size:20px">部屋</span><span class="jp muted" style="font-size:13px">へや</span></div><div style="font-size:14px;margin-top:2px">room</div></div><span class="chip ready" style="display:flex;gap:4px;align-items:center"><ion-icon name="skull"></ion-icon>Nemesis</span></div>
+      <div class="row" style="padding:12px 14px;border-bottom:1px solid var(--border);gap:12px"><div style="flex:1"><div class="row" style="gap:8px"><span class="jp" style="font-size:20px">美しい</span><span class="jp muted" style="font-size:13px">うつくしい</span></div><div style="font-size:14px;margin-top:2px">beautiful</div></div><span class="chip" style="background:#fef3c7;color:#92400e">★ Mastered</span></div>
+      <div class="row" style="padding:12px 14px;gap:12px"><div style="flex:1"><div class="row" style="gap:8px"><span class="jp" style="font-size:20px">読む</span><span class="jp muted" style="font-size:13px">よむ</span></div><div style="font-size:14px;margin-top:2px">to read</div></div><span class="chip new">New</span></div>
+    </div>
+  </div>
+  <div style="position:absolute;right:22px;bottom:40px" class="btn primary"><ion-icon name="add" style="font-size:22px"></ion-icon>Add card</div>
+</div>
+<div class="caption">4 · Build your own deck<small>Add cards by hand, from history, or from a photo</small></div>
+</div>
+
+<!-- 4. ADD FROM ANALYSIS -->
+<div class="wrap" id="add">
+<div class="phone">
+  <div class="status"><span>9:41</span><div class="island"></div><span class="icons"><ion-icon name="cellular"></ion-icon><ion-icon name="wifi"></ion-icon><span class="battery"></span></span></div>
+  <div class="navbar"><div class="back"><ion-icon name="chevron-back" style="font-size:22px"></ion-icon>Home</div><div class="navtitle">Analysis</div></div>
+  <div class="content" style="padding-top:12px">
+    <div class="jp" style="font-size:24px">彼女は新しい本を読んでいる。</div>
+    <div class="h2" style="margin:18px 0 10px">Sentence Structure</div>
+    <div class="wordcell" style="border-color:#fda4af;background:#fff1f2"><div class="row" style="gap:8px"><span class="chip" style="background:var(--purple);color:#fff;border-radius:6px">TOPIC</span><span class="jp" style="font-size:20px">彼女</span><span class="particle jp">は</span><span class="jp muted" style="font-size:14px">かのじょ</span></div><div style="margin-top:8px">she</div></div>
+    <div class="wordcell" style="margin-top:10px"><div class="row" style="gap:8px"><span class="jp" style="font-size:20px">新しい</span><span class="jp muted" style="font-size:14px">あたらしい</span><span style="color:var(--blue);font-size:14px">i-adjective</span></div><div style="margin-top:8px">new</div></div>
+    <div class="wordcell" style="margin-top:10px;border-color:var(--blue);background:#dbeafe"><div class="row" style="gap:8px"><span class="jp" style="font-size:20px">本</span><span class="particle jp">を</span><span class="jp muted" style="font-size:14px">ほん</span><span style="color:var(--blue);font-size:14px">noun</span></div><div style="margin-top:8px">book</div></div>
+  </div>
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.35)"></div>
+  <div class="sheet">
+    <div class="grabber"></div>
+    <div class="row" style="gap:10px"><span class="jp" style="font-size:34px">本</span><div><div class="jp muted">ほん</div><div style="color:var(--blue);font-size:14px">noun</div></div><span style="margin-left:auto" class="chip new">Not in any deck</span></div>
+    <div style="font-size:18px;margin-top:6px">book</div>
+
+    <div class="label" style="margin:18px 0 8px">Card preview</div>
+    <div class="row" style="gap:10px">
+      <div class="flash" style="flex:1;height:96px;border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:none"><span class="jp" style="font-size:32px;color:#fff">本</span></div>
+      <div class="flash" style="flex:1.6;height:96px;border-radius:14px;padding:10px 12px;box-shadow:none;font-size:13px"><div class="jp" style="color:#fff;font-size:16px">本 <span style="opacity:.75;font-size:13px">ほん</span></div><div>book</div><div class="jp" style="opacity:.8;margin-top:4px;font-size:12px">彼女は新しい本を読んでいる。</div></div>
+    </div>
+
+    <div class="label" style="margin:18px 0 8px">Add to</div>
+    <div class="field row" style="justify-content:space-between"><span>From my sentences</span><ion-icon name="chevron-down" style="color:var(--muted-fg)"></ion-icon></div>
+    <div class="btn primary" style="margin-top:16px"><ion-icon name="add-circle-outline" style="font-size:22px"></ion-icon>Add card</div>
+  </div>
+</div>
+<div class="caption">5 · Add from an analysis<small>Long-press a word; the analyzed sentence becomes the example</small></div>
+</div>
+
+<!-- 5. RUN FRONT -->
+<div class="wrap" id="front">
+<div class="phone">
+  <div class="status"><span>9:41</span><div class="island"></div><span class="icons"><ion-icon name="cellular"></ion-icon><ion-icon name="wifi"></ion-icon><span class="battery"></span></span></div>
+  <div class="hud">
+    <div class="row" style="gap:12px">
+      <ion-icon name="close" style="font-size:28px;color:var(--muted-fg)"></ion-icon>
+      <div class="bar" style="flex:1;height:6px;background:#f5f5f4"><i style="width:40%;background:#1c1917"></i></div>
+      <span class="mono muted" style="font-size:14px">12/30</span>
+    </div>
+    <div class="row" style="justify-content:space-between;margin-top:16px">
+      <div><div class="label">Score</div><div class="mono" style="font-size:28px;font-weight:700">3,240</div></div>
+      <div style="text-align:right"><div class="combo" style="justify-content:flex-end;font-size:28px"><svg class="flame" style="width:30px;height:30px;"><use href="#bolt"/></svg><span class="mono">11</span></div><div style="font-size:12px;font-weight:700;color:var(--orange);letter-spacing:.06em">COMBO · x2</div></div>
+    </div>
+    <div class="row" style="gap:10px;margin-top:14px"><div class="timer" style="flex:1"><i style="width:62%"></i></div><span class="mono" style="font-size:15px;font-weight:700;color:var(--primary);width:40px;text-align:right">6.2s</span></div>
+  </div>
+  <div class="content" style="padding-top:22px;display:flex;flex-direction:column">
+    <div class="flash" style="flex:1;display:flex;align-items:center;justify-content:center">
+      <div class="row" style="position:absolute;top:18px;left:18px;right:18px;justify-content:space-between;font-size:13px">
+        <span class="chip" style="background:rgba(254,202,202,.15);color:#fecaca">Review</span>
+        <span class="chip" style="background:rgba(254,202,202,.15);color:#fecaca">Lv 4</span>
+      </div>
+      <span class="jp" style="font-size:76px;color:#fff;font-weight:500">食べる</span>
+      <div style="position:absolute;bottom:20px;font-size:13px;opacity:.7">What does this mean?</div>
+    </div>
+    <div class="btn black" style="margin:20px 0 40px;font-size:18px;padding:18px"><ion-icon name="eye-outline" style="font-size:22px"></ion-icon>Tap to reveal</div>
+  </div>
+</div>
+<div class="caption">6 · Run: card front<small>The timer drains; reveal speed sets the grade</small></div>
+</div>
+
+<!-- 6. RUN BACK -->
+<div class="wrap" id="back">
+<div class="phone">
+  <div class="status"><span>9:41</span><div class="island"></div><span class="icons"><ion-icon name="cellular"></ion-icon><ion-icon name="wifi"></ion-icon><span class="battery"></span></span></div>
+  <div class="hud">
+    <div class="row" style="gap:12px">
+      <ion-icon name="close" style="font-size:28px;color:var(--muted-fg)"></ion-icon>
+      <div class="bar" style="flex:1;height:6px;background:#f5f5f4"><i style="width:40%;background:#1c1917"></i></div>
+      <span class="mono muted" style="font-size:14px">12/30</span>
+    </div>
+    <div class="row" style="justify-content:space-between;margin-top:16px">
+      <div><div class="label">Score</div><div class="mono" style="font-size:28px;font-weight:700">3,240</div></div>
+      <div style="text-align:right"><div class="combo" style="justify-content:flex-end;font-size:28px"><svg class="flame" style="width:30px;height:30px;"><use href="#bolt"/></svg><span class="mono">11</span></div><div style="font-size:12px;font-weight:700;color:var(--orange);letter-spacing:.06em">COMBO · x2</div></div>
+    </div>
+    <div class="row" style="gap:10px;margin-top:14px"><div class="timer" style="flex:1"><i style="width:79%;background:#16a34a"></i></div><span class="mono" style="font-size:15px;font-weight:700;color:#16a34a;width:40px;text-align:right">2.1s</span></div>
+  </div>
+  <div class="content" style="padding-top:22px;display:flex;flex-direction:column">
+    <div class="flash" style="flex:1;padding:26px 22px;display:flex;flex-direction:column;align-items:center">
+      <div class="row" style="position:absolute;top:18px;left:18px;right:18px;justify-content:space-between;font-size:13px">
+        <span class="chip" style="background:rgba(22,163,74,.25);color:#bbf7d0"><ion-icon name="stopwatch" style="vertical-align:-2px"></ion-icon> Perfect pace</span>
+        <span class="chip" style="background:rgba(254,202,202,.15);color:#fecaca">Lv 4</span>
+      </div>
+      <div class="jp" style="font-size:54px;color:#fff;margin-top:30px">食べる</div>
+      <div class="row" style="gap:14px;margin-top:8px">
+        <div>
+          <svg width="120" height="30" viewBox="0 0 120 30" style="display:block">
+            <polyline points="15,23 45,7 75,23 105,23" fill="none" stroke="#fdba74" stroke-width="2.5"/>
+            <circle cx="15" cy="23" r="5" fill="#fdba74"/><circle cx="45" cy="7" r="5" fill="#fdba74"/><circle cx="75" cy="23" r="5" fill="#fdba74"/>
+            <circle cx="105" cy="23" r="4.5" fill="#4a0c0c" stroke="#fdba74" stroke-width="2"/>
+          </svg>
+          <div class="row jp" style="font-size:20px;color:#fecaca"><span style="width:30px;text-align:center">た</span><span style="width:30px;text-align:center;color:#fff">べ</span><span style="width:30px;text-align:center">る</span><span style="width:30px;text-align:center;opacity:.5;font-size:15px">(が)</span></div>
+        </div>
+        <div class="speaker"><ion-icon name="volume-high"></ion-icon></div>
+      </div>
+      <div style="font-size:12px;margin-top:6px;opacity:.75">Nakadaka · drops after べ [2]</div>
+      <div style="font-size:26px;color:#fff;font-weight:600;margin-top:12px">to eat</div>
+      <div style="font-size:14px;color:#93c5fd;margin-top:2px">verb · ichidan</div>
+      <div class="row" style="margin-top:auto;width:100%;background:rgba(0,0,0,.25);border-radius:14px;padding:12px 14px;gap:10px">
+        <div style="flex:1">
+          <div class="jp" style="color:#fff;font-size:17px">毎朝パンを<b style="color:#fdba74">食べる</b>。</div>
+          <div style="font-size:14px;margin-top:4px">I eat bread every morning.</div>
+        </div>
+        <ion-icon name="volume-medium-outline" style="font-size:22px;color:#fecaca"></ion-icon>
+      </div>
+    </div>
+    <div class="row" style="gap:12px;margin:20px 0 40px">
+      <div class="btn ghost" style="flex:1;padding:18px"><ion-icon name="close-circle-outline" style="font-size:22px"></ion-icon>Missed</div>
+      <div class="btn primary" style="flex:1.4;padding:18px"><ion-icon name="checkmark-circle" style="font-size:22px"></ion-icon>Got it</div>
+    </div>
+  </div>
+</div>
+<div class="caption">7 · Run: answer revealed<small>Native audio + pitch accent; one tap to grade</small></div>
+</div>
+
+<!-- 7. HIT FEEDBACK -->
+<div class="wrap" id="hit">
+<div class="phone">
+  <div class="status"><span>9:41</span><div class="island"></div><span class="icons"><ion-icon name="cellular"></ion-icon><ion-icon name="wifi"></ion-icon><span class="battery"></span></span></div>
+  <div class="hud">
+    <div class="row" style="gap:12px">
+      <ion-icon name="close" style="font-size:28px;color:var(--muted-fg)"></ion-icon>
+      <div class="bar" style="flex:1;height:6px;background:#f5f5f4"><i style="width:43%;background:#1c1917"></i></div>
+      <span class="mono muted" style="font-size:14px">13/30</span>
+    </div>
+    <div class="row" style="justify-content:space-between;margin-top:16px">
+      <div><div class="label">Score</div><div class="row" style="gap:8px"><span class="mono" style="font-size:28px;font-weight:700">3,640</span><span class="mono" style="color:#16a34a;font-weight:700">+400</span></div></div>
+      <div style="text-align:right;transform:scale(1.15);transform-origin:right"><div class="combo" style="justify-content:flex-end;font-size:28px"><svg class="flame" style="width:30px;height:30px;"><use href="#bolt"/></svg><span class="mono">12</span></div><div style="font-size:12px;font-weight:700;color:var(--orange);letter-spacing:.06em">COMBO · x2</div></div>
+    </div>
+    <div class="row" style="gap:10px;margin-top:14px"><div class="timer" style="flex:1"><i style="width:100%"></i></div><span class="mono" style="font-size:15px;font-weight:700;color:var(--primary);width:40px;text-align:right">10s</span></div>
+  </div>
+  <div class="content" style="padding-top:22px;display:flex;flex-direction:column">
+    <div style="flex:1;position:relative">
+      <div class="flash" style="position:absolute;inset:0;transform:scale(.9) translateY(18px);opacity:.25;box-shadow:none"></div>
+      <div class="flash" style="position:absolute;inset:0;transform:translateX(150px) rotate(10deg);opacity:.18;box-shadow:none"></div>
+      <div style="position:absolute;left:0;right:0;top:26%;text-align:center;transform:rotate(-6deg)">
+        <div class="jp" style="font-size:50px;font-weight:800;letter-spacing:-2px;white-space:nowrap;color:#fff;-webkit-text-stroke:3px #dc2626;text-shadow:0 6px 0 #4a0c0c, 0 10px 30px rgba(220,38,38,.6)">パーフェクト!</div>
+        <div class="mono" style="display:inline-block;margin-top:8px;background:#16a34a;color:#fff;font-weight:700;font-size:22px;padding:6px 16px;border-radius:999px;box-shadow:0 6px 18px rgba(22,163,74,.45)">+400</div>
+        <div style="margin-top:12px;font-size:14px;font-weight:600;color:#57534e">2.1s · Perfect x2 · combo x2</div>
+      </div>
+    </div>
+    <div class="row" style="justify-content:center;gap:8px;margin:20px 0 52px;font-size:13px">
+      <span class="chip" style="background:#fee2e2;color:#b91c1c">Perfect &lt;3s</span>
+      <span class="chip" style="background:#ffedd5;color:#c2410c">Great &lt;7s</span>
+      <span class="chip" style="background:#f5f5f4;color:#57534e;border:1px solid #e7e5e4">OK &lt;10s</span>
+      <span class="chip" style="background:#1c1917;color:#fff">Miss</span>
+    </div>
+  </div>
+</div>
+<div class="caption">8 · Hit feedback<small>Pop + haptic; the next card slides in after ~600ms</small></div>
+</div>
+
+<!-- 8. RESULTS -->
+<div class="wrap" id="results">
+<div class="phone">
+  <div class="status"><span>9:41</span><div class="island"></div><span class="icons"><ion-icon name="cellular"></ion-icon><ion-icon name="wifi"></ion-icon><span class="battery"></span></span></div>
+  <div class="content" style="padding-top:20px;display:flex;flex-direction:column;align-items:center">
+    <div class="label" style="color:var(--primary);font-size:14px">JLPT N5 Vocab</div>
+    <div style="font-size:34px;font-weight:800;letter-spacing:-.5px;margin-top:2px">Run clear!</div>
+    <div class="row" style="gap:22px;margin-top:40px;width:100%;justify-content:center">
+      <svg width="150" height="150" viewBox="0 0 120 120" style="overflow:visible;flex:none;margin:-8px 0">
+ <defs><linearGradient id="b3" x1="0" y1="0" x2="0.4" y2="1"><stop offset="0" stop-color="#ef4444"/><stop offset="1" stop-color="#991b1b"/></linearGradient></defs>
+   
+  <g transform="rotate(-12 60 60)" font-family="Kaushan Script, cursive" font-size="118" text-anchor="middle">
+   <text x="60" y="98" fill="url(#b3)">A</text>
+  </g>
+</svg>
+      <div>
+        <div style="font-size:22px;font-weight:700">A rank</div>
+        <div class="mono" style="font-size:30px;font-weight:700;margin-top:4px">8,920</div>
+        <div class="muted" style="font-size:13px">best 9,410 (S)</div>
+      </div>
+    </div>
+    <div class="ladder" style="margin-top:30px">
+      <div class=""><svg width="34" height="34" viewBox="0 0 120 120" style="overflow:visible;flex:none;opacity:.4">
+ <defs><linearGradient id="b4" x1="0" y1="0" x2="0.4" y2="1"><stop offset="0" stop-color="#fde68a"/><stop offset="1" stop-color="#d97706"/></linearGradient></defs>
+  
+  <g transform="rotate(-12 60 60)" font-family="Kaushan Script, cursive" font-size="118" text-anchor="middle">
+   <text x="60" y="98" fill="url(#b4)">S</text>
+  </g>
+</svg>9,000+</div><div class="on"><svg width="44" height="44" viewBox="0 0 120 120" style="overflow:visible;flex:none;">
+ <defs><linearGradient id="b5" x1="0" y1="0" x2="0.4" y2="1"><stop offset="0" stop-color="#ef4444"/><stop offset="1" stop-color="#991b1b"/></linearGradient></defs>
+   
+  <g transform="rotate(-12 60 60)" font-family="Kaushan Script, cursive" font-size="118" text-anchor="middle">
+   <text x="60" y="98" fill="url(#b5)">A</text>
+  </g>
+</svg>7,500+</div><div class=""><svg width="34" height="34" viewBox="0 0 120 120" style="overflow:visible;flex:none;opacity:.4">
+ <defs><linearGradient id="b6" x1="0" y1="0" x2="0.4" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#1e3a8a"/></linearGradient></defs>
+  
+  <g transform="rotate(-12 60 60)" font-family="Kaushan Script, cursive" font-size="118" text-anchor="middle">
+   <text x="60" y="98" fill="url(#b6)">B</text>
+  </g>
+</svg>5,500+</div><div class=""><svg width="34" height="34" viewBox="0 0 120 120" style="overflow:visible;flex:none;opacity:.4">
+ <defs><linearGradient id="b7" x1="0" y1="0" x2="0.4" y2="1"><stop offset="0" stop-color="#22c55e"/><stop offset="1" stop-color="#14532d"/></linearGradient></defs>
+  
+  <g transform="rotate(-12 60 60)" font-family="Kaushan Script, cursive" font-size="118" text-anchor="middle">
+   <text x="60" y="98" fill="url(#b7)">C</text>
+  </g>
+</svg>3,500+</div><div class=""><svg width="34" height="34" viewBox="0 0 120 120" style="overflow:visible;flex:none;opacity:.4">
+ <defs><linearGradient id="b8" x1="0" y1="0" x2="0.4" y2="1"><stop offset="0" stop-color="#a8a29e"/><stop offset="1" stop-color="#44403c"/></linearGradient></defs>
+  
+  <g transform="rotate(-12 60 60)" font-family="Kaushan Script, cursive" font-size="118" text-anchor="middle">
+   <text x="60" y="98" fill="url(#b8)">D</text>
+  </g>
+</svg>below</div>
+    </div>
+    <div class="row" style="gap:6px;margin-top:24px;background:#ffedd5;color:#c2410c;font-weight:700;padding:7px 14px;border-radius:999px;font-size:14px"><svg class="flame" style="width:18px;height:18px"><use href="#bolt"/></svg>New best combo: 27</div>
+
+    <div class="row" style="gap:8px;margin-top:26px;width:100%">
+      <div class="box" style="flex:1;padding:12px 0;text-align:center"><div class="mono" style="font-size:20px;font-weight:700;color:#b91c1c">14</div><div class="muted" style="font-size:12px">Perfect</div></div>
+      <div class="box" style="flex:1;padding:12px 0;text-align:center"><div class="mono" style="font-size:20px;font-weight:700;color:#c2410c">9</div><div class="muted" style="font-size:12px">Great</div></div>
+      <div class="box" style="flex:1;padding:12px 0;text-align:center"><div class="mono" style="font-size:20px;font-weight:700">4</div><div class="muted" style="font-size:12px">OK</div></div>
+      <div class="box" style="flex:1;padding:12px 0;text-align:center"><div class="mono" style="font-size:20px;font-weight:700;color:#78716c">3</div><div class="muted" style="font-size:12px">Miss</div></div>
+    </div>
+    <div class="row" style="width:100%;margin-top:16px;justify-content:space-between;font-size:13px;color:var(--muted-fg)">
+      <span><b class="mono" style="color:var(--fg)">90%</b> accuracy</span><span><b class="mono" style="color:var(--fg)">3.4s</b> avg</span><span><b style="color:var(--fg)">+2 ★</b> mastered</span>
+    </div>
+    <div style="width:100%;margin-top:26px">
+      <div class="row" style="justify-content:space-between;font-size:14px"><span style="font-weight:600">Lv 7 <span class="muted" style="font-weight:400">+180 XP</span></span><span class="mono muted">4,820 / 5,200</span></div>
+      <div class="bar" style="margin-top:6px"><i style="width:73%"></i></div>
+    </div>
+    <div class="row" style="gap:12px;width:100%;margin-top:auto;margin-bottom:40px">
+      <div class="btn outline" style="flex:1">Retry misses</div>
+      <div class="btn primary" style="flex:1">Done</div>
+    </div>
+  </div>
+</div>
+<div class="caption">9 · Run results<small>Score earns a rank: S · A · B · C · D</small></div>
+</div>
+
+<script>
+  const want = location.hash.slice(1).split(",").filter(Boolean);
+  if (want.length) document.querySelectorAll(".wrap").forEach(w => { if (!want.includes(w.id)) w.remove(); });
+</script>
+</body>
+</html>

@@ -20,6 +20,7 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── scripts/seed-admin.mjs           Explicit production admin bootstrap with transactional credentials
 ├── docs/monitoring.md               Grafana Cloud integration, deployment settings, and operational verification
 ├── docs/deployment.md               Provisioning and single-host production deploy through Cloudflare Tunnel
+├── docs/flashcards/                 Planned flashcard mode: gameplay and design plan, mobile mockups
 ├── deploy/                         Production Compose stack (web, Postgres, migrate, cloudflared) and env examples
 ├── deploy/infra/                   OpenTofu: Lightsail host, Cloudflare Tunnel/DNS/zone settings, budget alert
 ├── Dockerfile                      Dependencies, dev server, production build, and standalone runner
