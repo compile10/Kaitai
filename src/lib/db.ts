@@ -1,5 +1,5 @@
 import { safeMessage } from "@common/redaction";
-import type { DeckCard, RunRank } from "@common/types";
+import type { CardReviewPhase, DeckCard, RunRank } from "@common/types";
 import { type ColumnType, Kysely, PostgresDialect } from "kysely";
 import { Pool, types } from "pg";
 
@@ -18,8 +18,20 @@ export interface Database {
   user_settings: {
     user_id: string;
     // jsonb: written as serialized JSON, read back as a parsed object.
-    preferences: ColumnType<Record<string, unknown>, string, string>;
+    preferences: ColumnType<
+      Record<string, unknown>,
+      string | undefined,
+      string
+    >;
     updated_at: Date;
+    xp: ColumnType<number, number | undefined, number>;
+    current_streak: ColumnType<number, number | undefined, number>;
+    longest_streak: ColumnType<number, number | undefined, number>;
+    last_played_on: ColumnType<string | null, string | undefined, string>;
+    daily_quest_target: ColumnType<number, number | undefined, number>;
+    daily_quest_progress: ColumnType<number, number | undefined, number>;
+    daily_quest_date: ColumnType<string | null, string | undefined, string>;
+    time_zone: ColumnType<string | null, string | undefined, string | null>;
   };
   decks: {
     id: string;
@@ -45,6 +57,20 @@ export interface Database {
     added_at: ColumnType<Date, Date | undefined, never>;
     last_played_at: ColumnType<Date | null, never, Date>;
   };
+  card_review_state: {
+    user_id: string;
+    deck_id: string;
+    card_id: string;
+    phase: CardReviewPhase;
+    due: Date;
+    stability: number;
+    difficulty: number;
+    scheduled_days: number;
+    learning_step: ColumnType<number, number | undefined, number>;
+    reps: number;
+    lapses: ColumnType<number, number | undefined, number>;
+    last_reviewed_at: Date;
+  };
   inviteCodes: {
     id: string;
     code: string;
@@ -63,6 +89,9 @@ export interface Database {
 // int8 (bigint, count(*)) values here are epoch milliseconds and counts, well
 // within Number range; Better Auth's rate limiter does arithmetic on them.
 types.setTypeParser(types.builtins.INT8, Number);
+// date columns are calendar days in the account's time zone; keep them as
+// YYYY-MM-DD instead of a Date at server-local midnight.
+types.setTypeParser(types.builtins.DATE, (value) => value);
 
 function createPool() {
   const pool = new Pool({
