@@ -110,3 +110,36 @@ export interface Deck {
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
 }
+
+export type RunRank = "S" | "A" | "B" | "C" | "D";
+
+/** Per-account play settings for one deck. */
+export interface DeckPlaySettings {
+  timePerCard: 5 | 10 | 15 | "zen"; // Seconds; Zen has no timer and no score
+  cardFront: "japanese" | "english" | "listen";
+  newCardsPerRun: number;
+  audioOnReveal: boolean;
+  soundEffects: boolean;
+  haptics: boolean;
+}
+
+export const DEFAULT_DECK_PLAY_SETTINGS: DeckPlaySettings = {
+  timePerCard: 10,
+  cardFront: "japanese",
+  newCardsPerRun: 10,
+  audioOnReveal: true,
+  soundEffects: true,
+  haptics: true,
+};
+
+/** One account's data for a deck it has added. */
+export interface UserDeckData {
+  deckId: string;
+  settings: DeckPlaySettings;
+  bestScore: number | null; // Null until the first finished Run
+  bestRank: RunRank | null;
+  bestCombo: number;
+  runsPlayed: number;
+  addedAt: string; // ISO date string
+  lastPlayedAt: string | null; // ISO date string
+}

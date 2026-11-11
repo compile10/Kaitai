@@ -15,7 +15,7 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── mobile/                         Expo app; own package.json, talks to the web API
 ├── public/                         Static assets served by Next
 ├── postgres/Dockerfile             Official Postgres 17 image plus pg_cron
-├── postgres/migrations/            Forward-only SQL schema migrations (Better Auth + app tables, flashcard decks, pg_cron expiry jobs)
+├── postgres/migrations/            Forward-only SQL schema migrations (Better Auth + app tables, flashcard decks and per-account deck data, pg_cron expiry jobs)
 ├── scripts/migrate.mjs              Applies pending migrations (Kysely Migrator)
 ├── scripts/seed-admin.mjs           Explicit production admin bootstrap with transactional credentials
 ├── docs/monitoring.md               Grafana Cloud integration, deployment settings, and operational verification
@@ -41,7 +41,7 @@ When testing, run the web app through the dockerfile with docker compose.
 | --- | --- |
 | `monitoring.ts` | Shared client error labels, error preparation, and reporting |
 | `redaction.ts` | Shared diagnostic text redaction, sensitive attribute detection, and message/stack sanitization |
-| `types.ts` | `SentenceAnalysis`, word/punctuation `SentenceNode` union, `UserSettings`, history/invite shapes, flashcard `Deck`/`DeckCard` |
+| `types.ts` | `SentenceAnalysis`, word/punctuation `SentenceNode` union, `UserSettings`, history/invite shapes, flashcard `Deck`/`DeckCard`, per-account `UserDeckData` and play settings |
 | `api.ts` | `analyzeSentence`, `analyzeImage`, `createInviteCode`; `MAX_SENTENCE_LENGTH` |
 | `image.ts` | 20MB cap and allowed MIME types for image upload |
 | `tailwind.config.js` | Shared light/dark color tokens (web + NativeWind) |

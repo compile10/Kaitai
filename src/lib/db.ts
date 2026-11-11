@@ -1,5 +1,5 @@
 import { safeMessage } from "@common/redaction";
-import type { DeckCard } from "@common/types";
+import type { DeckCard, RunRank } from "@common/types";
 import { type ColumnType, Kysely, PostgresDialect } from "kysely";
 import { Pool, types } from "pg";
 
@@ -32,6 +32,18 @@ export interface Database {
     version: ColumnType<number, number | undefined, number>;
     created_at: ColumnType<Date, Date | undefined, never>;
     updated_at: ColumnType<Date, Date | undefined, Date>;
+  };
+  user_deck_data: {
+    user_id: string;
+    deck_id: string;
+    // jsonb: written as serialized JSON, read back as a parsed object.
+    settings: ColumnType<Record<string, unknown>, string | undefined, string>;
+    best_score: ColumnType<number | null, never, number | null>;
+    best_rank: ColumnType<RunRank | null, never, RunRank | null>;
+    best_combo: ColumnType<number, never, number>;
+    runs_played: ColumnType<number, never, number>;
+    added_at: ColumnType<Date, Date | undefined, never>;
+    last_played_at: ColumnType<Date | null, never, Date>;
   };
   inviteCodes: {
     id: string;
