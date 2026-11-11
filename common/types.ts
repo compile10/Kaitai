@@ -83,3 +83,30 @@ export interface UserSettings {
 export const DEFAULT_USER_SETTINGS: UserSettings = {
   showWordTranslations: true,
 };
+
+/** One flashcard in a deck's `cards` array. */
+export interface DeckCard {
+  id: string; // Stable UUID; per-account review state refers to it, so never regenerate on edit
+  word: string; // Front of the card, e.g. 食べる
+  reading: string | null; // Kana reading; null when the word is already kana
+  pitchAccent: number | null; // Downstep mora: 0 heiban, 1 atamadaka, n nakadaka/odaka; null if unknown
+  meaning: string;
+  partOfSpeech: string;
+  example: {
+    sentence: string; // Often the analyzed sentence the card was added from
+    translation: string | null;
+  } | null;
+}
+
+/** Shared deck content. Holds nothing specific to the accounts that use it. */
+export interface Deck {
+  id: string;
+  ownerId: string | null;
+  name: string;
+  description: string;
+  cards: DeckCard[];
+  cardCount: number;
+  version: number;
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+}
