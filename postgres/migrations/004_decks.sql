@@ -8,9 +8,8 @@
 
 CREATE TABLE decks (
   id text PRIMARY KEY CHECK (id NOT LIKE 'starter:%'),
-  -- Nullable: a deck may have no owner. Deleting the owner's account deletes
-  -- their decks.
-  owner_id text REFERENCES "user" ("id") ON DELETE CASCADE,
+  -- Nullable: a deck may have no owner.
+  owner_id text REFERENCES "user" ("id"),
   name text NOT NULL CHECK (char_length(name) BETWEEN 1 AND 100),
   description text NOT NULL DEFAULT '' CHECK (char_length(description) <= 1000),
   -- Array of DeckCard (common/types.ts). Card ids must stay stable across

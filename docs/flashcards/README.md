@@ -143,6 +143,6 @@ Build these with Reanimated and Gesture Handler, which are both already in the m
 
 ## Data model
 
-- **`decks`** (`postgres/migrations/004_decks.sql`): shared deck content only. Name, description, an optional owner (deleting the owner's account deletes the deck), a `cards` jsonb array of `DeckCard` (`common/types.ts`), a generated `card_count`, and a `version` that goes up with each content change. One deck can be added by many accounts, so nothing account-specific is stored here.
+- **`decks`** (`postgres/migrations/004_decks.sql`): shared deck content only. Name, description, an optional owner, a `cards` jsonb array of `DeckCard` (`common/types.ts`), a generated `card_count`, and a `version` that goes up with each content change. One deck can be added by many accounts, so nothing account-specific is stored here.
 - **Starter decks** are not in the database. They will ship with the app as JSON with `starter:<slug>` ids, which the `decks` table rejects. Because starter ids never appear in `decks`, per-account tables can't use a foreign key on the deck id.
 - Card ids inside `cards` stay the same when a card is edited. Per-account tables still to come (decks an account has added, FSRS state per card, play settings, personal bests, XP/streaks) use `(deck id, card id)` to point at a card.
