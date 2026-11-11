@@ -15,7 +15,7 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── mobile/                         Expo app; own package.json, talks to the web API
 ├── public/                         Static assets served by Next
 ├── postgres/Dockerfile             Official Postgres 17 image plus pg_cron
-├── postgres/migrations/            Forward-only SQL schema migrations (Better Auth + app tables, flashcard decks and per-account deck data, pg_cron expiry jobs)
+├── postgres/migrations/            Forward-only SQL schema migrations (Better Auth + app tables, flashcard decks, per-account deck data, card review state and progress, pg_cron expiry jobs)
 ├── scripts/migrate.mjs              Applies pending migrations (Kysely Migrator)
 ├── scripts/seed-admin.mjs           Explicit production admin bootstrap with transactional credentials
 ├── docs/monitoring.md               Grafana Cloud integration, deployment settings, and operational verification
@@ -41,7 +41,7 @@ When testing, run the web app through the dockerfile with docker compose.
 | --- | --- |
 | `monitoring.ts` | Shared client error labels, error preparation, and reporting |
 | `redaction.ts` | Shared diagnostic text redaction, sensitive attribute detection, and message/stack sanitization |
-| `types.ts` | `SentenceAnalysis`, word/punctuation `SentenceNode` union, `UserSettings`, history/invite shapes, flashcard `Deck`/`DeckCard`, per-account `UserDeckData` and play settings |
+| `types.ts` | `SentenceAnalysis`, word/punctuation `SentenceNode` union, `UserSettings`, history/invite shapes, flashcard `Deck`/`DeckCard`, per-account `UserDeckData` and play settings, `CardReviewState`, `AccountProgress` |
 | `api.ts` | `analyzeSentence`, `analyzeImage`, `createInviteCode`; `MAX_SENTENCE_LENGTH` |
 | `image.ts` | 20MB cap and allowed MIME types for image upload |
 | `tailwind.config.js` | Shared light/dark color tokens (web + NativeWind) |
@@ -94,7 +94,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `api-auth.ts` | Route-configured auth, permission, and rate-limit wrappers; thrown-error responses; trusted proxy IP extraction |
 | `db.ts` | Single server-side Postgres pool + typed Kysely instance (dev: pool reused on `globalThis`) |
 | `rate-limit.ts` | Postgres-backed per-user/per-IP route limits and per-account sign-in limits, keyed by HMAC |
-| `settings.ts` | Account preference helpers + authenticated settings resolver |
+| `settings.ts` | Account preference helpers + authenticated settings resolver (`user_settings` also holds flashcard progress) |
 | `history.ts` | `history` table; upsert on `(user_id, sentence)` and paginated listing; stores the analysis model for debugging |
 | `invites.ts` | `inviteCodes` table: creation, validation, serialization, and expiry; auth claims use the signup transaction |
 | `cors.ts` | JSON + preflight helpers, `ApiError` for client-facing failures, error trace IDs, and same-origin browser CORS policy |

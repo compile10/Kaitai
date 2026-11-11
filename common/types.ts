@@ -143,3 +143,35 @@ export interface UserDeckData {
   addedAt: string; // ISO date string
   lastPlayedAt: string | null; // ISO date string
 }
+
+/** FSRS card phase once reviewed; a card with no review state is new. */
+export type CardReviewPhase = "learning" | "review" | "relearning";
+
+/** One account's FSRS scheduling state for one card. */
+export interface CardReviewState {
+  deckId: string;
+  cardId: string;
+  phase: CardReviewPhase;
+  due: string; // ISO date string
+  stability: number; // Days until recall probability falls to 90%
+  difficulty: number; // 1–10
+  scheduledDays: number;
+  learningStep: number;
+  reps: number;
+  lapses: number;
+  lastReviewedAt: string; // ISO date string
+}
+
+/** Account-wide flashcard progress. */
+export interface AccountProgress {
+  xp: number;
+  currentStreak: number;
+  longestStreak: number;
+  lastPlayedOn: string | null; // YYYY-MM-DD in the account's time zone
+  dailyQuest: {
+    target: number;
+    progress: number;
+    date: string | null; // YYYY-MM-DD in the account's time zone
+  };
+  timeZone: string | null; // IANA name; null means UTC
+}
