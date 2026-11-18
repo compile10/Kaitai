@@ -17,6 +17,8 @@ const MAX_REPAIR_ATTEMPTS = 2;
 const INLINE_TAGS = ["strong", "em", "br"];
 const INLINE_TAG_LIST = INLINE_TAGS.map((tag) => `<${tag}>`).join(", ");
 
+// TODO: Give set phrases (ことにする, ように, という, 必要がある) their own node
+// type. Their meaning differs from their parts, so splitting them misleads learners.
 const ANALYSIS_PROMPT = `Analyze the following Japanese sentence and break it down into its constituent words and phrases. For each word/phrase, identify what it modifies or relates to in the sentence. This will be used to create a visual diagram showing the grammatical relationships.
 
 Sentence: {{SENTENCE}}
@@ -45,6 +47,8 @@ IMPORTANT RULES:
    - Objects (を) modify verbs
    - Topics (は) do NOT modify anything - they provide context only
    - Subjects (が) modify the verb or an adjective they are attached to
+   - Copulas and sentence-ending auxiliaries (だ, です, でしょう, らしい, じゃん) modify the word before them; other words modify that content word, not the copula. Examples: "学生です" → です modifies 学生; "本を読むのが好きだ" → の modifies 好き, だ modifies 好き; "中止になるでしょう" → でしょう modifies なる.
+   - The last word of a quoted clause modifies the と or って that quotes it, and that word modifies the quoting verb ("「明日来る」と言った" → 来る modifies と, と modifies 言った).
 
 5. Copy each word's "text" exactly as it is written in the sentence. Do NOT convert kana to kanji or kanji to kana, and never include punctuation in a word.
 
@@ -52,15 +56,19 @@ IMPORTANT RULES:
    - Keep together: verb/adjective stems with their endings and auxiliaries (聞いています, 掃除させた, 忘れてしまった, 叱られた, 甘くなかった, 見てみたい).
    - Split off as attachedParticle: particles that link clauses (から, ので, のに, ながら, けど, たら's ら, と, て is NOT split). Example: "読みながら" → { text: "読み", attachedParticle: { text: "ながら", ... } }; "降ったら" → { text: "降った", attachedParticle: { text: "ら", ... } }.
    - Split off as their own word: copulas and sentence-ending auxiliaries (だ, です, でしょう, らしい). Examples: "中止になるでしょう" → "中止" (に) | "なる" | "でしょう"; "マンションになっている" → "マンション" (に) | "なっている".
+   - Keep casual contractions whole: っつった, なきゃ, ちゃった, てる, じゃん are never split into fragments.
+   - Keep honorific お/ご〜になる and humble お/ご〜する forms whole: "お帰りになりました", "お待ちします", "ご案内します".
    - Nouns joined by の are separate words: "子供の頃" → "子供" (の) | "頃".
+   - Nominalizers の and こと are their own words with the following particle attached: "読むのが" → "読む" | "の" (が); "できないことが" → "できない" | "こと" (が).
    - Each character of the sentence belongs to exactly one word, attached particle, or punctuation entry. A word's text never starts with the particle attached to the previous word (wrong: "マンション" (に) | "になっている").
 
 7. PUNCTUATION: Punctuation is part of the grammar. The "nodes" array holds two node types, in sentence order:
    - Word nodes (type: "word") for everything except punctuation.
-   - Punctuation nodes (type: "punctuation") for every punctuation mark or symbol (。、？！「」『』…・〜♪ etc.), one mark per node, with "description" giving its function in THIS sentence in a few words (e.g. "pause after the reason clause", "marks a question", "opens quoted speech"). You may use HTML in the description, limited to ${INLINE_TAG_LIST}.
+   - Punctuation nodes (type: "punctuation") for every punctuation mark or symbol (。、？！「」『』…・〜♪ etc.), one mark per node ("？！" is two nodes; a run of the same mark such as "……" is one), with "description" giving its function in THIS sentence in a few words (e.g. "pause after the reason clause", "marks a question", "opens quoted speech"). You may use HTML in the description, limited to ${INLINE_TAG_LIST}.
    Words never modify punctuation nodes. A particle after a closing quote is its own word node ("「…」と言った" → "」" | "と" | "言った").
    Exceptions:
    - The ・ inside a single foreign name stays part of that word ("トム・クルーズ" is one word).
+   - A hyphen inside a word stays part of it ("Wi-Fi", "T-シャツ").
    - Numbers stay one word with their symbols and separators: prices, decimals, times, percentages, units, signs, and ranges ("￥500", "1,000円", "3.5キロ", "10:30", "50％", "25℃", "−5℃", "10〜20人"). Punctuation nodes are only for marks that do grammatical work.
    Example: "雨なので、" → { type: "word", text: "雨", attachedParticle: { text: "なので", ... } } | { type: "punctuation", text: "、", description: "pause after the reason clause" }
 

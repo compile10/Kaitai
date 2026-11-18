@@ -59,6 +59,18 @@ function WordNodeComponent({ data }: { data: WordNodeData }) {
         style={{ opacity: 0, right: 0 }}
       />
       <Handle
+        type="source"
+        position={Position.Left}
+        id="source-left"
+        style={{ opacity: 0, left: 0 }}
+      />
+      <Handle
+        type="target"
+        position={Position.Right}
+        id="target-right"
+        style={{ opacity: 0, right: 0 }}
+      />
+      <Handle
         type="target"
         position={Position.Top}
         id="target-top"
@@ -117,12 +129,13 @@ function CustomEdge({
   } else {
     // Nodes have intermediates - use arc from top to top
     const distance = Math.abs(targetX - sourceX);
+    const direction = targetX < sourceX ? -1 : 1;
     const arcHeight = Math.max(100, Math.min(150, distance * 0.3));
 
     // Control points for a smooth high arc
-    const controlPoint1X = sourceX + distance * 0.3;
+    const controlPoint1X = sourceX + direction * distance * 0.3;
     const controlPoint1Y = sourceY - arcHeight;
-    const controlPoint2X = targetX - distance * 0.3;
+    const controlPoint2X = targetX - direction * distance * 0.3;
     const controlPoint2Y = sourceY - arcHeight;
 
     edgePath = `M ${sourceX} ${sourceY} C ${controlPoint1X} ${controlPoint1Y}, ${controlPoint2X} ${controlPoint2Y}, ${targetX} ${targetY}`;
@@ -272,15 +285,24 @@ export default function SentenceVisualization({
           const targetIndex = sortedWords.findIndex((w) => w.id === targetId);
           const nodesBetween = Math.abs(targetIndex - sourceIndex) - 1;
 
-          // Use top handles for arcing arrows, side handles for straight arrows
+          // Use top handles for arcing arrows, facing side handles for straight arrows
           const useTopHandles = nodesBetween > 0;
+          const pointsLeft = targetIndex < sourceIndex;
 
           edges.push({
             id: `${word.id}-${targetId}`,
             source: word.id,
             target: targetId,
-            sourceHandle: useTopHandles ? "source-top" : "source-right",
-            targetHandle: useTopHandles ? "target-top" : "target-left",
+            sourceHandle: useTopHandles
+              ? "source-top"
+              : pointsLeft
+                ? "source-left"
+                : "source-right",
+            targetHandle: useTopHandles
+              ? "target-top"
+              : pointsLeft
+                ? "target-right"
+                : "target-left",
             type: "custom",
             animated: false,
             data: { nodesBetween },
@@ -374,7 +396,6 @@ export default function SentenceVisualization({
                 <Controls showInteractive={false} />
               </ReactFlow>
             </div>
-
           </div>
         </div>
 

@@ -3,6 +3,8 @@ import { isPunctuationNode, type SentenceAnalysis } from "@common/types";
 const PUNCTUATION = /[\p{P}\p{S}]/u;
 // ・ may join a single foreign name (トム・クルーズ), so it is allowed inside words.
 const NAME_SEPARATOR = /・/gu;
+// A hyphen between letters or digits joins one word (Wi-Fi, T-シャツ).
+const WORD_HYPHEN = /(?<=[\p{L}\p{N}])[-‐‑](?=[\p{L}\p{N}])/gu;
 // Number expressions keep their symbols and separators (¥500, 1,000, 10:30,
 // 50%, 25°C, −5°C, 10〜20), checked after NFKC normalization.
 const NUMBER = String.raw`[-+−]?\p{Sc}?\d+(?:[.,:]\d+)*[%°]?`;
@@ -66,10 +68,15 @@ export function validateAnalysis(
         errors.push(
           `Punctuation node "${node.id}" (${node.text}) contains non-punctuation characters. Use a word node instead.`,
         );
+      } else if (new Set(node.text.trim()).size > 1) {
+        errors.push(
+          `Punctuation node "${node.id}" (${node.text}) combines different marks. Give each mark its own punctuation node.`,
+        );
       }
     } else if (
       PUNCTUATION.test(
         normalize(node.text)
+          .replace(WORD_HYPHEN, "")
           .replace(NUMBER_EXPRESSION, "")
           .replace(NAME_SEPARATOR, ""),
       )
