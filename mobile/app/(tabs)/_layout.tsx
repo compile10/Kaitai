@@ -46,6 +46,19 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="decks"
+        options={{
+          title: "Decks",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "albums" : "albums-outline"}
+              size={24}
+              color={color as string}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="more"
         options={{
           title: "Account",

@@ -1,6 +1,6 @@
 # Flashcard mode plan
 
-Status: in progress. Mobile app first; web follows using the same shared code. Built so far: the storage tables and `GET`/`PUT /api/progress`.
+Status: in progress. Mobile app first; web follows using the same shared code. Built so far: the storage tables, `GET`/`PUT /api/progress`, and the mobile Decks tab (deck lists are placeholder data).
 
 ![Mobile mockups](mockups.png)
 

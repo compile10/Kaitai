@@ -21,6 +21,8 @@ module.exports = {
       colors: varColors,
       fontFamily: {
         "geist-reg": ["Geist_400Regular"],
+        // Custom fonts have one weight per file; use this, not font-bold.
+        "geist-bold": ["Geist_700Bold"],
       },
     },
   },

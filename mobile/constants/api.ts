@@ -38,6 +38,7 @@ export const API_ENDPOINTS = {
   analyze: "/api/analyze",
   analyzeImage: "/api/analyze-image",
   history: "/api/history",
+  progress: "/api/progress",
 } as const;
 
 /**

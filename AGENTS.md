@@ -157,6 +157,7 @@ Separate Expo 58 app (file routing). Dev API host is inferred from Expo `hostUri
 | --- | --- |
 | `app/_layout.tsx` | Root stack, Geist fonts, theme vars, Query, settings preload |
 | `app/(tabs)/index.tsx` | Analyze tab |
+| `app/(tabs)/decks.tsx` | Decks tab: progress banner and deck lists (decks are placeholder data) |
 | `app/(tabs)/more.tsx` | More / overflow tab |
 | `app/results.tsx` | Analysis results |
 | `app/history.tsx` | History |
@@ -165,6 +166,7 @@ Separate Expo 58 app (file routing). Dev API host is inferred from Expo `hostUri
 | `components/themed-text.tsx` | Geist `ThemedText` / `ThemedTextInput` |
 | `components/dependency-map.tsx` | SVG dependency graph |
 | `components/bottom-sheet.tsx` / `bottom-sheet-picker.tsx` | Sheets |
+| `components/decks/` | Decks tab pieces: progress banner, deck row with faded Unsplash banner, streak flame |
 | `constants/api.ts` | `API_BASE_URL` + endpoint map |
 | `app.json` / `app.config.ts` | App identity, native configuration, validated release API origin |
 | `eas.json` | Development, internal preview, and store build profiles; Play Store submit profile |
@@ -172,13 +174,15 @@ Separate Expo 58 app (file routing). Dev API host is inferred from Expo `hostUri
 | `assets/images/` | App icon, Android adaptive icon layers, splash image, web favicon |
 | `store-assets/android/` | Google Play listing icon, feature graphic, and phone/7"/10" tablet screenshots |
 | `README.md` | Mobile overview and local development setup |
-| `lib/fonts.ts` | Load Geist; NativeWind `font-geist-reg` maps to it |
+| `lib/fonts.ts` | Load Geist regular and bold; NativeWind `font-geist-reg` / `font-geist-bold` map to them |
 | `lib/auth-client.ts` | Better Auth Expo client (SecureStore) |
 | `lib/picked-image.ts` | Ephemeral transfer of picker-selected images to the results screen |
 | `lib/auth-fetch.ts` | Authenticated fetch |
 | `lib/query-client.ts` | Shared Query client with failure reporting |
 | `lib/monitoring.ts` | Mobile JavaScript error reporting through the web API |
 | `hooks/use-settings-sync.ts` | Server account preferences → Zustand; query + mutation |
+| `hooks/use-account-progress.ts` | Flashcard progress query; keeps the account time zone matched to the device |
+| `lib/dummy-decks.ts` | Placeholder deck summaries with Unsplash banner photos until deck endpoints exist |
 | `stores/settings-store.ts` | Persisted account preferences |
 | `android/` / `ios/` | Native projects from `expo prebuild` |
 

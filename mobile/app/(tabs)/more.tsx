@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { PROGRESS_KEY } from "@/hooks/use-account-progress";
 import { useRawCSSTheme } from "@/hooks/use-raw-css-theme";
 import { SETTINGS_KEY } from "@/hooks/use-settings-sync";
 import { authClient } from "@/lib/auth-client";
@@ -17,6 +18,7 @@ export default function MoreScreen() {
   const handleSignOut = async () => {
     await authClient.signOut();
     queryClient.removeQueries({ queryKey: SETTINGS_KEY });
+    queryClient.removeQueries({ queryKey: PROGRESS_KEY });
   };
 
   if (isPending) {
