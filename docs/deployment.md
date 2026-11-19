@@ -82,10 +82,20 @@ Then apply:
 ```bash
 cd deploy/infra
 cp terraform.tfvars.example terraform.tfvars   # fill in
+aws s3 cp terraform.tfvars "s3://$BUCKET/beta/terraform.tfvars" --sse AES256
 tofu init -backend-config="bucket=$BUCKET"
 tofu plan -out beta.tfplan
 tofu apply beta.tfplan
 ```
+
+`terraform.tfvars` is gitignored; the copy next to the state is the source of
+truth. On another machine, fetch it before planning:
+
+```bash
+aws s3 cp "s3://$BUCKET/beta/terraform.tfvars" deploy/infra/
+```
+
+After editing it, upload it again with the first `aws s3 cp` command.
 
 Re-run `tofu plan` after console changes to detect drift.
 
