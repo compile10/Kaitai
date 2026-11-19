@@ -1,7 +1,7 @@
 # ── AWS: Lightsail host ───────────────────────
 
 resource "aws_lightsail_key_pair" "deploy" {
-  name       = "kaitai-beta"
+  name       = "kaitai-beta-deploy"
   public_key = file(pathexpand(var.ssh_public_key_path))
 }
 
