@@ -162,9 +162,14 @@ unset ADMIN_EMAIL ADMIN_NAME ADMIN_PASSWORD
 
 The host never builds the app and holds no GitHub credential. GitHub holds no
 AWS credentials; reaching the host takes both the Access service token and the
-restricted deploy key. Deploys
+restricted deploy key. Runs
 are serialized; a newer push replaces a queued one. To redeploy `main`, run
 the workflow from the Actions tab.
+
+`deploy.sh` refuses a commit older than the one deployed, recorded in
+`.git/kaitai-deployed` on the host, so re-running an old workflow run cannot
+roll production back. To roll back, revert on `main`. After a successful
+deploy it deletes every other `kaitai-web` and `kaitai-tools` image.
 
 ### Zero-downtime deploys
 

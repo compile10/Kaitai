@@ -26,6 +26,17 @@ wait_healthy() {
   fail "web is $status"
 }
 
+# Keeps only the running app images; an image still used by a container is skipped.
+remove_old_images() {
+  local keep id
+  keep=$(docker image inspect -f '{{.Id}}' kaitai-web:current kaitai-tools:current)
+  for id in $(docker image ls -q --no-trunc \
+    --filter "reference=$REGISTRY/kaitai-web" --filter "reference=$REGISTRY/kaitai-tools" | sort -u); do
+    grep -qx "$id" <<<"$keep" || docker image rm "$id" >/dev/null 2>&1 || true
+  done
+  docker image prune -f >/dev/null
+}
+
 # https://github.com/wowu/docker-rollout, pinned and checksummed.
 rollout() {
   local bin="$HOME/.cache/kaitai/docker-rollout-$ROLLOUT_VERSION"
@@ -56,9 +67,22 @@ main() {
 
   git fetch --quiet origin main
   git merge-base --is-ancestor "$commit" FETCH_HEAD || fail "$commit is not on main"
+  local deployed
+  deployed=$(cat .git/kaitai-deployed 2>/dev/null || git rev-parse HEAD)
+  if [[ $commit != "$deployed" ]] && git merge-base --is-ancestor "$commit" "$deployed"; then
+    fail "$commit is older than the deployed $deployed; revert on main to roll back"
+  fi
   git checkout --quiet --detach "$commit"
 
-  "${COMPOSE[@]}" build --quiet postgres
+  # Rebuilds produce a new image ID even from the same Dockerfile, which would
+  # restart Postgres, so build once per Dockerfile version.
+  local pg_image
+  pg_image="kaitai-postgres:$(git rev-parse --short=12 HEAD:postgres/Dockerfile)"
+  if ! docker image inspect "$pg_image" >/dev/null 2>&1; then
+    "${COMPOSE[@]}" build --quiet postgres
+    docker tag kaitai-postgres:current "$pg_image"
+  fi
+  docker tag "$pg_image" kaitai-postgres:current
 
   # Registry credentials live only for this run.
   DOCKER_CONFIG=$(mktemp -d)
@@ -76,7 +100,8 @@ main() {
   rollout -f deploy/compose.yml --timeout 120 --wait-after-healthy 3 web
   "${COMPOSE[@]}" up -d --no-build --remove-orphans
   wait_healthy
-  docker image prune -af --filter until=720h >/dev/null
+  echo "$commit" >.git/kaitai-deployed
+  remove_old_images
   echo "deployed $commit"
 }
 

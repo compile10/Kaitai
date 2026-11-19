@@ -10,8 +10,8 @@ x-logging: &logging
 
 x-database-url: &database-url DATABASE_URL=postgres://kaitai:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in deploy/.env}@postgres:5432/kaitai
 
-# web and the builder-stage services run the :current images: built here with
-# --build, or pulled and tagged by deploy/deploy.sh.
+# Services run the :current images: built here with --build, or pulled
+# (web, tools) and built once per Dockerfile version (postgres) by deploy/deploy.sh.
 services:
   web:
     image: kaitai-web:current
@@ -56,6 +56,7 @@ services:
     logging: *logging
 
   postgres:
+    image: kaitai-postgres:current
     build:
       context: ../postgres
     environment:

@@ -9,6 +9,12 @@ on:
 
 permissions: {}
 
+# Whole runs queue in push order, so builds can't finish out of order; a newer
+# run replaces one still waiting.
+concurrency:
+  group: production
+  cancel-in-progress: false
+
 env:
   REGISTRY: ghcr.io/compile10
   SSH_HOST: ssh.kaitai.app
@@ -67,9 +73,6 @@ jobs:
     environment:
       name: production
       url: https://kaitai.app
-    concurrency:
-      group: production
-      cancel-in-progress: false
     permissions:
       packages: read
     steps:
