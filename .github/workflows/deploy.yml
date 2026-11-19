@@ -1,0 +1,118 @@
+# Builds production images on every push to main and deploys them to the
+# Lightsail host. See "Continuous deployment" in docs/deployment.md.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+env:
+  REGISTRY: ghcr.io/compile10
+  SSH_HOST: ssh.kaitai.app
+  CLOUDFLARED_VERSION: 2026.10.0
+  CLOUDFLARED_SHA256: d33ff2d14475178d2012c2c56beba87389ac5ded27649519f198a7d3134a99db
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      web: ${{ steps.web.outputs.digest }}
+      tools: ${{ steps.tools.outputs.digest }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: web
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          target: runner
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.REGISTRY }}/kaitai-web:${{ github.sha }}
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          cache-from: type=gha,scope=kaitai
+          cache-to: type=gha,scope=kaitai,mode=max
+
+      # Runs migrations and one-off scripts on the host.
+      - id: tools
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          target: builder
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.REGISTRY }}/kaitai-tools:${{ github.sha }}
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          cache-from: type=gha,scope=kaitai
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: production
+      url: https://kaitai.app
+    concurrency:
+      group: production
+      cancel-in-progress: false
+    permissions:
+      packages: read
+    steps:
+      - name: Install cloudflared
+        run: |
+          set -euo pipefail
+          curl -fsSL -o "$RUNNER_TEMP/cloudflared" \
+            "https://github.com/cloudflare/cloudflared/releases/download/$CLOUDFLARED_VERSION/cloudflared-linux-amd64"
+          echo "$CLOUDFLARED_SHA256  $RUNNER_TEMP/cloudflared" | sha256sum --check --quiet
+          chmod +x "$RUNNER_TEMP/cloudflared"
+
+      # SSH goes through the Cloudflare Tunnel; Access admits only the deploy
+      # service token. The key can only run deploy/deploy.sh on the host
+      # (forced command). The job's registry token goes over stdin and expires
+      # with the job.
+      - name: Deploy
+        env:
+          TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+          DEPLOY_KNOWN_HOSTS: ${{ vars.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WEB_DIGEST: ${{ needs.build.outputs.web }}
+          TOOLS_DIGEST: ${{ needs.build.outputs.tools }}
+        run: |
+          set -euo pipefail
+          install -m 600 /dev/null "$RUNNER_TEMP/deploy_key"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$RUNNER_TEMP/deploy_key"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/known_hosts"
+          printf '%s\n' "$REGISTRY_TOKEN" | ssh \
+            -i "$RUNNER_TEMP/deploy_key" \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/known_hosts" \
+            -o ProxyCommand="$RUNNER_TEMP/cloudflared access ssh --hostname %h" \
+            -o ServerAliveInterval=30 \
+            "ubuntu@$SSH_HOST" \
+            deploy "$GITHUB_SHA" "$WEB_DIGEST" "$TOOLS_DIGEST" "$GITHUB_ACTOR"
+
+      - name: Check public health
+        run: |
+          for _ in $(seq 1 12); do
+            curl -fsS --max-time 10 https://kaitai.app/api/health && exit 0
+            sleep 5
+          done
+          exit 1

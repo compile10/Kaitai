@@ -42,3 +42,8 @@ variable "monthly_budget_usd" {
   type        = string
   default     = "25"
 }
+
+variable "deploy_service_token_id" {
+  description = "ID (not Client ID) of the Cloudflare Access service token GitHub Actions uses for SSH"
+  type        = string
+}

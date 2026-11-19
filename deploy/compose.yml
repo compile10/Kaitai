@@ -1,4 +1,4 @@
-# Production stack for a single host: Next.js, PostgreSQL, and a Cloudflare Tunnel.
+# Production stack for a single host: Next.js behind Caddy, PostgreSQL, and a Cloudflare Tunnel.
 # No ports are published; all public traffic arrives through the tunnel.
 # POSTGRES_PASSWORD comes from deploy/.env. See docs/deployment.md.
 
@@ -10,8 +10,11 @@ x-logging: &logging
 
 x-database-url: &database-url DATABASE_URL=postgres://kaitai:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in deploy/.env}@postgres:5432/kaitai
 
+# web and the builder-stage services run the :current images: built here with
+# --build, or pulled and tagged by deploy/deploy.sh.
 services:
   web:
+    image: kaitai-web:current
     build:
       context: ..
       target: runner
@@ -21,11 +24,25 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+    # Lets in-flight requests finish on shutdown; Cloudflare times out at 100s.
+    stop_grace_period: 90s
+    restart: unless-stopped
+    logging: *logging
+
+  # Routes to every running web container; see deploy/Caddyfile.
+  caddy:
+    image: caddy:2.11.9-alpine
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      web:
+        condition: service_healthy
     restart: unless-stopped
     logging: *logging
 
   # Applies pending schema migrations before web starts.
   migrate:
+    image: kaitai-tools:current
     build:
       context: ..
       target: builder
@@ -56,20 +73,24 @@ services:
     restart: unless-stopped
     logging: *logging
 
-  # Outbound-only connector; routes kaitai.app to http://web:3000.
+  # Outbound-only connector; routes kaitai.app to http://caddy:80 and, behind
+  # Cloudflare Access, ssh.kaitai.app to the host's sshd.
   cloudflared:
     image: cloudflare/cloudflared:2026.10.0
     command: ["tunnel", "--no-autoupdate", "run"]
     env_file: .env.tunnel
+    extra_hosts:
+      - host.docker.internal:host-gateway
     depends_on:
-      web:
-        condition: service_healthy
+      caddy:
+        condition: service_started
     restart: unless-stopped
     logging: *logging
 
   # One-off: docker compose -f deploy/compose.yml run --rm seed
   seed:
     profiles: ["tools"]
+    image: kaitai-tools:current
     build:
       context: ..
       target: builder

@@ -84,8 +84,9 @@ data "cloudflare_zone" "this" {
 }
 
 locals {
-  zone_id    = data.cloudflare_zone.this.zone_id
-  account_id = data.cloudflare_zone.this.account.id
+  zone_id      = data.cloudflare_zone.this.zone_id
+  account_id   = data.cloudflare_zone.this.account.id
+  ssh_hostname = "ssh.${var.domain}"
 }
 
 # No tunnel_secret: Cloudflare generates it, so no connector credential is
@@ -104,13 +105,20 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "web" {
     ingress = [
       {
         hostname = var.domain
-        service  = "http://web:3000" # Compose service name
+        service  = "http://caddy:80" # Compose service name
+      },
+      {
+        hostname = local.ssh_hostname
+        service  = "ssh://host.docker.internal:22" # host sshd; see deploy/compose.yml
       },
       {
         service = "http_status:404"
       },
     ]
   }
+
+  # The SSH route must never be live without Access in front of it.
+  depends_on = [cloudflare_zero_trust_access_application.ssh]
 }
 
 resource "cloudflare_dns_record" "apex" {
@@ -120,6 +128,45 @@ resource "cloudflare_dns_record" "apex" {
   content = "${cloudflare_zero_trust_tunnel_cloudflared.web.id}.cfargotunnel.com"
   proxied = true
   ttl     = 1 # automatic; required for proxied records
+}
+
+resource "cloudflare_dns_record" "ssh" {
+  zone_id = local.zone_id
+  name    = local.ssh_hostname
+  type    = "CNAME"
+  content = "${cloudflare_zero_trust_tunnel_cloudflared.web.id}.cfargotunnel.com"
+  proxied = true
+  ttl     = 1
+
+  depends_on = [cloudflare_zero_trust_access_application.ssh]
+}
+
+# ── Cloudflare: Access for CI SSH ─────────────
+
+# The service token is created in the dashboard so its secret stays out of
+# state; only its ID is passed in.
+resource "cloudflare_zero_trust_access_policy" "deploy" {
+  account_id = local.account_id
+  name       = "kaitai-github-deploy"
+  decision   = "non_identity"
+  include = [{
+    service_token = {
+      token_id = var.deploy_service_token_id
+    }
+  }]
+}
+
+resource "cloudflare_zero_trust_access_application" "ssh" {
+  account_id                = local.account_id
+  name                      = "kaitai-ssh"
+  type                      = "self_hosted"
+  domain                    = local.ssh_hostname
+  app_launcher_visible      = false
+  service_auth_401_redirect = true
+  policies = [{
+    id         = cloudflare_zero_trust_access_policy.deploy.id
+    precedence = 1
+  }]
 }
 
 # Zone-wide settings. Removing an entry stops managing it but does not revert it.

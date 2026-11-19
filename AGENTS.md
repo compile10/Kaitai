@@ -19,10 +19,12 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── scripts/migrate.mjs              Applies pending migrations (Kysely Migrator)
 ├── scripts/seed-admin.mjs           Explicit production admin bootstrap with transactional credentials
 ├── docs/monitoring.md               Grafana Cloud integration, deployment settings, and operational verification
-├── docs/deployment.md               Provisioning and single-host production deploy through Cloudflare Tunnel
+├── docs/deployment.md               Provisioning, continuous deployment, and single-host production through Cloudflare Tunnel
 ├── docs/flashcards/                 Planned flashcard mode: gameplay and design plan, mobile mockups
-├── deploy/                         Production Compose stack (web, Postgres, migrate, cloudflared) and env examples
-├── deploy/infra/                   OpenTofu: Lightsail host, Cloudflare Tunnel/DNS/zone settings, budget alert
+├── deploy/                         Production Compose stack (web, Caddy, Postgres, migrate, cloudflared) and env examples
+├── deploy/Caddyfile                 Reverse proxy between cloudflared and web containers for zero-downtime deploys
+├── deploy/deploy.sh                 Host-side forced command: deploys CI-built images for a commit on main, rolling web
+├── deploy/infra/                   OpenTofu: Lightsail host, Cloudflare Tunnel/DNS/zone settings, Access-protected CI SSH route, budget alert
 ├── Dockerfile                      Dependencies, dev server, production build, and standalone runner
 ├── docker-compose.yml              Local web + Postgres 17 (pg_cron) + migrations (not for production)
 ├── package.json                    Web scripts: next (turbopack), biome lint/format
@@ -31,7 +33,7 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── biome.json                      Lint/format for the web tree
 ├── components.json                 shadcn/ui config
 ├── .env.local.example              OpenRouter key, server/auth configuration, and optional DEV_ADMIN_* overrides
-├── .github/workflows/              Claude Code GitHub Actions
+├── .github/workflows/              Production build + deploy on push to main; Claude Code GitHub Actions
 └── README.md                       Project overview, setup instructions
 ```
 

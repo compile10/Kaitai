@@ -1,0 +1,30 @@
+# Sits between cloudflared and web so deploys can swap web containers without
+# dropping requests. See "Zero-downtime deploys" in docs/deployment.md.
+{
+	admin off
+	auto_https off
+	persist_config off
+	servers {
+		# Keep cloudflared's X-Forwarded-* headers; it is the only client.
+		trusted_proxies static private_ranges
+	}
+}
+
+:80 {
+	reverse_proxy {
+		# Every running web container, re-resolved through Docker DNS.
+		dynamic a web 3000 {
+			refresh 1s
+		}
+
+		# A refused or failed connection is retried on another container
+		# for any method; that covers containers starting up or shutting down.
+		lb_try_duration 10s
+		fail_duration 5s
+		flush_interval -1
+
+		transport http {
+			dial_timeout 2s
+		}
+	}
+}
