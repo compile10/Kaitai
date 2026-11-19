@@ -24,14 +24,22 @@ export interface Database {
       string
     >;
     updated_at: Date;
+  };
+  account_progress: {
+    user_id: string;
     xp: ColumnType<number, number | undefined, number>;
     current_streak: ColumnType<number, number | undefined, number>;
     longest_streak: ColumnType<number, number | undefined, number>;
-    last_played_on: ColumnType<string | null, string | undefined, string>;
+    last_streak_day: ColumnType<string | null, string | undefined, string>;
+    streak_forgiveness_used: ColumnType<boolean, boolean | undefined, boolean>;
+    // bit varying: read and written as a string of 0s and 1s.
+    streak_days: ColumnType<string, string | undefined, string>;
+    forgiven_days: ColumnType<string, string | undefined, string>;
     daily_quest_target: ColumnType<number, number | undefined, number>;
     daily_quest_progress: ColumnType<number, number | undefined, number>;
     daily_quest_date: ColumnType<string | null, string | undefined, string>;
     time_zone: ColumnType<string | null, string | undefined, string | null>;
+    updated_at: ColumnType<Date, Date | undefined, Date>;
   };
   decks: {
     id: string;
