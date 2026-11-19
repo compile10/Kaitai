@@ -11,7 +11,7 @@ export default function GeneralSettingsPage() {
   const mutation = useSettingsMutation();
 
   return (
-    <div className="min-w-0 flex-1 p-6">
+    <div className="min-w-0 flex-1 overflow-y-auto p-6">
       <h2 className="text-xl font-semibold text-card-foreground">General</h2>
       <div className="mt-6 flex items-center justify-between gap-6">
         <span>

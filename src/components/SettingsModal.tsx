@@ -62,7 +62,7 @@ export default function SettingsModal({
     >
       <DialogContent
         showCloseButton={false}
-        className="overflow-hidden p-0 gap-0 rounded-none sm:max-w-4xl bg-card text-card-foreground border-border max-h-[90vh] flex flex-col"
+        className="overflow-hidden p-0 gap-0 rounded-none sm:max-w-4xl bg-card text-card-foreground border-border h-[min(40rem,90vh)] flex flex-col"
       >
         <DialogTitle className="sr-only">Settings</DialogTitle>
 
@@ -125,7 +125,7 @@ export default function SettingsModal({
           </aside>
 
           {/* Content */}
-          <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             {sectionContent[activeSection]}
           </div>
         </div>
