@@ -80,10 +80,6 @@ export interface UserSettings {
   showWordTranslations: boolean;
 }
 
-export const DEFAULT_USER_SETTINGS: UserSettings = {
-  showWordTranslations: true,
-};
-
 /** One flashcard in a deck's `cards` array. */
 export interface DeckCard {
   id: string; // Stable UUID; per-account review state refers to it, so never regenerate on edit

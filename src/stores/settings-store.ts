@@ -1,12 +1,13 @@
-import { DEFAULT_USER_SETTINGS, type UserSettings } from "@common/types";
+import type { UserSettings } from "@common/types";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { createStore } from "zustand/vanilla";
 
-export type SettingsState = { settings: UserSettings };
+/** Null until the server returns the account's settings. */
+export type SettingsState = { settings: UserSettings | null };
 export type SettingsActions = { setSettings: (settings: UserSettings) => void };
 export type SettingsStore = SettingsState & SettingsActions;
 export const defaultSettingsState: SettingsState = {
-  settings: { ...DEFAULT_USER_SETTINGS },
+  settings: null,
 };
 
 export const createSettingsStore = (
@@ -16,8 +17,7 @@ export const createSettingsStore = (
     persist(
       (set) => ({
         ...initState,
-        setSettings: (settings) =>
-          set({ settings: { ...DEFAULT_USER_SETTINGS, ...settings } }),
+        setSettings: (settings) => set({ settings }),
       }),
       {
         name: "kaitai-settings",
