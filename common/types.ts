@@ -163,11 +163,29 @@ export interface AccountProgress {
   xp: number;
   currentStreak: number;
   longestStreak: number;
-  lastPlayedOn: string | null; // YYYY-MM-DD in the account's time zone
+  /** Last day the daily quest was completed; YYYY-MM-DD in the account's time zone. */
+  lastStreakDay: string | null;
+  /**
+   * Bitmask string of "0"/"1" characters, one per day: "1" = quest completed.
+   * Index 0 is today, index n is n days ago; up to 366 characters.
+   */
+  streakDays: string;
+  /**
+   * Bitmask string like streakDays: "1" = a day skipped by a time zone change
+   * and forgiven, so the streak continued. Shown as travel on the calendar.
+   */
+  forgivenDays: string;
   dailyQuest: {
     target: number;
-    progress: number;
-    date: string | null; // YYYY-MM-DD in the account's time zone
+    progress: number; // Cards cleared today
   };
   timeZone: string | null; // IANA name; null means UTC
+  /** ISO 8601 timestamp of when the current day ends and the quest resets. */
+  dayEndsAt: string;
+}
+
+/** The progress fields a player may change; omitted fields stay as they are. */
+export interface AccountProgressUpdate {
+  dailyQuestTarget?: number; // 1–1000
+  timeZone?: string | null; // IANA name; null means UTC
 }

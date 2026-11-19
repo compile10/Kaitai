@@ -1,4 +1,6 @@
 import type {
+  AccountProgress,
+  AccountProgressUpdate,
   CreateInviteCodeResponse,
   ImageAnalysisResponse,
   InviteCode,
@@ -95,4 +97,49 @@ export async function createInviteCode(url: string): Promise<InviteCode> {
   }
 
   return (data as CreateInviteCodeResponse).inviteCode;
+}
+
+/** A fetch-compatible function; mobile passes its cookie-attaching authFetch. */
+export type Fetcher = (url: string, init?: RequestInit) => Promise<Response>;
+
+/** Fetch the signed-in account's flashcard progress. */
+export async function fetchAccountProgress(
+  url: string,
+  fetcher: Fetcher = fetch,
+): Promise<AccountProgress> {
+  const response = await fetcher(url, {
+    headers: { Accept: "application/json" },
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new ApiError(
+      data.error || "Failed to load progress",
+      response.status,
+    );
+  }
+  return data as AccountProgress;
+}
+
+/** Change the daily quest target or time zone; returns the updated progress. */
+export async function updateAccountProgress(
+  url: string,
+  update: AccountProgressUpdate,
+  fetcher: Fetcher = fetch,
+): Promise<AccountProgress> {
+  const response = await fetcher(url, {
+    method: "PUT",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(update),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new ApiError(
+      data.error || "Failed to save progress",
+      response.status,
+    );
+  }
+  return data as AccountProgress;
 }

@@ -27,7 +27,8 @@ When testing, run the web app through the dockerfile with docker compose.
 ├── deploy/infra/                   OpenTofu: Lightsail host, Cloudflare Tunnel/DNS/zone settings, Access-protected CI SSH route, budget alert
 ├── Dockerfile                      Dependencies, dev server, production build, and standalone runner
 ├── docker-compose.yml              Local web + Postgres 17 (pg_cron) + migrations (not for production)
-├── package.json                    Web scripts: next (turbopack), biome lint/format
+├── package.json                    Web scripts: next (turbopack), biome lint/format, vitest
+├── vitest.config.mts               Vitest for web/API unit tests (`*.test.ts` under src/ and common/)
 ├── next.config.ts                  standalone output
 ├── tsconfig.json                   @/* → src/*, @common/* → common/*; excludes mobile
 ├── biome.json                      Lint/format for the web tree
@@ -44,7 +45,7 @@ When testing, run the web app through the dockerfile with docker compose.
 | `monitoring.ts` | Shared client error labels, error preparation, and reporting |
 | `redaction.ts` | Shared diagnostic text redaction, sensitive attribute detection, and message/stack sanitization |
 | `types.ts` | `SentenceAnalysis`, word/punctuation `SentenceNode` union, `UserSettings`, history/invite shapes, flashcard `Deck`/`DeckCard`, per-account `UserDeckData` and play settings, `CardReviewState`, `AccountProgress` |
-| `api.ts` | `analyzeSentence`, `analyzeImage`, `createInviteCode`; `MAX_SENTENCE_LENGTH` |
+| `api.ts` | `analyzeSentence`, `analyzeImage`, `createInviteCode`, account progress fetch/update; `MAX_SENTENCE_LENGTH` |
 | `image.ts` | 20MB cap and allowed MIME types for image upload |
 | `tailwind.config.js` | Shared light/dark color tokens (web + NativeWind) |
 | `assets/branding/logo.svg` | Wordmark used on web |
@@ -72,7 +73,7 @@ When testing, run the web app through the dockerfile with docker compose.
 
 ### API routes
 
-All analysis/history/settings routes require a session (`withAuth`). Telemetry accepts bounded, rate-limited signed-out reports. Invite creation requires `{ invite: ["create"] }`. `/api` is excluded from the proxy matcher so the mobile app is never HTML-redirected.
+All analysis/history/settings/progress routes require a session (`withAuth`). Telemetry accepts bounded, rate-limited signed-out reports. Invite creation requires `{ invite: ["create"] }`. `/api` is excluded from the proxy matcher so the mobile app is never HTML-redirected.
 
 | Path | Role |
 | --- | --- |
@@ -82,6 +83,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `app/api/analyze-image/route.ts` | POST image → OCR, then shared analysis pipeline |
 | `app/api/history/route.ts` | GET paginated history for the signed-in user; excludes diagnostic metadata |
 | `app/api/settings/route.ts` | GET/PUT account preferences |
+| `app/api/progress/route.ts` | GET flashcard progress (streak/quest rolled over for the account's day); PUT quest target and time zone only |
 | `app/api/admin/invite-codes/route.ts` | POST a 24h invite code (admin) |
 | `app/api/auth/[...all]/route.ts` | Better Auth catch-all |
 
@@ -97,6 +99,7 @@ All analysis/history/settings routes require a session (`withAuth`). Telemetry a
 | `db.ts` | Single server-side Postgres pool + typed Kysely instance (dev: pool reused on `globalThis`) |
 | `rate-limit.ts` | Postgres-backed per-user/per-IP route limits and per-account sign-in limits, keyed by HMAC |
 | `settings.ts` | Account preference read/update on `user_settings` |
+| `progress.ts` | `account_progress` table: day rollover in the account's time zone, time zone validation, player-editable fields |
 | `history.ts` | `history` table; upsert on `(user_id, sentence)` and paginated listing; stores the analysis model for debugging |
 | `invites.ts` | `inviteCodes` table: creation, validation, serialization, and expiry; auth claims use the signup transaction |
 | `cors.ts` | JSON + preflight helpers, `ApiError` for client-facing failures, error trace IDs, and same-origin browser CORS policy |
@@ -181,7 +184,7 @@ Separate Expo 58 app (file routing). Dev API host is inferred from Expo `hostUri
 
 ## Conventions
 
-- Web lint/format: `npm run lint` / `npm run format` (Biome). Mobile: `cd mobile && npm run lint`.
+- Web lint/format: `npm run lint` / `npm run format` (Biome). Web tests: `npm test` (Vitest). Mobile: `cd mobile && npm run lint`.
 - The analysis model is stored on history entries for debugging and excluded from client responses.
 - Image text extraction and sentence analysis share the server AI client configuration.
 - Schema changes go in a new numbered file in `postgres/migrations/`; never edit an applied migration. Better Auth checks its tables against the config at startup, so auth or plugin schema changes need a matching migration.
