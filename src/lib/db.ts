@@ -17,13 +17,8 @@ export interface Database {
   };
   user_settings: {
     user_id: string;
-    // jsonb: written as serialized JSON, read back as a parsed object.
-    preferences: ColumnType<
-      Record<string, unknown>,
-      string | undefined,
-      string
-    >;
-    updated_at: Date;
+    show_word_translations: ColumnType<boolean, boolean | undefined, boolean>;
+    updated_at: ColumnType<Date, Date | undefined, Date>;
   };
   account_progress: {
     user_id: string;

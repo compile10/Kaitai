@@ -2,7 +2,7 @@ import { z } from "zod";
 import { withAuth } from "@/lib/api-auth";
 import { corsPreflightResponse, jsonResponse } from "@/lib/cors";
 import { RATE_LIMIT_POLICIES } from "@/lib/rate-limit";
-import { resolveSettings, upsertUserSettings } from "@/lib/settings";
+import { getUserSettings, updateUserSettings } from "@/lib/settings";
 
 export async function OPTIONS() {
   return corsPreflightResponse();
@@ -11,7 +11,7 @@ export async function OPTIONS() {
 export const GET = withAuth(
   { name: "fetch settings", rateLimit: RATE_LIMIT_POLICIES.settings },
   async (_request, session) => {
-    return jsonResponse(await resolveSettings(session));
+    return jsonResponse(await getUserSettings(session.user.id));
   },
 );
 
@@ -31,7 +31,6 @@ export const PUT = withAuth(
         400,
       );
     }
-    const settings = { ...(await resolveSettings(session)), ...result.data };
-    return jsonResponse(await upsertUserSettings(session.user.id, settings));
+    return jsonResponse(await updateUserSettings(session.user.id, result.data));
   },
 );
