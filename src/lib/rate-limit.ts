@@ -85,6 +85,13 @@ export const RATE_LIMIT_POLICIES = {
     ipLimit: 90,
     windowSeconds: 60,
   }),
+  progress: createPolicy({
+    name: "progress",
+    message: "Too many progress requests.",
+    userLimit: 60,
+    ipLimit: 180,
+    windowSeconds: 60,
+  }),
   inviteCodes: createPolicy({
     name: "invite-codes",
     message: "Too many invite code requests.",

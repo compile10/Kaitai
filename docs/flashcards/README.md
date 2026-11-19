@@ -1,6 +1,6 @@
 # Flashcard mode plan
 
-Status: planned, not started. Mobile app first; web follows using the same shared code.
+Status: in progress. Mobile app first; web follows using the same shared code. Built so far: the storage tables and `GET`/`PUT /api/progress`.
 
 ![Mobile mockups](mockups.png)
 
@@ -91,7 +91,7 @@ The results screen shows the rank, the score against the player's best, best com
 ### Progress between Runs
 
 - **XP and level:** every Run gives XP. The exact amounts are still to be decided, roughly per correct card plus a rank bonus.
-- **Day streak:** playing at least one Run a day keeps it going.
+- **Day streak:** completing the daily quest each day keeps it going. A day with Runs that fall short of the quest does not count.
 - **Daily quest:** a daily card target.
 - **Card level:** Lv 1–10, based on the card's FSRS stability (how long it is remembered). The top level is **Mastered**.
 - **Nemesis:** a card that keeps lapsing (Anki's "leech"). Nemeses are listed from the lobby.
@@ -149,3 +149,9 @@ Build these with Reanimated and Gesture Handler, which are both already in the m
 - **`card_review_state`** (`postgres/migrations/006_card_review_state.sql`): FSRS scheduling state per account and card, keyed by `(user_id, deck_id, card_id)`. A card with no row is new. Holds phase, due time, stability, difficulty, scheduled days, learning step, reps, lapses and last review time. Card level and Mastered come from stability, and Nemesis from lapses. Deleting a deck, or removing a card from one, must delete the matching rows in the same transaction.
 - **`account_progress`** (`postgres/migrations/008_account_progress_table.sql`): one row per account. XP, current and longest day streak, last streak day (the date the quest was last completed, not tied to a zone), whether a skipped day has been forgiven since the last real streak day (`streak_forgiveness_used`), the streak days over the last year (a bitmask counted back from the last streak day, for the calendar view), and the days forgiven after a time zone change skipped them (a second bitmask aligned with the first, so the calendar can show them as travel), daily quest target, progress and date, and an IANA time zone that sets when the day rolls over (UTC if unset). Every account gets this row when it is created (`009_account_rows_on_signup.sql`). Day columns are `date` values read as `YYYY-MM-DD` strings.
 - Card ids inside `cards` stay the same when a card is edited, because `card_review_state` refers to them.
+
+## API
+
+- **`/api/progress`**: `GET` returns `AccountProgress`. The server applies the day rollover before responding, so a streak with no completed quest since yesterday reads 0 and quest progress from an earlier day reads 0. The current day is today in the account's time zone, unless the last streak day is later: a local date after the last streak day is a new day in any zone, and a date up to it is still that day. The streak stays unbroken while the last streak day is today or yesterday. When `PUT` changes the zone and the move would break a streak that is alive in the old zone (a day skipped by flying east), the skipped day is forgiven: the last streak day becomes yesterday in the new zone, and the skipped days are added to both bitmasks as unplayed and forgiven (`forgivenDays` in the API), so calendar history stays on its real dates. Only one day can be forgiven until the quest is completed on a real day; a second skipped day before then breaks the streak. `dayEndsAt` is the real moment the current day ends, for countdowns in the phone's clock. `PUT` changes only `dailyQuestTarget` (1–1000) and `timeZone` (IANA name or null). The mobile app sends the device's zone automatically.
+- XP, streaks and quest progress have no write endpoint. Finishing a Run (planned: one transaction that also writes card review state and personal bests) is the only thing that changes them, apart from a time zone change forgiving a skipped day.
+- When a Run completes the daily quest, the Run endpoint continues the streak if `isStreakAlive`, otherwise starts it at 1; sets `last_streak_day` to the current day and `streak_forgiveness_used` to false; and adds bits to the front of `streak_days` (1 for today) and `forgiven_days` (0s) for the days since the last streak day. If today is a forgiven day the player has now reached (its `streak_days` bit is 0 and its `forgiven_days` bit is 1), completing the quest makes it a real streak day: flip the bits and add 1 to the streak. Decide by the bits, not by `last_streak_day === today`.
